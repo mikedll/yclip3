@@ -266,7 +266,7 @@ class App extends React.Component {
 
     const rows = this.props.clips.map((c, i) => (
       <tr key={i} className={"" + ((this.state.clipIndex !== null && this.state.clipIndex === i) ? 'active' : '')}>
-        <td>{c.vid} -- {this.state.clipIndex} {this.state.clipIndex === i}* {i}</td>
+        <td>{c.vid}</td>
         <td>{c.start}s</td>
         <td>{c.duration}s</td>
       </tr>      

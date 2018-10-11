@@ -47,7 +47,11 @@ body {
   text-align: left;
 }
 
+tr {
+  transition: background-color 0.5s ease;    
+}
+
 tr.active {
-  background: #6E3667;
-  color: ##b8d76d;    
+  background: #272b65;
+  color: #c70a9e;    
 }
