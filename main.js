@@ -56,7 +56,7 @@ function staticServe(reqPath, res, reqPathNoAlias) {
         if(typeof(reqPathNoAlias) !== 'undefined') {
           handleDynamicPath(reqPathNoAlias, res)
         } else {
-          handleDynamicPath(path, res)
+          handleDynamicPath(reqPath, res)
         }
         
         return;
@@ -68,9 +68,9 @@ function staticServe(reqPath, res, reqPathNoAlias) {
     const ext = path.extname(staticFile)
     let contentType
     if (ext === '' || !(ext.slice(1) in MIMETypes)) {
-      contentType = MIMETypes[ext]
-    } else {
       contentType = ''
+    } else {
+      contentType = MIMETypes[ext.slice(1)]
     }
     res.writeHead(200, {'Content-Type': contentType})
     fs.createReadStream('', {encoding: 'UTF-8', fd: fd})
