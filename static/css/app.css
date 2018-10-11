@@ -37,3 +37,7 @@ body {
   color: #fff;
   text-decoration: underline;
 }
+
+.controls {
+  padding: 1rem;
+}
