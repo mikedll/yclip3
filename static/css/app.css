@@ -35,8 +35,11 @@ body {
 }
 
 .panel-relaxed a {
-  color: #fff;
-  text-decoration: underline;
+  color: #b4ffbe;
+}
+
+.panel-relaxed a i {
+  text-decoration: none;
 }
 
 .controls {
