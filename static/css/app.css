@@ -1,0 +1,30 @@
+
+body {
+  background: #1a0315;
+  color: #fff;
+}
+
+.primary-pane {
+  background: #6E3667;
+  color: #fff;
+}
+
+.primary-pane .emph {
+  background: #6E3667;
+  color: ##b8d76d;
+}
+
+.panel-relaxed {
+  background: #535353;
+  color: #fff;
+}
+
+.main-cont {
+  padding-top: 1em;
+}
+
+.footer { 
+  margin-top: 1rem;
+  text-align: right; 
+}
+     
