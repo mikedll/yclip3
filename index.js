@@ -180,10 +180,16 @@ function handleReq(req, res) {
 }
 
 function main() {
+
+  let port = process.env.PORT;
+  if (port == null || port == "") {
+    port = DefaultPort;
+  }
+  
   console.log("Creating server and listening.")
   http.createServer(function(req, res) {
     handleReq(req, res)
-  }).listen(DefaultPort)
+  }).listen(port)
 
   console.log("server queued to listen on " + DefaultPort)
 }
