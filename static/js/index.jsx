@@ -1,4 +1,3 @@
-
 var ytApiLoadedHook = null;
 
 function onYouTubeIframeAPIReady() {
@@ -21,7 +20,7 @@ class App extends React.Component {
       player: null,
       loaded: false,
       clips: clips,
-      clipIndex: 0
+      clipIndex: null
     }
 
     this.onPlay = this.onPlay.bind(this)    
@@ -30,6 +29,8 @@ class App extends React.Component {
   }
 
   curClip() {
+    if(this.state.clipIndex === null) return null;
+
     if(this.state.clipIndex < this.state.clips.length) {
       return this.state.clips[this.state.clipIndex]
     }
@@ -40,9 +41,14 @@ class App extends React.Component {
    * Keeps calling itself once called until the current clip
    * is done (pos is within epsilon of ending).
    */
-  endClipOrScheduleInterrupt() {
+  nextClipOrReschedule() {
     if(!this.state.loaded) {
       console.log("error: trying to interrupt while not yet loaded.")
+      return
+    }
+
+    if(this.player.getPlayerState() !== YT.PlayerState.PLAYING) {
+      // Let player state change schedule an interrupt.
       return
     }
     
@@ -53,49 +59,67 @@ class App extends React.Component {
     }
 
     const pos = this.player.getCurrentTime()
-    console.log("interrupt: current time from player: " + pos)
+    console.log("nextClip: pos=" + (Math.round(pos * 100) / 100))
 
     // Time left, so schedule interrupt (make a timeout)
     if (pos < c.end) {
-      console.log("setting time out for " + (c.end - pos) + " c.end=" + c.end + " pos=" + pos)
+      console.log("setting time out for " + (Math.round((c.end - pos) * 100) / 100) + " c.end=" + c.end)
       // Have to start capturing the return values
       // to prevent users from causing infinite
       // timeouts by repetitively clicking the play clips button.
       setTimeout(() => {
-        this.endClipOrScheduleInterrupt()
+        this.nextClipOrReschedule()
       }, (c.end - pos) * 1000)
     } else {
       console.log("interrupt: detected end of clip. setState being called.")
-      this.setState((state, props) => {
-        return {clipIndex: state.clipIndex + 1}
-      })
+      this.setState((state, props) => { return {clipIndex: state.clipIndex + 1} })
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    console.log("didupdate")
+
     const c = this.curClip()
-    if(this.player.getPlayerState() === YT.PlayerState.PLAYING
-       && !(this.state.clipIndex < this.state.clips.length)) {
-      this.player.pauseVideo()
+    const s = this.player.getPlayerState()
+    switch (s) {
+    case YT.PlayerState.UNSTARTED, YT.PlayerState.CUED: {
+      console.log("didUpdated.(unstarted|cued)")
+      if(prevState.clipIndex === null && this.state.clipIndex === 0) {
+        console.log("didUpdated.seeking")
+        this.player.seekTo(c.start, true)
+        this.player.playVideo()
+      }
+      break
     }
+    case YT.PlayerState.PLAYING: {
+      if (!c) {
+        // All clips done
+        this.player.pauseVideo()
+      } else {
+        // Next clip jump required?
+        const pos = this.player.getCurrentTime()
+        if(pos < c.start) {
+          this.player.seekTo(c.start, true)
+        }
+      }
+      break
+    }
+    default: {
+      // buffering...stopped...?
+      console.log("didUpdated.default with YT player state: " + s)
+    }}
   }
   
   onPlay(e) {
     e.preventDefault()
-    if (!this.state.loaded) return
+    if (!this.state.loaded) {
+      console.log("error: trying to play when player isn't ready.")
+      return
+    }
 
-    // find current clip
-    // if video is inside current clip (>=, <), take difference till end of clip
-    //   else, move video to start of current clip, and play it.
-    // set timeout for pausing video at that point.
-    // if clips are done, leave video paused. move clipIndex to 0.
-    // timeout func should jump video to next point.
-    // upon play resumption, repeat (find clip, schedule stop).
-    
-    const c = this.curClip()
-    this.player.seekTo(c.start, true)
-    this.player.playVideo()
-    this.endClipOrScheduleInterrupt()
+    if(this.state.clipIndex === null) {
+      this.setState({clipIndex: 0})
+    }    
   }
 
   onPlayerReady(e) {
@@ -103,8 +127,26 @@ class App extends React.Component {
   }
   
   onPlayerStateChange(e) {
-    // if(e.data === YT.PlayerState.PAUSED) {
-    // }
+    console.log("player.state.changed.")
+    switch (e.data) {
+    case YT.PlayerState.CUED: {
+      console.log("noticed cued")
+      break
+    }
+    case YT.PlayerState.UNSTARTED: {
+      console.log("noticed unstarted.")
+      break
+    }
+    case YT.PlayerState.PLAYING: {
+      console.log("detected player is playing.")
+      // what if an interrupt is already scheduled?
+      this.nextClipOrReschedule()
+      break
+    }
+    default: {
+      console.log("noticed ? = " + e.data)
+      // unstarted? cued?
+    }}
   }
   
   componentDidMount() {
@@ -130,12 +172,12 @@ class App extends React.Component {
 
   render() {
     let cMsg = "n/a"
-    let remMsg = "n/a"
-    const c = this.curClip()
-    if(this.state.loaded && c) {
-      const pos = this.player.getCurrentTime()
-      if(pos >= c.start && pos < c.end) {
-        remMsg = "{Math.round((end - pos) * 100) / 2} seconds"
+    let btnMsg = "Loading..."
+    if(this.state.loaded) {
+      btnMsg = "Roll Clips"
+      const c = this.curClip()
+      if(c) {
+        cMsg = `${this.state.clipIndex+1} of ${this.state.clips.length}`
       }
     }
     
@@ -144,8 +186,7 @@ class App extends React.Component {
         <div id="embedded-player-5"></div>
         <div className="controls">
           <div>Playing Clip: {cMsg}</div>
-          <div>Time Left: {remMsg}</div>
-          <button onClick={this.onPlay} className="btn btn-primary btn-lg btn-block">Roll Clips</button>
+          <button disabled={!this.state.loaded} onClick={this.onPlay} className="btn btn-primary btn-lg btn-block">{btnMsg}</button>
         </div>
         
       </div>
@@ -155,7 +196,7 @@ class App extends React.Component {
 
 const clips = [{
   start: 30,
-  duration: 3
+  duration: 1.5
 },{
   start: 500,
   duration: 3

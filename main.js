@@ -17,17 +17,18 @@ function e500(res) {
 function handleDynamicPath(dPath, res) {
   let notFound = false
   switch (dPath) {
-  case "/me/clips":
+  case "/me/clips": {
     res.writeHead(200, {'Content-Type': 'text/plain'})
     res.write("One day this can be interesting.")
     res.end()
     break
-  default:
+  }
+  default: {
     notFound = true
     res.writeHead(404, {'Content-Type': 'text/plain'})
     res.write("Resource not found.")
-    res.end()  
-  }
+    res.end()
+  }}
   console.log(notFound ? dPath + " (404)" : dPath)  
 }
 
