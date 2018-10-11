@@ -4,7 +4,8 @@ function onYouTubeIframeAPIReady() {
   ytApiLoadedHook()
 }
 
-function dout() {
+function dout(s) {
+  console.log(s)
 }
 
 class App extends React.Component {
