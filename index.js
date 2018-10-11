@@ -2,9 +2,9 @@
 const http = require('http')
 const fs = require('fs')
 const path = require('path')
-
-const root = __dirname;
-const staticDir = path.join(root, 'static')
+const Mustache = require('mustache')
+const appRoot = __dirname;
+const staticDir = path.join(appRoot, 'static')
 
 const DefaultPort = 8081 // sharing this with windows Go...
 
@@ -14,22 +14,82 @@ function e500(res) {
   res.end()  
 }
 
+function fromTemplate(view, res, templBindings) {
+  fs.open(path.join(appRoot, 'views', view + ".mustache"), 'r', (err, fd) => {
+    if (err) {
+      if (err.code === 'ENOENT') {
+        e500(res)
+        return
+      }
+
+      throw err
+    }
+
+    let templateBody = ""
+    res.writeHead(200, {'Content-Type': 'text/html'})
+    fs.createReadStream('', {encoding: 'UTF-8', fd: fd})
+      .on('data', (data) => {
+        templateBody += data
+      })
+      .on('end', () => {
+        res.write(Mustache.render(templateBody, templBindings))
+        res.end()
+      })
+  })
+  
+}
+
+function index(res) {
+  // const clips = [{
+  //   vid: 'Iwuy4hHO3YQ',
+  //   start: 34,
+  //   duration: 18
+  // },{
+  //   vid: 'dQw4w9WgXcQ',
+  //   start: 43,
+  //   duration: 8
+  // },{
+  //   vid: 'djV11Xbc914',
+  //   start: 52,
+  //   duration: 24
+  // }]
+  
+  const clips = [{
+    vid: 'Iwuy4hHO3YQ',
+    start: 34,
+    duration: 3
+  },{
+    vid: 'dQw4w9WgXcQ',
+    start: 43,
+    duration: 3
+  },{
+    vid: 'djV11Xbc914',
+    start: 52,
+    duration: 3
+  }]
+
+  fromTemplate('index', res, {bootstrap: JSON.stringify(clips)})
+}
+
 function handleDynamicPath(dPath, res) {
-  let notFound = false
   switch (dPath) {
+  case "/": {
+    index(res)
+    break
+  }
   case "/me/clips": {
     res.writeHead(200, {'Content-Type': 'text/plain'})
     res.write("One day this can be interesting.")
     res.end()
+    console.log(dPath)
     break
   }
   default: {
-    notFound = true
     res.writeHead(404, {'Content-Type': 'text/plain'})
     res.write("Resource not found.")
     res.end()
+    console.log(dPath + " (404)")
   }}
-  console.log(notFound ? dPath + " (404)" : dPath)  
 }
 
 /*

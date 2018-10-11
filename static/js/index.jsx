@@ -281,32 +281,6 @@ class App extends React.Component {
   }
 }
 
-// const clips = [{
-//   vid: 'Iwuy4hHO3YQ',
-//   start: 34,
-//   duration: 18
-// },{
-//   vid: 'dQw4w9WgXcQ',
-//   start: 43,
-//   duration: 8
-// },{
-//   vid: 'djV11Xbc914',
-//   start: 52,
-//   duration: 24
-// }]
-
-const clips = [{
-  vid: 'Iwuy4hHO3YQ',
-  start: 34,
-  duration: 3
-},{
-  vid: 'dQw4w9WgXcQ',
-  start: 43,
-  duration: 3
-},{
-  vid: 'djV11Xbc914',
-  start: 52,
-  duration: 3
-}]
+const clips = window.__bootstrap
 
 ReactDOM.render(<App clips={clips}/>, document.querySelector('.player-container'))

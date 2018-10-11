@@ -1,0 +1,12 @@
+{
+  "name": "yclip3",
+  "version": "0.1.0",
+  "description": "App to make YouTube clips, and play them as a compilation video.",
+  "main": "index.js",
+  "repository": "git@github.com:mikedll/yclip3.git",
+  "author": "Michael Rivera <soymrmike@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "mustache": "^3.0.0"
+  }
+}
