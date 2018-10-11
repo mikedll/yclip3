@@ -5,6 +5,7 @@ body {
 }
 
 .primary-pane {
+  padding: 1rem 0;    
   background: #6E3667;
   color: #fff;
 }
@@ -30,4 +31,9 @@ body {
 
 .player-container {
   text-align: center;
+}
+
+.panel-relaxed a {
+  color: #fff;
+  text-decoration: underline;
 }

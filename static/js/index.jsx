@@ -40,8 +40,7 @@ class App extends React.Component {
         events: {
           'onReady': this.onPlayerReady,
           'onStateChange': this.onPlayerStateChange
-        },
-        origin: window.location.origin
+        }
       })      
     }
 
