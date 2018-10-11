@@ -5,7 +5,9 @@ function onYouTubeIframeAPIReady() {
   ytApiLoadedHook()
 }
 
+const silent = false
 function dout(s) {
+  if (silent) return
   console.log(s)
 }
 
@@ -43,6 +45,17 @@ class App extends React.Component {
     return null
   }
 
+  calcClipInc(prevState) {
+    const next = {}
+    if(prevState.clipIndex >= prevState.clips.length - 1) {
+      next.clipIndex = null
+    } else {
+      next.clipIndex = prevState.clipIndex + 1
+    }
+    console.log("setting to " + next.clipIndex + ", from " + prevState.clipIndex)
+    return next
+  }
+  
   /*
    * Keeps calling itself once called until the current clip
    * is done (pos is within epsilon of ending).
@@ -85,8 +98,8 @@ class App extends React.Component {
         this.nextClipOrReschedule()
       }, (c.end - pos) * 1000)
     } else {
-      dout("interrupt: detected end of clip. setState being called.")
-      this.setState((state, props) => { return {clipIndex: state.clipIndex + 1} })
+      dout("nextClip() succeeded on clip " + this.state.clipIndex)
+      this.setState((prevState) => (this.calcClipInc(prevState)))
     }
   }
 
@@ -95,49 +108,51 @@ class App extends React.Component {
       this.player.destroy()
     }
   }
-  
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    dout("didUpdate.start")
 
-    const s = this.player.getPlayerState()
-    const c = this.curClip()
-    switch (s) {
-    case YT.PlayerState.ENDED:
-    case YT.PlayerState.PAUSED:
-    case YT.PlayerState.CUED:
-    case YT.PlayerState.UNSTARTED: {
-      dout("didUpdated.(ended,paused,cued,unstarted)")
-      if(this.state.clipIndex === 0) {
-        dout("didUpdated.seeking")
-        if(this.player.getVideoData().video_id !== c.vid) {
+  componentDidUpdate(prevProps, prevState, snapshot) {
+
+    const seekIfNew = function(prevState, curState) {
+      if (prevState.clipIndex !== curState.clipIndex) {
+        // clip change
+        const c = this.curClip()
+        if (this.player.getVideoData().video_id !== c.vid) {
           this.player.cueVideoById({videoId:c.vid, startSeconds: c.start, endSeconds: c.end})
         } else {
           this.player.seekTo(c.start, true)
-          this.player.playVideo()
         }
       }
+    }
+    
+    const s = this.player.getPlayerState()
+    switch (s) {
+    case YT.PlayerState.ENDED: {
+      if(prevState.clipIndex === prevState.clips.length && this.state.clipIndex === null) {
+        // Clips finished.
+        dout("successful finish")
+        break
+      }
+    }
+    case YT.PlayerState.CUED:
+    case YT.PlayerState.UNSTARTED: {
+      dout("didUpdated.(ended,cued,unstarted)")
+      seekIfNew.call(this, prevState, this.state)
       break
     }
     case YT.PlayerState.PLAYING: {
-      if (!c) {
-        // All clips done
+      dout("didUpdate.playing")
+      if(prevState.clipIndex !== null && this.state.clipIndex === null) {
+        // Clips finished.
         this.player.pauseVideo()
       } else {
-        if(this.player.getVideoData().video_id !== c.vid) {
-          this.player.cueVideoById({videoId:c.vid, startSeconds: c.start, endSeconds: c.end})
-        } else {
-          // Next clip jump required?
-          const pos = this.player.getCurrentTime()
-          if(pos < c.start) {
-            this.player.seekTo(c.start, true)
-          }
-        }
+        seekIfNew.call(this, prevState, this.state)
       }
+
       break
     }
+    case YT.PlayerState.PAUSED:
     default: {
       // buffering...stopped...?
-      dout("didUpdated.default with state=" + s)
+      dout("didUpdated.(ended,paused,other:" + s + ")")
     }}
   }
   
@@ -162,11 +177,13 @@ class App extends React.Component {
   onPlayerStateChange(e) {
     switch (e.data) {
     case YT.PlayerState.ENDED: {
-      // don't bother waiting for a scheduled nextClip. Jump clips.
-      if (this.state.clipIndex !== 0 &&
-          this.state.clipIndex < this.state.clips.length) {
-        dout("unusual case: ended video and more clips.")
-        this.setState((prevState, prevProps) => { return {clipIndex: prevState.clipIndex + 1} })
+      dout("player.state.ended")
+      if (this.state.clipIndex !== null) {
+        // nextClip() will fizzle. This is an opportunity to jump clips.
+        dout("assuming a clip ended")
+        this.setState((prevState) => (this.calcClipInc(prevState)))
+      } else {
+        dout("clips finished cleanly.")
       }
       break
     }
@@ -179,8 +196,6 @@ class App extends React.Component {
           dout("very unexpected. cued video that isn't for current clip. shutting clips down.")
           this.setState({clipIndex: null})
         } else {
-          dout("seeking to " + c.start)
-          // this.player.seekTo(c.start, true)
           this.player.playVideo()
         }
       }
@@ -266,18 +281,32 @@ class App extends React.Component {
   }
 }
 
+// const clips = [{
+//   vid: 'Iwuy4hHO3YQ',
+//   start: 34,
+//   duration: 18
+// },{
+//   vid: 'dQw4w9WgXcQ',
+//   start: 43,
+//   duration: 8
+// },{
+//   vid: 'djV11Xbc914',
+//   start: 52,
+//   duration: 24
+// }]
+
 const clips = [{
-  vid: 'QLkSoyQDOXo',
-  start: 30,
-  duration: 1.5
+  vid: 'Iwuy4hHO3YQ',
+  start: 34,
+  duration: 3
 },{
-  vid: 'QLkSoyQDOXo',
-  start: 500,
-  duration: 2
+  vid: 'dQw4w9WgXcQ',
+  start: 43,
+  duration: 3
 },{
-  vid: '4JrJBq_sYMY',
-  start: 167,
-  duration: 2
+  vid: 'djV11Xbc914',
+  start: 52,
+  duration: 3
 }]
 
 ReactDOM.render(<App clips={clips}/>, document.querySelector('.player-container'))
