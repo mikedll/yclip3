@@ -4,6 +4,9 @@ function onYouTubeIframeAPIReady() {
   ytApiLoadedHook()
 }
 
+function dout() {
+}
+
 class App extends React.Component {
 
   constructor(props) {
@@ -43,7 +46,7 @@ class App extends React.Component {
    */
   nextClipOrReschedule() {
     if(!this.state.loaded) {
-      console.log("error: trying to interrupt while not yet loaded.")
+      dout("error: trying to interrupt while not yet loaded.")
       return
     }
 
@@ -54,16 +57,16 @@ class App extends React.Component {
     
     const c = this.curClip()
     if(!c) {
-      console.log("error: requested timeout without a clip in bounds.")
+      dout("error: requested timeout without a clip in bounds.")
       return
     }
 
     const pos = this.player.getCurrentTime()
-    console.log("nextClip: pos=" + (Math.round(pos * 100) / 100))
+    dout("nextClip: pos=" + (Math.round(pos * 100) / 100))
 
     // Time left, so schedule interrupt (make a timeout)
     if (pos < c.end) {
-      console.log("setting time out for " + (Math.round((c.end - pos) * 100) / 100) + " c.end=" + c.end)
+      dout("setting time out for " + (Math.round((c.end - pos) * 100) / 100) + " c.end=" + c.end)
       // Have to start capturing the return values
       // to prevent users from causing infinite
       // timeouts by repetitively clicking the play clips button.
@@ -71,21 +74,23 @@ class App extends React.Component {
         this.nextClipOrReschedule()
       }, (c.end - pos) * 1000)
     } else {
-      console.log("interrupt: detected end of clip. setState being called.")
+      dout("interrupt: detected end of clip. setState being called.")
       this.setState((state, props) => { return {clipIndex: state.clipIndex + 1} })
     }
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log("didupdate")
+    dout("didUpdate.start")
 
-    const c = this.curClip()
     const s = this.player.getPlayerState()
+    const c = this.curClip()
     switch (s) {
-    case YT.PlayerState.UNSTARTED, YT.PlayerState.CUED: {
-      console.log("didUpdated.(unstarted|cued)")
-      if(prevState.clipIndex === null && this.state.clipIndex === 0) {
-        console.log("didUpdated.seeking")
+    case YT.PlayerState.PAUSED:
+    case YT.PlayerState.CUED:
+    case YT.PlayerState.UNSTARTED: {
+      dout("didUpdated.(unstarted,cued,paused)")
+      if(this.state.clipIndex === 0) {
+        dout("didUpdated.seeking")
         this.player.seekTo(c.start, true)
         this.player.playVideo()
       }
@@ -106,18 +111,20 @@ class App extends React.Component {
     }
     default: {
       // buffering...stopped...?
-      console.log("didUpdated.default with YT player state: " + s)
+      dout("didUpdated.default with state=" + s)
     }}
   }
   
   onPlay(e) {
     e.preventDefault()
     if (!this.state.loaded) {
-      console.log("error: trying to play when player isn't ready.")
+      dout("error: trying to play when player isn't ready.")
       return
     }
 
-    if(this.state.clipIndex === null) {
+    dout("onPlay.clipIndex=" + this.state.clipIndex)
+    if(this.state.clipIndex === null || this.state.clipIndex >= this.state.clips.length) {
+      dout("onPlay.calling setState")
       this.setState({clipIndex: 0})
     }    
   }
@@ -127,24 +134,24 @@ class App extends React.Component {
   }
   
   onPlayerStateChange(e) {
-    console.log("player.state.changed.")
+    dout("player.state.changed.")
     switch (e.data) {
     case YT.PlayerState.CUED: {
-      console.log("noticed cued")
+      dout("noticed cued")
       break
     }
     case YT.PlayerState.UNSTARTED: {
-      console.log("noticed unstarted.")
+      dout("noticed unstarted.")
       break
     }
     case YT.PlayerState.PLAYING: {
-      console.log("detected player is playing.")
+      dout("detected player is playing.")
       // what if an interrupt is already scheduled?
       this.nextClipOrReschedule()
       break
     }
     default: {
-      console.log("noticed ? = " + e.data)
+      dout("noticed ? = " + e.data)
       // unstarted? cued?
     }}
   }
@@ -171,6 +178,7 @@ class App extends React.Component {
   }
 
   render() {
+    // dout("invoked render")
     let cMsg = "n/a"
     let btnMsg = "Loading..."
     if(this.state.loaded) {
