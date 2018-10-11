@@ -2,7 +2,9 @@
 const http = require('http')
 const fs = require('fs')
 const path = require('path')
+
 const Mustache = require('mustache')
+const _ = require('lodash')
 const appRoot = __dirname;
 const staticDir = path.join(appRoot, 'static')
 
@@ -14,82 +16,92 @@ function e500(res) {
   res.end()  
 }
 
-function fromTemplate(view, res, templBindings) {
-  fs.open(path.join(appRoot, 'views', view + ".mustache"), 'r', (err, fd) => {
-    if (err) {
-      if (err.code === 'ENOENT') {
+function e404(res) {
+  res.writeHead(404, {'Content-Type': 'text/plain'})
+  res.write("Resource not found.")
+  res.end()
+}
+function fromTemplate(req, res, view, templBindings) {
+}
+
+/*
+ * id is sanitized.
+ */
+function clip(req, res, id) {
+  fs.readFile(path.join(appRoot, 'data', id + '.json'), {encoding: 'UTF-8'}, (err, content) => {
+    if (err !== null) {
+      e404(res)
+      console.log(req.url + " (404)")
+      return
+    }
+
+    const clips = JSON.parse(content)
+    fs.readFile(path.join(appRoot, 'views', "clip.mustache"), {encoding: 'UTF-8'}, (err, content) => {
+      if (err !== null) {
         e500(res)
+        console.log(req.url + " (500)")
         return
       }
 
-      throw err
-    }
-
-    let templateBody = ""
-    res.writeHead(200, {'Content-Type': 'text/html'})
-    fs.createReadStream('', {encoding: 'UTF-8', fd: fd})
-      .on('data', (data) => {
-        templateBody += data
-      })
-      .on('end', () => {
-        res.write(Mustache.render(templateBody, templBindings))
-        res.end()
-      })
+      res.writeHead(200, {'Content-Type': 'text/html'})
+      res.write(Mustache.render(content, {bootstrap: JSON.stringify(clips)}))
+      res.end()    
+      console.log(req.url)
+    })
+    
   })
-  
 }
 
-function index(res) {
-  // const clips = [{
-  //   vid: 'Iwuy4hHO3YQ',
-  //   start: 34,
-  //   duration: 18
-  // },{
-  //   vid: 'dQw4w9WgXcQ',
-  //   start: 43,
-  //   duration: 8
-  // },{
-  //   vid: 'djV11Xbc914',
-  //   start: 52,
-  //   duration: 24
-  // }]
-  
-  const clips = [{
-    vid: 'Iwuy4hHO3YQ',
-    start: 34,
-    duration: 3
-  },{
-    vid: 'dQw4w9WgXcQ',
-    start: 43,
-    duration: 3
-  },{
-    vid: 'djV11Xbc914',
-    start: 52,
-    duration: 3
-  }]
+function handleDynamicPath(req, res, dPath) {
 
-  fromTemplate('index', res, {bootstrap: JSON.stringify(clips)})
-}
+  const idRegex = /^[a-zA-Z][a-zA-Z0-9]*$/
 
-function handleDynamicPath(dPath, res) {
-  switch (dPath) {
-  case "/": {
-    index(res)
-    break
-  }
-  case "/me/clips": {
+  const stub1 = function(req, res) {
     res.writeHead(200, {'Content-Type': 'text/plain'})
     res.write("One day this can be interesting.")
     res.end()
-    console.log(dPath)
-    break
+    console.log(req.url)
   }
-  default: {
-    res.writeHead(404, {'Content-Type': 'text/plain'})
-    res.write("Resource not found.")
-    res.end()
-    console.log(dPath + " (404)")
-  }}
+  
+  const rootHandle = function(req, res) {
+    clip(req, res, "1")
+  }
+ 
+  const matches = [
+    ['/me/clips/', clip, true],
+    ['/me/clips', stub1, false],
+    ['/', rootHandle, false]
+  ]
+
+  console.log("handling dynamic path for " + dPath)
+
+  if (!  _.some(matches, (matchRoute, i) => {
+
+    console.log("entering a test. " + i + " with potential prefix " + matchRoute[0] + " having id bool of " + matchRoute[2])
+    
+    if(dPath.indexOf(matchRoute[0]) !== -1) {
+      // attempt id match?
+      if(!matchRoute[2]) {
+        console.log("got a good match on " + matchRoute[0])
+        matchRoute[1].call(this, req, res)
+        return true
+      } else {
+        const possibleId = dPath.substr(matchRoute[0].length, dPath.length - matchRoute[0].length)
+        console.log("trying " + possibleId)
+        const regexRes = idRegex.exec(possibleId)
+        console.log("got " + regexRes + " for a.text(b) " + idRegex + ", " + possibleId)
+        if(regexRes) {
+          matchRoute[1].call(this, req, res, regexRes[0])
+          return true
+        }
+      }
+    }
+
+    return false
+  })) {
+    e404(res)
+    console.log(dPath + " (404)")    
+  }
 }
 
 /*
@@ -101,7 +113,7 @@ function handleDynamicPath(dPath, res) {
  * of aliases, and then use tail recursion to
  * try each of them.
  */
-function staticServe(reqPath, res, reqPathNoAlias) {
+function staticServe(req, res, reqPath, reqPathNoAlias) {
   const MIMETypes = {
     'html': 'text/html',
     'js': 'text/javascript',
@@ -115,9 +127,9 @@ function staticServe(reqPath, res, reqPathNoAlias) {
     if (err) {
       if (err.code === 'ENOENT') {
         if(typeof(reqPathNoAlias) !== 'undefined') {
-          handleDynamicPath(reqPathNoAlias, res)
+          handleDynamicPath(req, res, reqPathNoAlias)
         } else {
-          handleDynamicPath(reqPath, res)
+          handleDynamicPath(req, res, reqPath)
         }
         
         return;
@@ -148,14 +160,14 @@ function staticServe(reqPath, res, reqPathNoAlias) {
 /*
  * Simplifies path and tries aliases, if applicable to the path.
  */
-function handleReq(reqPath, res) {
+function handleReq(req, res) {
 
   // some/dir/path/ -> some/dir/path
   // some/file/path.html (same)
   // /foo/// -> /foo
   // /// -> /
   // / (same)
-  let chomped = reqPath;
+  let chomped = req.url;
   while (chomped.length > 1 && chomped[chomped.length - 1] === '/') {
     chomped = chomped.slice(0, chomped.length-1)
   }
@@ -164,19 +176,19 @@ function handleReq(reqPath, res) {
   if (basename === '' || (basename[0] !== '.' && path.extname(chomped) === '')) {
     // "/" -> "/index.html"
     // some/dir/path -> some/dir/path/index.html
-    staticServe(path.join(chomped, 'index.html'), res, chomped)
+    staticServe(req, res, path.join(chomped, 'index.html'), chomped)
   } else {
     // /css/.unusual
     // /css/app.css
     // /index.html
-    staticServe(chomped, res)
+    staticServe(req, res, chomped)
   }
 }
 
 function main() {
   console.log("Creating server and listening.")
   http.createServer(function(req, res) {
-    handleReq(req.url, res)
+    handleReq(req, res)
   }).listen(DefaultPort)
 
   console.log("server queued to listen on " + DefaultPort)

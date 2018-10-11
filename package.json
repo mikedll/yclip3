@@ -7,6 +7,7 @@
   "author": "Michael Rivera <soymrmike@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "lodash": "^4.17.11",
     "mustache": "^3.0.0"
   }
 }

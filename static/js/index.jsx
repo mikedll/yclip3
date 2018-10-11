@@ -262,21 +262,39 @@ class App extends React.Component {
 
   render() {
     // dout("invoked render")
-    let cMsg = "n/a"
-    let btnMsg = "Loading..."
-    if(this.state.loaded) {
-      btnMsg = "Roll Clips"
-      const c = this.curClip()
-      if(c) {
-        cMsg = `${this.state.clipIndex+1} of ${this.state.clips.length}`
-      }
-    }
+    let btnMsg = (this.state.loaded ? "Roll Clips" : "Loading...")
+
+    const rows = this.props.clips.map((c, i) => (
+      <tr key={i} className={"" + ((this.state.clipIndex !== null && this.state.clipIndex === i) ? 'active' : '')}>
+        <td>{c.vid} -- {this.state.clipIndex} {this.state.clipIndex === i}* {i}</td>
+        <td>{c.start}s</td>
+        <td>{c.duration}s</td>
+      </tr>      
+    ))
+    const table = (
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Video</th>
+              <th>Start</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows}
+          </tbody>
+        </table>
+    )
     
     return (
       <div className="embedded-player-container">
         <div id="embedded-player-5"></div>
+
+        <div className="clip-summary">
+          <div>Clips in this Compilation:</div>
+          {table}
+        </div>
         <div className="controls">
-          <div>Playing Clip: {cMsg}</div>
           <button disabled={!this.state.loaded} onClick={this.onPlay} className="btn btn-primary btn-lg btn-block">{btnMsg}</button>
         </div>
         
