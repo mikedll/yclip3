@@ -54,7 +54,7 @@ function clip(req, res, id) {
 
 function handleDynamicPath(req, res, dPath) {
 
-  const idRegex = /^[a-zA-Z][a-zA-Z0-9]*$/
+  const idRegex = /^[a-zA-Z0-9]+$/
 
   const stub1 = function(req, res) {
     res.writeHead(200, {'Content-Type': 'text/plain'})
@@ -66,34 +66,28 @@ function handleDynamicPath(req, res, dPath) {
   const rootHandle = function(req, res) {
     clip(req, res, "1")
   }
- 
+
+  /*
+   * These are not specific enough.
+   */
   const matches = [
     ['/me/clips/', clip, true],
     ['/me/clips', stub1, false],
     ['/', rootHandle, false]
   ]
 
-  console.log("handling dynamic path for " + dPath)
-
   if (!  _.some(matches, (matchRoute, i) => {
 
-    console.log("entering a test. " + i + " with potential prefix " + matchRoute[0] + " having id bool of " + matchRoute[2])
-    
-    if(dPath.indexOf(matchRoute[0]) !== -1) {
+    if(!matchRoute[2] && dPath === matchRoute[0]) {
+      matchRoute[1].call(this, req, res)
+      return true
+    } else if(matchRoute[2] && dPath.indexOf(matchRoute[0]) !== -1) {
       // attempt id match?
-      if(!matchRoute[2]) {
-        console.log("got a good match on " + matchRoute[0])
-        matchRoute[1].call(this, req, res)
+      const possibleId = dPath.substr(matchRoute[0].length, dPath.length - matchRoute[0].length)
+      const regexRes = idRegex.exec(possibleId)
+      if(regexRes) {
+        matchRoute[1].call(this, req, res, regexRes[0])
         return true
-      } else {
-        const possibleId = dPath.substr(matchRoute[0].length, dPath.length - matchRoute[0].length)
-        console.log("trying " + possibleId)
-        const regexRes = idRegex.exec(possibleId)
-        console.log("got " + regexRes + " for a.text(b) " + idRegex + ", " + possibleId)
-        if(regexRes) {
-          matchRoute[1].call(this, req, res, regexRes[0])
-          return true
-        }
       }
     }
 
