@@ -1,4 +1,5 @@
-var ytApiLoadedHook = null;
+var ytApiLoadedHook = null
+var ytPlayer
 
 function onYouTubeIframeAPIReady() {
   ytApiLoadedHook()
@@ -15,6 +16,7 @@ class App extends React.Component {
 
     const clips = this.props.clips.map((c) => {
       return {
+        vid: c.vid,
         start: c.start,
         end: c.start + c.duration
       }
@@ -53,6 +55,8 @@ class App extends React.Component {
 
     if(this.player.getPlayerState() !== YT.PlayerState.PLAYING) {
       // Let player state change schedule an interrupt.
+      // Video might have started buffering.
+      // Could be something else.
       return
     }
     
@@ -62,11 +66,17 @@ class App extends React.Component {
       return
     }
 
+    if (this.player.getVideoData().video_id !== c.vid) {
+      // wrong video. this timeout probably should have been
+      // cleared.
+      dout("critical error: video_id mismatch in nextClip. clear this timeout?")
+      return
+    }
+
     const pos = this.player.getCurrentTime()
     dout("nextClip: pos=" + (Math.round(pos * 100) / 100))
-
-    // Time left, so schedule interrupt (make a timeout)
     if (pos < c.end) {
+      // Time left, so schedule interrupt (make a timeout)
       dout("setting time out for " + (Math.round((c.end - pos) * 100) / 100) + " c.end=" + c.end)
       // Have to start capturing the return values
       // to prevent users from causing infinite
@@ -80,20 +90,31 @@ class App extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    if(this.loaded) {
+      this.player.destroy()
+    }
+  }
+  
   componentDidUpdate(prevProps, prevState, snapshot) {
     dout("didUpdate.start")
 
     const s = this.player.getPlayerState()
     const c = this.curClip()
     switch (s) {
+    case YT.PlayerState.ENDED:
     case YT.PlayerState.PAUSED:
     case YT.PlayerState.CUED:
     case YT.PlayerState.UNSTARTED: {
-      dout("didUpdated.(unstarted,cued,paused)")
+      dout("didUpdated.(ended,paused,cued,unstarted)")
       if(this.state.clipIndex === 0) {
         dout("didUpdated.seeking")
-        this.player.seekTo(c.start, true)
-        this.player.playVideo()
+        if(this.player.getVideoData().video_id !== c.vid) {
+          this.player.cueVideoById({videoId:c.vid, startSeconds: c.start, endSeconds: c.end})
+        } else {
+          this.player.seekTo(c.start, true)
+          this.player.playVideo()
+        }
       }
       break
     }
@@ -102,10 +123,14 @@ class App extends React.Component {
         // All clips done
         this.player.pauseVideo()
       } else {
-        // Next clip jump required?
-        const pos = this.player.getCurrentTime()
-        if(pos < c.start) {
-          this.player.seekTo(c.start, true)
+        if(this.player.getVideoData().video_id !== c.vid) {
+          this.player.cueVideoById({videoId:c.vid, startSeconds: c.start, endSeconds: c.end})
+        } else {
+          // Next clip jump required?
+          const pos = this.player.getCurrentTime()
+          if(pos < c.start) {
+            this.player.seekTo(c.start, true)
+          }
         }
       }
       break
@@ -135,20 +160,51 @@ class App extends React.Component {
   }
   
   onPlayerStateChange(e) {
-    dout("player.state.changed.")
     switch (e.data) {
+    case YT.PlayerState.ENDED: {
+      // don't bother waiting for a scheduled nextClip. Jump clips.
+      if (this.state.clipIndex !== 0 &&
+          this.state.clipIndex < this.state.clips.length) {
+        dout("unusual case: ended video and more clips.")
+        this.setState((prevState, prevProps) => { return {clipIndex: prevState.clipIndex + 1} })
+      }
+      break
+    }
     case YT.PlayerState.CUED: {
-      dout("noticed cued")
+      dout("player.state.cued")
+      // Handle nextClipJump to new video.
+      const c = this.curClip()
+      if(c) {
+        if(this.player.getVideoData().video_id !== c.vid) {
+          dout("very unexpected. cued video that isn't for current clip. shutting clips down.")
+          this.setState({clipIndex: null})
+        } else {
+          dout("seeking to " + c.start)
+          // this.player.seekTo(c.start, true)
+          this.player.playVideo()
+        }
+      }
+      break
+    }
+    case YT.PlayerState.BUFFERING: {
+      dout("player.state.buffer")
       break
     }
     case YT.PlayerState.UNSTARTED: {
-      dout("noticed unstarted.")
+      dout("player.state.unstarted")
+      break
+    }
+    case YT.PlayerState.PAUSED: {
+      dout("player.state.paused")
+      // clear scheduled nextClip?
       break
     }
     case YT.PlayerState.PLAYING: {
-      dout("detected player is playing.")
-      // what if an interrupt is already scheduled?
-      this.nextClipOrReschedule()
+      dout("player.state.playing.")
+      if(this.curClip()) {
+        // what if an interrupt is already scheduled?
+        this.nextClipOrReschedule()
+      }
       break
     }
     default: {
@@ -161,10 +217,17 @@ class App extends React.Component {
     // bind to ytApiLoadedHook before onYouTubeIframeAPIReady tries
     // to use it.
     window.ytApiLoadedHook = () => {
-      this.player = new YT.Player('embedded-player-5', {
+
+      
+      if(this.state.clips.length === 0) {
+        dOut("very strange. loaded without a clip.")
+        return;
+      }
+
+      window.ytPlayer = this.player = new YT.Player('embedded-player-5', {
         height: '390',
         width: '640',
-        videoId: 'QLkSoyQDOXo',
+        videoId: this.state.clips[0].vid,
         events: {
           'onReady': this.onPlayerReady,
           'onStateChange': this.onPlayerStateChange
@@ -204,11 +267,17 @@ class App extends React.Component {
 }
 
 const clips = [{
+  vid: 'QLkSoyQDOXo',
   start: 30,
   duration: 1.5
 },{
+  vid: 'QLkSoyQDOXo',
   start: 500,
-  duration: 3
+  duration: 2
+},{
+  vid: '4JrJBq_sYMY',
+  start: 167,
+  duration: 2
 }]
 
 ReactDOM.render(<App clips={clips}/>, document.querySelector('.player-container'))
