@@ -13,7 +13,7 @@ body {
 
 .primary-pane .emph {
   background: #6E3667;
-  color: ##b8d76d;
+  color: #b8d76d;
 }
 
 .panel-relaxed {
@@ -23,6 +23,11 @@ body {
 
 .main-cont {
   padding-top: 1em;
+}
+
+.header,
+.header a {
+  color: #c8ec0d;
 }
 
 .footer { 
