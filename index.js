@@ -141,13 +141,7 @@ function staticServe(req, res, reqPath, reqPathNoAlias) {
     }
     res.writeHead(200, {'Content-Type': contentType})
     fs.createReadStream('', {encoding: 'UTF-8', fd: fd})
-      .on('data', (data) => {
-        res.write(data)
-      })
-      .on('end', () => {
-        res.end()
-        console.log(reqPath)
-      })
+      .pipe(res)
   })
 }
 
