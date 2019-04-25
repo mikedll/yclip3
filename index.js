@@ -33,6 +33,18 @@ app.get(/^\/((?!api).)*$/, csrfProtection, (req, res, next) => {
   })  
 })
 
+const dataDir = path.join(__dirname, 'data')
+app.get('/api/collection/:id', csrfProtection, (req, res, next) => {
+  fs.readFile(path.join(dataDir, req.params.id + '.json'), {encoding: 'UTF-8'}, (err, content) => {
+    if (err !== null) {
+      next("unable to find clip " + req.params.id)
+    } else {
+      const collection = JSON.parse(content)
+      res.json(collection)
+    }  
+  })
+})
+
 const DefaultPort = 8081 // sharing this with windows Go...
 
 let port = process.env.PORT;
