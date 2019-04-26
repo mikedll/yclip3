@@ -16,7 +16,10 @@ describe('App', () => {
     duration: 3
   }
   
-  before(() => { return mongoose.connect(config.mongo.uri, config.mongo.connectionOpts) })
+  before(() => {
+    return mongoose.connect(config.mongo.uri, config.mongo.connectionOpts)
+      .then(() => ClipCollection.deleteMany({}))
+  })
 
   after(() => { return mongoose.disconnect() } )
   
@@ -24,9 +27,10 @@ describe('App', () => {
     const collection = new ClipCollection({name: "nice songs"})
     return collection.save()
       .then(collection => {
-        return request(app).post('/collections/' + collection._id + '/clips', clip1)
+        return request(app).post('/api/collections/' + collection._id + '/clips', clip1)
       })
       .then((response) => {
+        expect(response.status).to.equal(201)
         return ClipCollection.findById(collection._id)
       })
       .then((collectionUpdated) => {

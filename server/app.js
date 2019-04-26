@@ -5,7 +5,8 @@ const express = require('express')
 const cookieParser = require('cookie-parser')
 const cons = require('consolidate')
 const csrf = require('csurf')
-
+const ClipCollection = require('./models/clipCollection.js')
+const config = require('./config.js')
 
 const app = express()
 app.engine('mustache', cons.mustache)
@@ -18,7 +19,12 @@ app.use(express.json())
 
 app.use(cookieParser())
 
-const csrfProtection = csrf({ cookie: true })
+const csrfOpts = {cookie: true}
+if(config.env === "test") {
+  csrfOpts.ignoreMethods = ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'DELETE']
+}
+
+const csrfProtection = csrf(csrfOpts)
 
 app.get(/^\/((?!api).)*$/, csrfProtection, (req, res, next) => {
   const id = 1
@@ -33,6 +39,7 @@ app.get(/^\/((?!api).)*$/, csrfProtection, (req, res, next) => {
 })
 
 const dataDir = path.join(__dirname, 'data')
+
 app.get('/api/collection/:id', csrfProtection, (req, res, next) => {
   fs.readFile(path.join(dataDir, req.params.id + '.json'), {encoding: 'UTF-8'}, (err, content) => {
     if (err !== null) {
@@ -42,6 +49,17 @@ app.get('/api/collection/:id', csrfProtection, (req, res, next) => {
       res.json(collection)
     }  
   })
+})
+
+app.post('/api/collections/:collection_id/clips', csrfProtection, (req, res, next) => {
+  ClipCollection.findById(req.params.collection_id)
+    .then(collection => {
+      collection.clips.push(req.body)
+      return collection.save()
+    })
+    .then(collection => {
+      res.status(201).json(collection)
+    })
 })
 
 module.exports = app
