@@ -1,2 +1,5 @@
 
 node_modules/*
+
+.emacs.desktop
+.emacs.desktop.lock
