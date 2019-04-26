@@ -3,7 +3,7 @@ const path = require('path')
 module.exports = {
   module: {
     rules: [
-      { test: /\.jsx$/,
+      { test: /\.js(x)?$/,
         use: [{ loader: 'babel-loader', options: { cacheDirectory: 'tmp/babel-loader-cache' } }],
         exclude: '/node_modules'
       }

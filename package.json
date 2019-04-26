@@ -18,7 +18,8 @@
     "lodash": "^4.17.11",
     "mongoose": "^5.5.4",
     "mustache": "^3.0.1",
-    "react": "^16.8.6"
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3",
@@ -26,6 +27,7 @@
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.5",
     "chai": "^4.2.0",
+    "enzyme": "^3.9.0",
     "mocha": "^6.1.4",
     "supertest": "^4.0.2",
     "webpack": "^3.12.0"
