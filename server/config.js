@@ -27,7 +27,7 @@ const config = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   mongo: {
-    uri: `mongodb://{envVars.MONGO_HOST}:{envVars.MONGO_PORT}/{envVars.MONGO_DATABASE}`,
+    uri: `mongodb://${envVars.MONGO_HOST}:${envVars.MONGO_PORT}/${envVars.MONGO_DATABASE}`,
     connectionOpts: { useNewUrlParser: true }
   }
 }

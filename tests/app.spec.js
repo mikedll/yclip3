@@ -5,6 +5,7 @@ const srcDir = path.join(__dirname, '../server/')
 const app = require(path.join(srcDir, 'app.js'))
 const mongoose = require('mongoose')
 const ClipCollection = require(path.join(srcDir, 'models/clipCollection.js'))
+const config = require(path.join(srcDir, 'config.js'))
   
 describe('App', () => {
 
@@ -14,9 +15,7 @@ describe('App', () => {
     duration: 3
   }
   
-  beforeAll(() => {
-    return mongoose.connect(config.mongo.uri, config.mongo.collectionOpts)
-  })
+  beforeAll(() => { return mongoose.connect(config.mongo.uri, config.mongo.connectionOpts) })
 
   afterAll(() => { return mongoose.disconnect() } )
   
