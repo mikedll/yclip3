@@ -1,7 +1,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom'
-import App from './components/App.jsx'
+import AppRoot from './components/AppRoot.jsx'
 
 window.ytApiLoadedHook = null // will be defined when the App component mounts.
 window.ytPlayer
@@ -16,8 +16,6 @@ window.dout = function(s) {
   console.log(s)
 }
 
-const clips = window.__bootstrap
-
 addEventListener('DOMContentLoaded', () => {
-  ReactDOM.render(<App clips={clips}/>, document.querySelector('.player-container'))
+  ReactDOM.render(<AppRoot bootstrap={window.__bootstrap}/>, document.querySelector('.player-container'))
 })

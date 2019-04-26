@@ -4,6 +4,10 @@ body {
   color: #fff;
 }
 
+.navbar-dark {
+  background: #1a0315;
+}
+
 .primary-pane {
   padding-top: 1rem;    
   padding-bottom: 1rem;    
