@@ -28,6 +28,7 @@
     "babel-loader": "^8.0.5",
     "chai": "^4.2.0",
     "enzyme": "^3.9.0",
+    "enzyme-adapter-react-16": "^1.12.1",
     "mocha": "^6.1.4",
     "supertest": "^4.0.2",
     "webpack": "^3.12.0"
