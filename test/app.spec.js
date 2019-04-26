@@ -7,7 +7,7 @@ const app = require(path.join(srcDir, 'app.js'))
 const mongoose = require('mongoose')
 const ClipCollection = require(path.join(srcDir, 'models/clipCollection.js'))
 const config = require(path.join(srcDir, 'config.js'))
-  
+
 describe('App', () => {
 
   let clip1 = {

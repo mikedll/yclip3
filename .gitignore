@@ -1,5 +1,9 @@
 
 node_modules/*
 
+tmp/*
+
+test/components.js
+
 .emacs.desktop
 .emacs.desktop.lock
