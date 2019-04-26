@@ -221,9 +221,8 @@ class App extends React.Component {
     // to use it.
     window.ytApiLoadedHook = () => {
 
-      
       if(this.state.clips.length === 0) {
-        dOut("very strange. loaded without a clip.")
+        dout("very strange. loaded without a clip.")
         return;
       }
 

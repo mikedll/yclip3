@@ -3,15 +3,15 @@ import React from 'react';
 import ReactDOM from 'react-dom'
 import App from './components/App.jsx'
 
-var ytApiLoadedHook = null
-var ytPlayer
+window.ytApiLoadedHook = null // will be defined when the App component mounts.
+window.ytPlayer
 
-function onYouTubeIframeAPIReady() {
-  ytApiLoadedHook()
-}
+window.onYouTubeIframeAPIReady = function() {
+  window.ytApiLoadedHook()
+}  
 
 const silent = false
-function dout(s) {
+window.dout = function(s) {
   if (silent) return
   console.log(s)
 }
