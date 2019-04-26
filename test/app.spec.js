@@ -21,16 +21,17 @@ describe('App', () => {
   after(() => { return mongoose.disconnect() } )
   
   it('should save a new clip in a collection', function() {
-    console.log(config.mongo.uri)
-    // const collection = new ClipCollection({name: "nice songs"})
-    // return collection.save()
-    //   .then(collection => {
-    //     request(app).post('/collections/' + collection._id + '/clips', clip1)
-    //   })
-    //   .then((response) => {
-    //     const collectionUpdated = ClipCollection.findById(collection._id)
-    //     expect(collectionUpdated.clips.length).to.equal(1)
-    //     expect(collectionUpdated.clips[0].vid).to.equal("Iwuy4hHO3YQ")
-    //   })
+    const collection = new ClipCollection({name: "nice songs"})
+    return collection.save()
+      .then(collection => {
+        return request(app).post('/collections/' + collection._id + '/clips', clip1)
+      })
+      .then((response) => {
+        return ClipCollection.findById(collection._id)
+      })
+      .then((collectionUpdated) => {
+        expect(collectionUpdated.clips.length).to.equal(1)
+        expect(collectionUpdated.clips[0].vid).to.equal("Iwuy4hHO3YQ")
+      })
   })
 })
