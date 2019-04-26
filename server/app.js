@@ -44,4 +44,4 @@ app.get('/api/collection/:id', csrfProtection, (req, res, next) => {
   })
 })
 
-export default app
+module.exports = app

@@ -30,4 +30,4 @@ const ClipCollectionSchema = new mongoose.Schema({
 
 const ClipCollection = mongoose.model('ClipCollection', ClipCollectionSchema)
 
-export default ClipCollection
+module.exports = ClipCollection

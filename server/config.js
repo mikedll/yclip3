@@ -15,7 +15,14 @@ const envVarsSchema = Joi.object({
   MONGO_DATABASE: Joi.string()
     .description("Mongo database name")
     .default("yclip3dev"),
-}).unknown().required()
+}).unknown().required().when(
+  Joi.object({
+    NODE_ENV: Joi.equal('test')
+  }).unknown(), {
+    then: {
+      MONGO_DATABASE: Joi.default("yclip3test")
+    }
+  })
 
 const { error, value: envVars } = Joi.validate(process.env, envVarsSchema);
 
