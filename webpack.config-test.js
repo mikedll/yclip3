@@ -4,6 +4,11 @@ const path = require('path')
 module.exports = {
   target: 'node',
   externals: [nodeExternals()],
+  output: {
+    // use absolute paths in sourcemaps (important for debugging via IDE)
+    devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+    devtoolFallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]'
+  },  
   module: {
     rules: [
       { test: /\.js(x)?$/,
