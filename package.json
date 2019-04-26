@@ -7,7 +7,8 @@
   "author": "Michael Rivera <soymrmike@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "NODE_ENV=test mocha"
+    "test": "NODE_ENV=test mocha",
+    "ctest": "NODE_ENV=test mocha-webpack --webpack-config ./webpack.config-test.js test/components/*.spec.js"
   },
   "dependencies": {
     "consolidate": "^0.15.1",
@@ -32,6 +33,7 @@
     "jsdom": "^15.0.0",
     "jsdom-global": "^3.0.2",
     "mocha": "^6.1.4",
+    "mocha-webpack": "^1.1.0",
     "supertest": "^4.0.2",
     "webpack": "^3.12.0",
     "webpack-node-externals": "^1.7.2"
