@@ -1,7 +1,9 @@
+var nodeExternals = require('webpack-node-externals');
 const path = require('path')
 
 module.exports = {
   target: 'node',
+  externals: [nodeExternals()],
   module: {
     rules: [
       { test: /\.js(x)?$/,
@@ -12,5 +14,6 @@ module.exports = {
   },
   resolve: {
     modules: [path.resolve(__dirname, 'static/js'), 'node_modules']
-  }
+  },
+  devtool: "inline-cheap-module-source-map"
 }

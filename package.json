@@ -29,8 +29,11 @@
     "chai": "^4.2.0",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
+    "jsdom": "^15.0.0",
+    "jsdom-global": "^3.0.2",
     "mocha": "^6.1.4",
     "supertest": "^4.0.2",
-    "webpack": "^3.12.0"
+    "webpack": "^3.12.0",
+    "webpack-node-externals": "^1.7.2"
   }
 }
