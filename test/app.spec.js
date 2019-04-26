@@ -27,7 +27,7 @@ describe('App', () => {
     const collection = new ClipCollection({name: "nice songs"})
     return collection.save()
       .then(collection => {
-        return request(app).post('/api/collections/' + collection._id + '/clips', clip1)
+        return request(app).post('/api/collections/' + collection._id + '/clips').send(clip1)
       })
       .then((response) => {
         expect(response.status).to.equal(201)
