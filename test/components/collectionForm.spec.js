@@ -1,4 +1,3 @@
-require('jsdom-global')()
 
 import React from 'react';
 import { expect } from 'chai'
