@@ -19,7 +19,7 @@ module.exports = {
     ]
   },
   resolve: {
-    modules: [path.resolve(__dirname, 'static/js'), 'node_modules']
+    modules: [path.resolve(__dirname, 'client'), 'node_modules']
   },
   devtool: "inline-cheap-module-source-map"
 }

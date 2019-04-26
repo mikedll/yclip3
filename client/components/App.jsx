@@ -1,5 +1,6 @@
 
 import React from 'react';
+import CollectionForm from './CollectionForm.jsx'
 
 class App extends React.Component {
 
@@ -278,6 +279,7 @@ class App extends React.Component {
     
     return (
       <div className="embedded-player-container">
+        <CollectionForm/>
         <div id="embedded-player-5"></div>
 
         <div className="clip-summary">

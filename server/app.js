@@ -11,9 +11,9 @@ const config = require('./config.js')
 const app = express()
 app.engine('mustache', cons.mustache)
 app.set('view engine', 'mustache')
-app.set('views', path.join(__dirname, './views'))
+app.set('views', path.join(__dirname, '../views'))
 
-app.use(express.static(path.join(__dirname, 'static')))
+app.use(express.static(path.join(__dirname, '../static')))
 
 app.use(express.json())
 
@@ -28,7 +28,7 @@ const csrfProtection = csrf(csrfOpts)
 
 app.get(/^\/((?!api).)*$/, csrfProtection, (req, res, next) => {
   const id = 1
-  fs.readFile(path.join(__dirname, 'data', id + '.json'), {encoding: 'UTF-8'}, (err, content) => {
+  fs.readFile(path.join(__dirname, '../data', id + '.json'), {encoding: 'UTF-8'}, (err, content) => {
     if (err !== null) {
       next("unable to find root clips")
     } else {

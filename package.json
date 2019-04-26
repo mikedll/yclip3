@@ -7,6 +7,8 @@
   "author": "Michael Rivera <soymrmike@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "watch": "webpack --watch --config webpack.config.js",
     "test": "NODE_ENV=test mocha",
     "ctest": "NODE_ENV=test mochapack --require test/components/setup.js --webpack-config ./webpack.config-test.js test/components/*.spec.js"
   },
@@ -36,6 +38,7 @@
     "mochapack": "^1.1.1",
     "supertest": "^4.0.2",
     "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.1",
     "webpack-node-externals": "^1.7.2"
   }
 }
