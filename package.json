@@ -6,6 +6,17 @@
   "repository": "git@github.com:mikedll/yclip3.git",
   "author": "Michael Rivera <soymrmike@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js"
+    ],
+    "transform": {
+      "^.+\\.js$": "<rootDir>/node_modules/babel-jest"
+    }
+  },
   "dependencies": {
     "consolidate": "^0.15.1",
     "cookie-parser": "^1.4.4",
@@ -15,5 +26,13 @@
     "lodash": "^4.17.11",
     "mongoose": "^5.5.4",
     "mustache": "^3.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "babel-core": "^7.0.0-bridge.0",
+    "core-js": "^3.0.1",
+    "jest": "^24.7.1",
+    "supertest": "^4.0.2"
   }
 }
