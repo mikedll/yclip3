@@ -59,6 +59,18 @@ describe('App', () => {
         expect(collectionUpdated.clips.length).to.equal(2)
         expect(collectionUpdated.clips[0].vid).to.equal("Iwuy4hHO3YQ")
         expect(collectionUpdated.clips[1].vid).to.equal("dQw4w9WgXcQ")
+      })    
+  })
+
+  it('should return a collection upon request', () => {
+    const collection = new ClipCollection({name: "nice songs", clips: [clip1, clip2]})
+    return collection.save()
+      .then(collection => {
+        return request(app).get('/api/collections/' + collection._id)
+      })
+      .then(response => {
+        expect(response.status).to.equal(200)
+        expect(response.body).to.match(collection)
       })
     
   })

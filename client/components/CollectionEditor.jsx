@@ -6,28 +6,53 @@ export default class CollectionEditor extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      clips: props.clips,
+      name: props.collection.name,
+      clips: props.collection.clips,
       vid: "",
       start: null,
-      duration: null
+      duration: null,
+      error: ""
     }
 
     this.onSubmit = this.onSubmit.bind(this)
   }
 
+  componentDidMount() {
+    if(!this.props.collection) {
+      $.ajax({
+        url: '/api/collections/' + this.match.params.id,
+        success: (data) => {
+          this.setState(prevState => {
+            return { ...prevState, ...{ name: data.name, clips: data.clips } }
+          })
+        },
+        error: (xhr) => {
+          var text = ""
+          try {
+            const data = JSON.parse(xhr.responseText)
+            text = data.errors
+          } catch(e) {
+            text = "An unknown error occurred."
+          }
+          this.setState(prevState => { return {...prevState, ...{error: text}} })
+        }
+      })
+    }
+  }
+  
   onChange(e) {
     const target = e.target
     const name = target.name
     const value = target.value
-    
-    this.setState((prevState) => update(prevState, {[name]: {$set: value}}))
+
+    this.setState((prevState) => { return { ...prevState, ...{name: value} } })
   }
   
   onSubmit(e) {
     e.preventDefault()
     
     this.props.$.ajax({
-      url: "/collections/{this.props.id}/clips",
+      url: "/api/collections/{this.props.id}/clips",
       method: "POST",
       dataType: "JSON",
       success: (data) => {
@@ -52,11 +77,19 @@ export default class CollectionEditor extends Component {
       )
     })
 
+    const error = this.state.error !== "" ? (
+      <div className="alert alert-danger">
+        Error: {this.state.error}
+      </div>
+    ): ""
+
     return (
       <div>
+        {error}
+        
         Collection:
         <strong>
-          {this.props.name}
+          {this.props.state.name}
         </strong>
 
         {clips}

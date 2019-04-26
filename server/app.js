@@ -40,15 +40,16 @@ app.get(/^\/((?!api).)*$/, csrfProtection, (req, res, next) => {
 
 const dataDir = path.join(__dirname, 'data')
 
-app.get('/api/collection/:id', csrfProtection, (req, res, next) => {
-  fs.readFile(path.join(dataDir, req.params.id + '.json'), {encoding: 'UTF-8'}, (err, content) => {
-    if (err !== null) {
-      next("unable to find clip " + req.params.id)
-    } else {
-      const collection = JSON.parse(content)
-      res.json(collection)
-    }  
-  })
+app.get('/api/collections/:id', csrfProtection, (req, res, next) => {
+  ClipCollection.findById(req.params.collection_id)
+    .then(collection => {
+      if(!collection) {
+        res.status(404).end()
+      } else {
+        res.json(collection)
+      }
+    })
+    .catch(err => next(err))
 })
 
 app.post('/api/collections/:collection_id/clips', csrfProtection, (req, res, next) => {
