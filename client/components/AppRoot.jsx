@@ -45,8 +45,6 @@ class AppRoot extends Component {
               <ul className="navbar-nav">
                 <MenuLink label="Home" to='/'>Home</MenuLink>
                 <MenuLink label="Browse" to='/collections'>Browse</MenuLink>
-                <MenuLink label="View a Collection" to='/collections/d535'></MenuLink>
-                <MenuLink label="Edit a Collection" to='/collections/d535/edit'></MenuLink>
                 <Route path="*" render={routeProps => {
                   return (
                     <NewCollectionLink $={jQuery} {...routeProps} />

@@ -27,6 +27,19 @@ class CollectionsBrowser extends Component {
   }
   
   render() {
+
+    const thumbnails = !this.state.collections ? "" : this.state.collections.map((c, i) => {
+      return (
+        <div key={i} className="collection-brief">
+          {c._id} - {c.name}
+          <br/>
+          Clips: {c.clips.length}
+          <br/>
+          <Link to={`/collections/${c._id}`}>View</Link>  | <Link to={`/collections/${c._id}/edit`}>Edit</Link>
+        </div>
+      )
+    })
+
     return (
       <div className="collection-brief-container">
 
@@ -34,12 +47,7 @@ class CollectionsBrowser extends Component {
             {this.state.error}
         </div> : ""}
         
-        {this.state.collections ? this.state.collections.map((c) => { return (<div className="collection-brief">
-                                                                              {c._id} - {c.name}
-                                                                                <br/>
-                                                                                  <Link to={`/collections/${c._id}`}>View</Link>
-                                                                              </div>
-                                                                             ) }) : ""}
+        {thumbnails}
       </div>
     )
   }

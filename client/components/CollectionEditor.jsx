@@ -113,9 +113,9 @@ export default class CollectionEditor extends Component {
         {body}
         
         <form onSubmit={this.onSubmit}>
-          Video Id: <input type="text" name="vid" onChange={this.onChange}/>
-          Start (seconds): <input type="text" name="start" onChange={this.onChange}/>
-          Duration (seconds): <input type="text" name="duration" onChange={this.onChange}/>
+          Video Id: <input type="text" name="vid" value={this.state.vid} onChange={this.onChange}/>
+          Start (seconds): <input type="text" name="start" value={this.state.start} onChange={this.onChange}/>
+          Duration (seconds): <input type="text" name="duration" value={this.state.duration} onChange={this.onChange}/>
 
           <br/>
           <button type="submit" className="btn btn-primary">Add Clip</button>
