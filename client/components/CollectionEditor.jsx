@@ -17,6 +17,7 @@ export default class CollectionEditor extends Component {
     }
 
     this.onSubmit = this.onSubmit.bind(this)
+    this.onChange = this.onChange.bind(this)
   }
 
   componentDidMount() {
@@ -57,16 +58,31 @@ export default class CollectionEditor extends Component {
       url: "/api/collections/{this.props.id}/clips",
       method: "POST",
       dataType: "JSON",
+      data: {
+        vid: this.state.vid,
+        start: this.state.start,
+        duration: this.state.duration
+      },
+      beforeSend: (xhr) => { xhr.setRequestHeader('CSRF-Token', this.props.$('meta[name=csrf-token]').attr('content')) },
       success: (data) => {
         this.setState(prevState => {          
           return { ...update(prevState, {collection: {clips: {$push: [data]}}}), ...{ vid: "", start: null, duration: null} }
         })
+      },
+      error: (xhr) => {
+        var text = ""
+        try {
+          const data = JSON.parse(xhr.responseText)
+          text = data.errors
+        } catch(e) {
+          text = "An unknown error occurred."
+        }
+        this.setState(prevState => { return {...prevState, ...{error: text}} })
       }
     })
   }
   
   render() {
-    console.log("id of collection in editor: ", this.props.match.params.id)
     const error = this.state.error !== "" ? (
       <div className="alert alert-danger">
         Error: {this.state.error}
@@ -104,7 +120,7 @@ export default class CollectionEditor extends Component {
 
         {body}
         
-        <form>
+        <form onSubmit={this.onSubmit}>
           Video Id: <input type="text" name="vid" onChange={this.onChange}/>
           Start (seconds): <input type="text" name="start" onChange={this.onChange}/>
           Duration (seconds): <input type="text" name="duration" onChange={this.onChange}/>
