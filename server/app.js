@@ -19,6 +19,10 @@ app.use(express.json())
 
 app.use(cookieParser())
 
+var bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
 const csrfOpts = {cookie: true}
 if(config.env === "test") {
   csrfOpts.ignoreMethods = ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'DELETE']

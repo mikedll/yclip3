@@ -52,39 +52,26 @@ export default class CollectionEditor extends Component {
     const name = target.name
     const value = target.value
 
-    this.setState((prevState) => { return { ...prevState, ...{[name]: value} } })
+    this.setState({[name]: value})
   }
   
   onSubmit(e) {
     e.preventDefault()
 
     this.setState({error: ""})
-    this.props.$.ajax({
-      url: `/api/collections/${this.props.match.params.id}/clips`,
-      method: "POST",
-      dataType: "JSON",
-      data: {
+    new AjaxAssistant(this.props.$).post(`/api/collections/${this.props.match.params.id}/clips`, {
         vid: this.state.vid,
         start: this.state.start,
         duration: this.state.duration
-      },
-      beforeSend: (xhr) => { xhr.setRequestHeader('CSRF-Token', this.props.$('meta[name=csrf-token]').attr('content')) },
-      success: (data) => {
-        this.setState(prevState => {          
+      })
+      .then(data => {
+        this.setState(prevState => {
           return { ...update(prevState, {collection: {clips: {$push: [data]}}}), ...{ vid: "", start: null, duration: null} }
         })
-      },
-      error: (xhr) => {
-        var text = ""
-        try {
-          const data = JSON.parse(xhr.responseText)
-          text = data.errors
-        } catch(e) {
-          text = "An unknown error occurred."
-        }
-        this.setState(prevState => { return {...prevState, ...{error: text}} })
-      }
-    })
+      })
+      .catch(error => {
+        this.setState({error})
+      })
   }
   
   render() {
