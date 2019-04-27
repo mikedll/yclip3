@@ -9,8 +9,8 @@ export default class CollectionEditor extends Component {
     super(props)
     this.state = {
       vid: "",
-      start: null,
-      duration: null,
+      start: "",
+      duration: "",
       error: ""
     }
 
@@ -36,7 +36,7 @@ export default class CollectionEditor extends Component {
   
   componentWillReceiveProps(nextProps) {
     if(this.state.collection && this.state.collection._id !== this.props.match.params.id) {
-      this.setState({error: "", vid: "", start: null, duration: null})
+      this.setState({error: "", vid: "", start: "", duration: ""})
       this.fetchCollection()
     }
   }
@@ -66,7 +66,7 @@ export default class CollectionEditor extends Component {
       })
       .then(data => {
         this.setState(prevState => {
-          return { ...update(prevState, {collection: {clips: {$push: [data]}}}), ...{ vid: "", start: null, duration: null} }
+          return { ...update(prevState, {collection: {$set: data}}), ...{ vid: "", start: "", duration: ""} }
         })
       })
       .catch(error => {
@@ -83,9 +83,9 @@ export default class CollectionEditor extends Component {
 
     var body = null
     if(this.state.collection) {
-      const clips = this.state.collection.clips.map((c) => {
+      const clips = this.state.collection.clips.map((c, i) => {
         return (
-          <div>
+          <div key={i}>
             vid: {c.vid}
             <br/>
             start: {c.start}
