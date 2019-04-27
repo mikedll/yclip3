@@ -1,9 +1,10 @@
 
 import React, { Component } from 'react'
-import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Link, Route, Switch, Redirect } from 'react-router-dom';
 
 import jQuery from 'jquery'
 
+import AjaxAssistant from 'AjaxAssistant.jsx'
 import CollectionViewer from 'components/CollectionViewer.jsx'
 import CollectionEditor from 'components/CollectionEditor.jsx'
 
@@ -19,8 +20,22 @@ const PropsRoute = ({ component, ...rest }) => {
 class AppRoot extends Component {
   constructor(props) {
     super(props)
+    this.state = {}
+    this.onNewCollection = this.onNewCollection.bind(this)
   }
 
+  onNewCollection(e) {
+    e.preventDefault()
+    if(this.state.busy) return
+    this.setState({busy: true})
+    new AjaxAssistant(jQuery)
+      .post('/api/collections')
+      .then(data => {
+        this.setState({busy: false, newCollectionMade: data._id})
+      })
+      .catch(error => this.setState({error, busy: false}))
+  }
+  
   render() {
     const welcome = () => (<div>Welcome to the application.</div>)
     const MenuLink = ({ label, to }) => (
@@ -30,10 +45,15 @@ class AppRoot extends Component {
         </li>
       )}/>
     );
-    
-    return (
+
+    const redirects = !this.state.newCollectionMade ? "" : (
+      <Redirect to={`/collections/${this.state.newCollectionMade}/edit`}/>
+    )
+
+    return (      
       <Router>
         <div>
+          {redirects}
 
           <nav className="navbar navbar-expand-lg navbar-dark">
             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,10 +61,13 @@ class AppRoot extends Component {
             </button>
             <div className="collapse navbar-collapse" id="navbarNav">
               <ul className="navbar-nav">
-                <Link className="nav-link" to='/'>Home</Link>
-                <Link className="nav-link" to='/collections'>Browse</Link>
-                <Link className="nav-link" to='/collections/e35'>View a Collection</Link>
-                <Link className="nav-link" to='/collections/e35/edit'>Edit a Collection</Link>
+                <MenuLink label="Home" to='/'>Home</MenuLink>
+                <MenuLink label="Browse" to='/collections'>Browse</MenuLink>
+                <MenuLink label="View a Collection" to='/collections/e35'></MenuLink>
+                <MenuLink label="Edit a Collection" to='/collections/e35/edit'></MenuLink>
+                <li className='nav-item'>
+                  <a className="nav-link" href='#' onClick={this.onNewCollection}>New Clip Collection</a>
+                </li>
               </ul>
             </div>
           </nav>

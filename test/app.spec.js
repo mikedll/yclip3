@@ -62,7 +62,7 @@ describe('App', () => {
       })    
   })
 
-  it('should return a collection upon request', () => {
+  it('should return a collection', () => {
     const collection = new ClipCollection({name: "nice songs", clips: [clip1, clip2]})
     return collection.save()
       .then(collection => {
@@ -73,5 +73,17 @@ describe('App', () => {
         expect(response.body).to.match(collection)
       })
     
+  })
+
+  it.only('should create a new collection', () => {
+    return request(app).post('/api/collections')
+      .then(response => {
+        expect(response.status).to.equal(201)
+        return ClipCollection.findById(response.body._id)
+      })
+      .then(collection =>{
+        expect(collection).to.not.be.null
+        expect(collection).to.not.be.undefined
+      })
   })
 })

@@ -107,7 +107,7 @@ export default class CollectionEditor extends Component {
         <div>
           Collection:
           <strong>
-            {this.props.state.name}
+            {this.state.collection.name}
           </strong>
 
           {clips}

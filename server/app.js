@@ -78,4 +78,11 @@ app.post('/api/collections/:collection_id/clips', csrfProtection, (req, res, nex
     .catch(err => next(err))
 })
 
+app.post('/api/collections', csrfProtection, (req, res, next) => {
+  const clipCollection = new ClipCollection({name: ""})
+  clipCollection.save()
+    .then(collection => res.status(201).json(collection))
+    .catch(err => { next(err) })
+})
+
 module.exports = app

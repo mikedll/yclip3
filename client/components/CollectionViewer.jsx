@@ -290,7 +290,6 @@ class CollectionViewer extends React.Component {
       </div>
     )
     
-    console.log('using error', errorMsg)
     return (
       <div className="embedded-player-container">
         <CollectionForm/>
