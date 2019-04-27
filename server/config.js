@@ -17,7 +17,7 @@ const envVarsSchema = Joi.object({
     .default("yclip3dev"),
 }).unknown().required().when(
   Joi.object({
-    NODE_ENV: Joi.equal('test')
+    NODE_ENV: Joi.exist().equal('test')
   }).unknown(), {
     then: {
       MONGO_DATABASE: Joi.default("yclip3test")
