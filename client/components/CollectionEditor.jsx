@@ -53,7 +53,8 @@ export default class CollectionEditor extends Component {
   
   onSubmit(e) {
     e.preventDefault()
-    
+
+    this.setState({error: ""})
     this.props.$.ajax({
       url: `/api/collections/${this.props.match.params.id}/clips`,
       method: "POST",
