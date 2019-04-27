@@ -83,6 +83,8 @@ app.post('/api/collections/:collection_id/clips', csrfProtection, (req, res, nex
 })
 
 app.get('/api/collections', csrfProtection, (req, res, next) => {
+  const PageSize = 9
+  
   let pageIndex = 0
   try {
     pageIndex = Number(req.query.page) - 1
@@ -90,7 +92,7 @@ app.get('/api/collections', csrfProtection, (req, res, next) => {
     pageIndex = 1
   }
   
-  ClipCollection.find({}, null, { limit: 10, skip: pageIndex * 10 })
+  ClipCollection.find({}, null, { limit: PageSize, skip: pageIndex * PageSize })
     .then(collections => res.json(collections))
     .catch(err => { next(err) })
 })
