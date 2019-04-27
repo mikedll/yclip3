@@ -1,6 +1,8 @@
 import update from 'immutability-helper';
 import React, { Component } from 'react'
 
+import AjaxAssistant from 'AjaxAssistant.jsx'
+
 export default class CollectionEditor extends Component {
 
   constructor(props) {
@@ -20,26 +22,28 @@ export default class CollectionEditor extends Component {
     this.onChange = this.onChange.bind(this)
   }
 
+  fetchCollection() {
+    new AjaxAssistant(this.props.$).get('/api/collections/' + this.props.match.params.id)
+      .then(data => {
+        this.setState(prevState => {
+          return { ...prevState, ...{ collection: { name: data.name, clips: data.clips } } }
+        })
+      })
+      .catch(error => {
+        this.setState({error})
+      })    
+  }
+  
+  componentWillReceiveProps(nextProps) {
+    if(this.state.collection && this.state.collection._id !== this.props.match.params.id) {
+      this.setState({error: "", vid: "", start: null, duration: null})
+      this.fetchCollection()
+    }
+  }
+  
   componentDidMount() {
     if(!this.props.collection) {
-      this.props.$.ajax({
-        url: '/api/collections/' + this.props.match.params.id,
-        success: (data) => {
-          this.setState(prevState => {
-            return { ...prevState, ...{ collection: { name: data.name, clips: data.clips } } }
-          })
-        },
-        error: (xhr) => {
-          var text = ""
-          try {
-            const data = JSON.parse(xhr.responseText)
-            text = data.errors
-          } catch(e) {
-            text = "An unknown error occurred."
-          }
-          this.setState(prevState => { return {...prevState, ...{error: text}} })
-        }
-      })
+      this.fetchCollection()
     }
   }
   
