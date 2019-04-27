@@ -1,17 +1,19 @@
 import update from 'immutability-helper';
-import { Component } from 'react'
+import React, { Component } from 'react'
 
 export default class CollectionEditor extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
-      name: props.collection.name,
-      clips: props.collection.clips,
       vid: "",
       start: null,
       duration: null,
       error: ""
+    }
+
+    if(this.props.collection) {
+      this.state = {...this.state, ...{collection: props.collection}}
     }
 
     this.onSubmit = this.onSubmit.bind(this)
@@ -19,11 +21,11 @@ export default class CollectionEditor extends Component {
 
   componentDidMount() {
     if(!this.props.collection) {
-      $.ajax({
-        url: '/api/collections/' + this.match.params.id,
+      this.props.$.ajax({
+        url: '/api/collections/' + this.props.match.params.id,
         success: (data) => {
           this.setState(prevState => {
-            return { ...prevState, ...{ name: data.name, clips: data.clips } }
+            return { ...prevState, ...{ collection: { name: data.name, clips: data.clips } } }
           })
         },
         error: (xhr) => {
@@ -57,7 +59,7 @@ export default class CollectionEditor extends Component {
       dataType: "JSON",
       success: (data) => {
         this.setState(prevState => {          
-          return { ...update(prevState, {clips: {$push: [data]}}), ...{ vid: "", start: null, duration: null} }
+          return { ...update(prevState, {collection: {clips: {$push: [data]}}}), ...{ vid: "", start: null, duration: null} }
         })
       }
     })
@@ -65,34 +67,42 @@ export default class CollectionEditor extends Component {
   
   render() {
     console.log("id of collection in editor: ", this.props.match.params.id)
-    const clips = this.state.clips.map((c) => {
-      return (
-        <div>
-          vid: {c.vid}
-          <br/>
-          start: {c.start}
-          <br/>
-          duration: {c.duration}
-        </div>
-      )
-    })
-
     const error = this.state.error !== "" ? (
       <div className="alert alert-danger">
         Error: {this.state.error}
       </div>
     ): ""
 
+    var body = null
+    if(this.state.collection) {
+      const clips = this.state.collection.clips.map((c) => {
+        return (
+          <div>
+            vid: {c.vid}
+            <br/>
+            start: {c.start}
+            <br/>
+            duration: {c.duration}
+          </div>
+        )
+      })
+      body = (
+        <div>
+          Collection:
+          <strong>
+            {this.props.state.name}
+          </strong>
+
+          {clips}
+        </div>
+      )
+    }
+
     return (
       <div>
         {error}
-        
-        Collection:
-        <strong>
-          {this.props.state.name}
-        </strong>
 
-        {clips}
+        {body}
         
         <form>
           Video Id: <input type="text" name="vid" onChange={this.onChange}/>
@@ -103,8 +113,7 @@ export default class CollectionEditor extends Component {
           <button type="submit" className="btn btn-primary">Add Clip</button>
         </form>
       </div>
-    )
-    
+    )    
   }
 }
 

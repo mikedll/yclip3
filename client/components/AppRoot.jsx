@@ -49,7 +49,7 @@ class AppRoot extends Component {
           
           <Switch>
             <PropsRoute path="/" exact component={App} $={jQuery} clips={this.props.bootstrap}/>
-            <PropsRoute path="/collections/:id" exact component={App} $={jQuery} collection={this.props.bootstrap}/>
+            <PropsRoute path="/collections/:id" exact component={App} $={jQuery} />
             <PropsRoute path="/collections/:id/edit" component={CollectionEditor} $={jQuery}/>
           </Switch>
         </div>
