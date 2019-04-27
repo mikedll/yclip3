@@ -48,14 +48,14 @@ export default class CollectionEditor extends Component {
     const name = target.name
     const value = target.value
 
-    this.setState((prevState) => { return { ...prevState, ...{name: value} } })
+    this.setState((prevState) => { return { ...prevState, ...{[name]: value} } })
   }
   
   onSubmit(e) {
     e.preventDefault()
     
     this.props.$.ajax({
-      url: "/api/collections/{this.props.id}/clips",
+      url: `/api/collections/${this.props.match.params.id}/clips`,
       method: "POST",
       dataType: "JSON",
       data: {

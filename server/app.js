@@ -41,7 +41,12 @@ app.get(/^\/((?!api).)*$/, csrfProtection, (req, res, next) => {
 const dataDir = path.join(__dirname, 'data')
 
 app.get('/api/collections/:id', csrfProtection, (req, res, next) => {
-  ClipCollection.findById(req.params.collection_id)
+  if(!/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
+    res.status(404).end()
+    return
+  }
+
+  ClipCollection.findById(req.params.id)
     .then(collection => {
       if(!collection) {
         res.status(404).end()
@@ -53,14 +58,24 @@ app.get('/api/collections/:id', csrfProtection, (req, res, next) => {
 })
 
 app.post('/api/collections/:collection_id/clips', csrfProtection, (req, res, next) => {
+  if(!/^[0-9a-fA-F]{24}$/.test(req.params.collection_id)) {
+    res.status(404).end()
+    return
+  }
+  
   ClipCollection.findById(req.params.collection_id)
     .then(collection => {
-      collection.clips.push(req.body)
-      return collection.save()
+      if(!collection) {
+        res.status(404).end()
+      } else {
+        collection.clips.push(req.body)
+        return collection.save()
+      }
     })
     .then(collection => {
       res.status(201).json(collection)
     })
+    .catch(err => next(err))
 })
 
 module.exports = app
