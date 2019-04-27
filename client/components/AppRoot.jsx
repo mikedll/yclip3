@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 
 import jQuery from 'jquery'
 
-import App from 'components/App.jsx'
+import CollectionViewer from 'components/CollectionViewer.jsx'
 import CollectionEditor from 'components/CollectionEditor.jsx'
 
 const renderMergedProps = (component, ...rest) => {
@@ -22,6 +22,7 @@ class AppRoot extends Component {
   }
 
   render() {
+    const welcome = () => (<div>Welcome to the application.</div>)
     const MenuLink = ({ label, to }) => (
       <Route path={to} exact children={({ match }) => (
         <li className={'nav-item' + (match ? ' active' : '')}>
@@ -42,14 +43,15 @@ class AppRoot extends Component {
               <ul className="navbar-nav">
                 <Link className="nav-link" to='/'>Home</Link>
                 <Link className="nav-link" to='/collections'>Browse</Link>
+                <Link className="nav-link" to='/collections/e35'>View a Collection</Link>
                 <Link className="nav-link" to='/collections/e35/edit'>Edit a Collection</Link>
               </ul>
             </div>
           </nav>
           
           <Switch>
-            <PropsRoute path="/" exact component={App} $={jQuery} clips={this.props.bootstrap}/>
-            <PropsRoute path="/collections/:id" exact component={App} $={jQuery} />
+            <PropsRoute path="/" exact component={welcome} $={jQuery}/>
+            <PropsRoute path="/collections/:id" exact component={CollectionViewer} $={jQuery} />
             <PropsRoute path="/collections/:id/edit" component={CollectionEditor} $={jQuery}/>
           </Switch>
         </div>

@@ -13,7 +13,7 @@ export default class CollectionEditor extends Component {
     }
 
     if(this.props.collection) {
-      this.state = {...this.state, ...{collection: props.collection}}
+      this.state.collection = props.collection
     }
 
     this.onSubmit = this.onSubmit.bind(this)

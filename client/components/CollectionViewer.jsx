@@ -1,27 +1,22 @@
 
 import React from 'react';
 import CollectionForm from './CollectionForm.jsx'
+import AjaxAssistant from 'AjaxAssistant.jsx'
 
-class App extends React.Component {
+class CollectionViewer extends React.Component {
 
   constructor(props) {
     super(props)
 
-    const clips = this.props.clips.map((c) => {
-      return {
-        vid: c.vid,
-        start: c.start,
-        end: c.start + c.duration
-      }
-    })
-    
     this.state = {
       player: null,
       loaded: false,
-      clips: clips,
       clipIndex: null,
-      seeking: false
+      seeking: false,
+      error: ""
     }
+    
+    if(this.props.collection) this.state.collection = this.props.collection
 
     this.onPlay = this.onPlay.bind(this)    
     this.onPlayerReady = this.onPlayerReady.bind(this)
@@ -31,8 +26,8 @@ class App extends React.Component {
   curClip() {
     if(this.state.clipIndex === null) return null;
 
-    if(this.state.clipIndex < this.state.clips.length) {
-      return this.state.clips[this.state.clipIndex]
+    if(this.state.clipIndex < this.state.collection.clips.length) {
+      return this.state.collection.clips[this.state.clipIndex]
     }
     return null
   }
@@ -168,7 +163,8 @@ class App extends React.Component {
   }
   
   componentDidUpdate(prevProps, prevState, snapshot) {
-
+    if(!this.player) return
+    
     const seekIfNew = function(prevState, curState) {
       if (prevState.clipIndex !== curState.clipIndex) {
         // clip change
@@ -215,17 +211,13 @@ class App extends React.Component {
       dout("didUpdated.(ended,paused,other:" + s + ")")
     }}
   }
-    
-  componentDidMount() {
-    // bind to ytApiLoadedHook before onYouTubeIframeAPIReady tries
-    // to use it.
-    window.ytApiLoadedHook = () => {
 
+  mountPlayer() {
+    const insertYt = () => {
       if(this.state.clips.length === 0) {
-        dout("very strange. loaded without a clip.")
         return;
       }
-
+      
       window.ytPlayer = this.player = new YT.Player('embedded-player-5', {
         height: '390',
         width: '640',
@@ -234,13 +226,29 @@ class App extends React.Component {
           'onReady': this.onPlayerReady,
           'onStateChange': this.onPlayerStateChange
         }
-      })      
+      })
+    }
+    if(window.ytApiLoaded) {
+      insertYt()
+    } else {
+      window.ytApiLoadedHook = () => { insertYt() }
+    }    
+  }
+  
+  componentDidMount() {
+    if(!this.state.collection) {
+      this.setState({error: ""})
+      new AjaxAssistant(this.props.$).get('/api/collections/' + this.props.match.params.id)
+        .then((data) => {
+          this.setState({collection: data})
+        })
+        .catch(error => {
+          this.setState({error})
+        })
+      return
     }
 
-    let tag = document.createElement('script')
-    tag.src = 'https://www.youtube.com/iframe_api'
-    const firstScriptTag = document.getElementsByTagName('script')[0]
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)    
+    this.mountPlayer()
   }
 
   componentWillUnmount() {
@@ -254,7 +262,7 @@ class App extends React.Component {
     // dout("invoked render")
     let btnMsg = (this.state.loaded ? "Roll Clips" : "Loading...")
 
-    const rows = this.props.clips.map((c, i) => (
+    const rows = !this.state.collection ? null : this.state.collection.clips.map((c, i) => (
       <tr key={i} className={"" + ((this.state.clipIndex !== null && this.state.clipIndex === i) ? 'active' : '')}>
         <td>{c.vid}</td>
         <td>{c.start}s</td>
@@ -275,10 +283,20 @@ class App extends React.Component {
           </tbody>
         </table>
     )
+
+    const errorMsg = (this.state.error === "") ? "" : (
+      <div className="alert alert-danger">
+        {this.state.error}
+      </div>
+    )
     
+    console.log('using error', errorMsg)
     return (
       <div className="embedded-player-container">
         <CollectionForm/>
+
+        {errorMsg}
+        
         <div id="embedded-player-5"></div>
 
         <div className="clip-summary">
@@ -294,4 +312,4 @@ class App extends React.Component {
   }
 }
 
-export default App
+export default CollectionViewer

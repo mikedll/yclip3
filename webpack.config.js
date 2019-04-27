@@ -4,7 +4,7 @@ const isProd = (process.env.NODE_ENV === 'production')
 
 module.exports = {
   mode: isProd ? "production" : "development",
-  entry: 'index.js',
+  entry: 'main.js',
   output: {
     path: path.resolve(__dirname, 'static/js')
   },
