@@ -82,11 +82,25 @@ app.post('/api/collections/:collection_id/clips', csrfProtection, (req, res, nex
     .catch(err => next(err))
 })
 
+app.get('/api/collections', csrfProtection, (req, res, next) => {
+  let pageIndex = 0
+  try {
+    pageIndex = Number(req.query.page) - 1
+  } catch(error) {
+    pageIndex = 1
+  }
+  
+  ClipCollection.find({}, null, { limit: 10, skip: pageIndex * 10 })
+    .then(collections => res.json(collections))
+    .catch(err => { next(err) })
+})
+
 app.post('/api/collections', csrfProtection, (req, res, next) => {
   const clipCollection = new ClipCollection({name: ""})
   clipCollection.save()
     .then(collection => res.status(201).json(collection))
     .catch(err => { next(err) })
 })
+
 
 module.exports = app

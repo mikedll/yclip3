@@ -7,6 +7,7 @@ import jQuery from 'jquery'
 import CollectionViewer from 'components/CollectionViewer.jsx'
 import CollectionEditor from 'components/CollectionEditor.jsx'
 import NewCollectionLink from 'components/NewCollectionLink.jsx'
+import CollectionsBrowser from 'components/CollectionsBrowser.jsx'
 
 const renderMergedProps = (component, ...rest) => {
   const finalProps = Object.assign({}, ...rest);
@@ -58,6 +59,7 @@ class AppRoot extends Component {
           
           <Switch>
             <PropsRoute path="/" exact component={welcome} $={jQuery}/>
+            <PropsRoute path="/collections" exact component={CollectionsBrowser} $={jQuery} />
             <PropsRoute path="/collections/:id" exact component={CollectionViewer} $={jQuery} />
             <PropsRoute path="/collections/:id/edit" exact component={CollectionEditor} $={jQuery}/>
           </Switch>

@@ -67,3 +67,13 @@ tr.active {
   background: #272b65;
   color: #c70a9e;    
 }
+
+.collection-brief-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.collection-brief {
+  width: 325px;
+  height: 250px;
+}
