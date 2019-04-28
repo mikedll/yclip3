@@ -79,9 +79,9 @@ app.get('/api/collections', csrfProtection, (req, res, next) => {
   
   let pageIndex = 0
   try {
-    pageIndex = Number(req.query.page) - 1
+    pageIndex = req.query.page ? (Number(req.query.page) - 1) : 0
   } catch(error) {
-    pageIndex = 1
+    pageIndex = 0
   }
   
   const countQuery = ClipCollection.countDocuments({})

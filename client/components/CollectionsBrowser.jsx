@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-
+import _ from 'underscore'
 import AjaxAssistant from 'AjaxAssistant.jsx'
 
 class CollectionsBrowser extends Component {
@@ -10,6 +10,7 @@ class CollectionsBrowser extends Component {
     super(props)
     this.state = {
       collections: null,
+      stats: {},
       error: ""
     }
   }
@@ -18,7 +19,7 @@ class CollectionsBrowser extends Component {
     if(!this.state.collections) {
       new AjaxAssistant(this.props.$).get('/api/collections')
         .then(data => {
-          this.setState({collections: data})
+          this.setState({stats: _.pick(data, 'pages', 'total'), collections: data.results})
         })
         .catch(error => {
           this.setState({error})
