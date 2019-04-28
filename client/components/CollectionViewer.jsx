@@ -9,10 +9,11 @@ class CollectionViewer extends React.Component {
     super(props)
 
     this.state = {
-      player: null,
-      loaded: false,
+      player: null,      // did the YT player become defined and start loading?
+      loaded: false,     // did the YT player load?
       clipIndex: null,
       seeking: false,
+      retrieving: false, // are we fetching data from server?
       error: ""
     }
     
@@ -98,7 +99,7 @@ class CollectionViewer extends React.Component {
     }
 
     dout("onPlay.clipIndex=" + this.state.clipIndex)
-    if(this.state.clipIndex === null || this.state.clipIndex >= this.state.clips.length) {
+    if(this.state.clipIndex === null || this.state.clipIndex >= this.state.collection.clips.length) {
       dout("onPlay.calling setState")
       this.setState({clipIndex: 0})
     }    
@@ -161,9 +162,68 @@ class CollectionViewer extends React.Component {
       // unstarted? cued?
     }}
   }
+
+  scheduleMountPlayer() {
+    const mountPlayer = () => {
+      if(this.state.collection.clips.length === 0) {
+        // No clips to play :(
+        return;
+      }
+      
+      window.ytPlayer = this.player = new YT.Player('embedded-player-5', {
+        height: '390',
+        width: '640',
+        videoId: this.state.collection.clips[0].vid,
+        events: {
+          'onReady': this.onPlayerReady,
+          'onStateChange': this.onPlayerStateChange
+        }
+      })
+    }
+    
+    if(window.ytApiLoaded) {
+      mountPlayer()
+    } else {
+      window.ytApiLoadedHook = () => {
+        mountPlayer()
+      }
+      window.ytApiLoadedHook = window.ytApiLoadedHook.bind(this)
+    }    
+  }
+
+  tryRetrieveAndMountPlayer() {
+    if(!this.player) {
+      // Why not? Missing a collection? Or just missing the player?
+      if(!this.state.collection && !this.state.retrieving) {
+        this.setState({error: "", retrieving: true})
+        new AjaxAssistant(this.props.$).get('/api/collections/' + this.props.match.params.id)
+          .then((data) => {
+            this.setState({collection: data})
+          })
+          .catch(error => {
+            this.setState({error})
+          })
+        return
+      } else if (this.state.collection){
+        this.scheduleMountPlayer()
+        return
+      } else {
+        // collection does not exist, but was retrieving. Future render will call this again
+        // via componentDidUpdate.
+        return
+      }
+    }    
+  }
+  
+  componentDidMount() {
+    this.tryRetrieveAndMountPlayer()
+  }
   
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if(!this.player) return
+    if(!this.player) {
+      this.tryRetrieveAndMountPlayer()
+      return
+    }
     
     const seekIfNew = function(prevState, curState) {
       if (prevState.clipIndex !== curState.clipIndex) {
@@ -190,7 +250,7 @@ class CollectionViewer extends React.Component {
     }
     case YT.PlayerState.CUED:
     case YT.PlayerState.UNSTARTED: {
-      dout("didUpdated.(ended,cued,unstarted)")
+      dout("didUpdate.(ended,cued,unstarted)")
       seekIfNew.call(this, prevState, this.state)
       break
     }
@@ -212,55 +272,26 @@ class CollectionViewer extends React.Component {
     }}
   }
 
-  mountPlayer() {
-    const insertYt = () => {
-      if(this.state.clips.length === 0) {
-        return;
-      }
-      
-      window.ytPlayer = this.player = new YT.Player('embedded-player-5', {
-        height: '390',
-        width: '640',
-        videoId: this.state.clips[0].vid,
-        events: {
-          'onReady': this.onPlayerReady,
-          'onStateChange': this.onPlayerStateChange
-        }
-      })
-    }
-    if(window.ytApiLoaded) {
-      insertYt()
-    } else {
-      window.ytApiLoadedHook = () => { insertYt() }
-    }    
-  }
-  
-  componentDidMount() {
-    if(!this.state.collection) {
-      this.setState({error: ""})
-      new AjaxAssistant(this.props.$).get('/api/collections/' + this.props.match.params.id)
-        .then((data) => {
-          this.setState({collection: data})
-        })
-        .catch(error => {
-          this.setState({error})
-        })
-      return
-    }
-
-    this.mountPlayer()
-  }
-
   componentWillUnmount() {
     if(this.state.loaded) {
       this.player.destroy()
     }
   }
 
+  canPlayClips() {
+    return (this.state.collection && this.state.loaded && this.state.collection.clips.length > 0)
+  }
 
   render() {
     // dout("invoked render")
-    let btnMsg = (this.state.loaded ? "Roll Clips" : "Loading...")
+    let btnMsg
+    if(this.state.collection && this.state.collection.clips.length === 0) {
+      btnMsg = "No Clips in Compilation"
+    } else if (this.state.loaded) {
+      btnMsg = "Roll Clips"
+    } else {
+      btnMsg = "Loading..."
+    }
 
     const rows = !this.state.collection ? null : this.state.collection.clips.map((c, i) => (
       <tr key={i} className={"" + ((this.state.clipIndex !== null && this.state.clipIndex === i) ? 'active' : '')}>
@@ -303,7 +334,7 @@ class CollectionViewer extends React.Component {
           {table}
         </div>
         <div className="controls">
-          <button disabled={!this.state.loaded} onClick={this.onPlay} className="btn btn-primary btn-lg btn-block">{btnMsg}</button>
+          <button disabled={!this.canPlayClips()} onClick={this.onPlay} className="btn btn-primary btn-lg btn-block">{btnMsg}</button>
         </div>
         
       </div>

@@ -38,7 +38,7 @@ export default class NewCollectionLink extends Component {
     return (
       <li className='nav-item'>
         {redirects}
-        <a className="nav-link" href='#' onClick={this.onNewCollection}>New Clip Collection</a>
+        <a className="nav-link" href='#' onClick={this.onNewCollection}>New Compilation</a>
       </li>
     )
   }
