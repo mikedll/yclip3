@@ -70,12 +70,15 @@ describe('App', () => {
       })
       .then(response => {
         expect(response.status).to.equal(200)
-        expect(response.body).to.match(collection)
+        
+        expect(response.body._id).to.equal(collection._id.toString())
+        expect(response.body.clips.length).to.equal(2)
+        expect(response.body.clips[0]._id).to.equal(collection.clips[0]._id.toString())
       })
     
   })
 
-  it.only('should create a new collection', () => {
+  it('should create a new collection', () => {
     return request(app).post('/api/collections')
       .then(response => {
         expect(response.status).to.equal(201)
