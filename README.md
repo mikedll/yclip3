@@ -2,13 +2,7 @@
 
 App to make YouTube clips, and play them as a compilation video.
 
-Tech used:
-
-  - Node.js
-  - Mustache
-  - Lodash
-  - React 16
-  - Bootstrap 4
+Node.js / React used.
 
 # Dev Setup
 
