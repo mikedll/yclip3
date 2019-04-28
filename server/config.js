@@ -15,6 +15,7 @@ const envVarsSchema = Joi.object({
   MONGO_DATABASE: Joi.string()
     .description("Mongo database name")
     .default("yclip3dev"),
+  MONGODB_URI: Joi.string()
 }).unknown().required().when(
   Joi.object({
     NODE_ENV: Joi.exist().equal('test')
@@ -34,7 +35,7 @@ const config = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   mongo: {
-    uri: `mongodb://${envVars.MONGO_HOST}:${envVars.MONGO_PORT}/${envVars.MONGO_DATABASE}`,
+    uri: envVars.MONGODB_URI || `mongodb://${envVars.MONGO_HOST}:${envVars.MONGO_PORT}/${envVars.MONGO_DATABASE}`,
     connectionOpts: { useNewUrlParser: true }
   }
 }
