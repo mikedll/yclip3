@@ -31,15 +31,7 @@ if(config.env === "test") {
 const csrfProtection = csrf(csrfOpts)
 
 app.get(/^\/((?!api).)*$/, csrfProtection, (req, res, next) => {
-  const id = 1
-  fs.readFile(path.join(__dirname, '../data', id + '.json'), {encoding: 'UTF-8'}, (err, content) => {
-    if (err !== null) {
-      next("unable to find root clips")
-    } else {
-      const clips = JSON.parse(content)
-      res.render('clip', { bootstrap: JSON.stringify(clips), csrfToken: req.csrfToken() })
-    }
-  })  
+  res.render('clip', { csrfToken: req.csrfToken() })
 })
 
 const dataDir = path.join(__dirname, 'data')
