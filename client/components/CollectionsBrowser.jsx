@@ -1,8 +1,10 @@
 
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import { serializeObj, getUrlQueryAsObj } from 'UrlHelper.jsx'
 import _ from 'underscore'
 import AjaxAssistant from 'AjaxAssistant.jsx'
+import Paginator from 'components/Paginator.jsx'
 
 class CollectionsBrowser extends Component {
 
@@ -10,21 +12,42 @@ class CollectionsBrowser extends Component {
     super(props)
     this.state = {
       collections: null,
+      retrieving: false,
       stats: {},
       error: ""
     }
   }
 
-  componentDidMount() {
-    if(!this.state.collections) {
-      new AjaxAssistant(this.props.$).get('/api/collections')
+  retrieveIfNecessary() {
+    const query = getUrlQueryAsObj()
+    let qPage = 1
+    try {
+      qPage = query.page ? Number(query.page) : 1
+    } catch(e) {
+      qPage = 1
+    }
+
+    if(!this.state.stats.page || this.state.stats.page !== qPage) {
+      if(this.state.retrieving) return
+      
+      this.setState({retrieving: true, stats: {}, collections: null})
+      const nextQuery = {page: qPage}
+      new AjaxAssistant(this.props.$).get('/api/collections?' + serializeObj(nextQuery))
         .then(data => {
-          this.setState({stats: _.pick(data, 'pages', 'total'), collections: data.results})
+          this.setState({retrieving: false, stats: _.pick(data, 'page', 'pages', 'total'), collections: data.results})
         })
         .catch(error => {
-          this.setState({error})
+          this.setState({retrieving: false, error})
         })
     }
+  }
+  
+  componentWillReceiveProps() {
+    this.retrieveIfNecessary()
+  }
+  
+  componentDidMount() {
+    this.retrieveIfNecessary()
   }
   
   render() {
@@ -41,6 +64,10 @@ class CollectionsBrowser extends Component {
       )
     })
 
+    const pagination = !this.state.stats.page ? "" : (
+      <Paginator path="/collections" {...this.state.stats}/>
+    )
+    
     return (
       <div className="collection-brief-container">
 
@@ -49,6 +76,8 @@ class CollectionsBrowser extends Component {
         </div> : ""}
         
         {thumbnails}
+
+        {pagination}
       </div>
     )
   }
