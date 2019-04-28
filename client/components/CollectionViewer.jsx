@@ -28,14 +28,24 @@ class CollectionViewer extends React.Component {
     if(this.state.clipIndex === null) return null;
 
     if(this.state.clipIndex < this.state.collection.clips.length) {
-      return this.state.collection.clips[this.state.clipIndex]
+      const clip = this.state.collection.clips[this.state.clipIndex]
+      
+      return {
+        vid: clip.vid,
+        start: clip.start,
+        end: (clip.start + clip.duration)
+      }
     }
     return null
   }
 
   calcClipInc(prevState) {
+    if(!prevState.collection) {
+      return {error: "Internal error in player."}
+    }
+    
     const next = {}
-    if(prevState.clipIndex >= prevState.clips.length - 1) {
+    if(prevState.clipIndex >= prevState.collection.clips.length - 1) {
       next.clipIndex = null
     } else {
       next.clipIndex = prevState.clipIndex + 1
@@ -242,7 +252,7 @@ class CollectionViewer extends React.Component {
     const s = this.player.getPlayerState()
     switch (s) {
     case YT.PlayerState.ENDED: {
-      if(prevState.clipIndex === prevState.clips.length && this.state.clipIndex === null) {
+      if(prevState.clipIndex === prevState.collection.clips.length && this.state.clipIndex === null) {
         // Clips finished.
         dout("successful finish")
         break
