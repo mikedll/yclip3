@@ -7,6 +7,7 @@ const app = require(path.join(srcDir, 'app.js'))
 const mongoose = require('mongoose')
 const ClipCollection = require(path.join(srcDir, 'models/clipCollection.js'))
 const config = require(path.join(srcDir, 'config.js'))
+const _ = require('underscore')
 
 describe('App', () => {
 
@@ -22,10 +23,45 @@ describe('App', () => {
   
   before(() => {
     return mongoose.connect(config.mongo.uri, config.mongo.connectionOpts)
-      .then(() => ClipCollection.deleteMany({}))
+  })
+
+  beforeEach(() => {
+    return ClipCollection.deleteMany({})
   })
 
   after(() => { return mongoose.disconnect() } )
+
+  it.only('should list compilations with page support', () => {
+    const saves = _.times(19, (i) => {
+      let collection = new ClipCollection({name: "nice songs " + i, clips: [clip1, clip2]})
+      return collection.save()
+    })
+    return Promise.all(saves)
+      .then(saved => {
+        return request(app).get('/api/collections?page=2')
+      })
+      .then(response => {
+        expect(response.body.total).to.equal(19)
+        expect(response.body.pages).to.equal(3)
+        expect(response.body.page).to.equal(2)
+        expect(response.body.results[0].name).to.equal("nice songs 9")
+        expect(response.body.results.length).to.equal(9)
+      })
+  })
+
+  it.only('should calculate even number of pages correctly', () => {
+    const saves = _.times(18, (i) => {
+      let collection = new ClipCollection({name: "nice songs " + i, clips: [clip1, clip2]})
+      return collection.save()
+    })
+    return Promise.all(saves)
+      .then(saved => {
+        return request(app).get('/api/collections?page=2')
+      })
+      .then(response => {
+        expect(response.body.pages).to.equal(2)
+      })
+  })
   
   it('should save a new clip in a collection', function() {
     const collection = new ClipCollection({name: "nice songs"})

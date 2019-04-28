@@ -84,8 +84,20 @@ app.get('/api/collections', csrfProtection, (req, res, next) => {
     pageIndex = 1
   }
   
-  ClipCollection.find({}, null, { limit: PageSize, skip: pageIndex * PageSize })
-    .then(collections => res.json(collections))
+  const countQuery = ClipCollection.countDocuments({})
+  const findQuery = ClipCollection.find({}, null, { limit: PageSize, skip: pageIndex * PageSize })
+  Promise.all([countQuery, findQuery])
+    .then(results => {
+      const [count, found] = results
+      const pages = Math.floor(count / PageSize) + ((count % PageSize > 0) ? 1 : 0)
+      
+      res.json({
+        total: count,
+        pages: pages,
+        page: pageIndex + 1,
+        results: found
+      })
+    })
     .catch(err => { next(err) })
 })
 
