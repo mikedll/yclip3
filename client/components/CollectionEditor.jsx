@@ -66,7 +66,7 @@ export default class CollectionEditor extends Component {
       })
       .then(data => {
         this.setState(prevState => {
-          return { ...update(prevState, {collection: {$set: data}}), ...{ vid: "", start: "", duration: ""} }
+          return { ...update(prevState, {collection: {$set: data}}), ...{ vid: "", start: "", duration: "", error: ""} }
         })
       })
       .catch(error => {
