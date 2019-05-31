@@ -56,52 +56,60 @@ app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
   }
 })
 
-app.post('/api/collections/:collection_id/clips', csrfProtection, (req, res, next) => {
-  if(!/^[0-9a-fA-F]{24}$/.test(req.params.collection_id)) {
-    res.status(404).end()
-    return
+app.post('/api/collections/:collection_id/clips', csrfProtection, async (req, res, next) => {
+  try {
+    if(!/^[0-9a-fA-F]{24}$/.test(req.params.collection_id)) {
+      res.status(404).end()
+      return
+    }
+
+    const clipCollection = await ClipCollection.findById(req.params.collection_id)
+    if(!clipCollection) {
+      res.status(404).end()
+    } else {
+      let newClip = new Clip(req.body)
+      newClip.clipCollection = req.params.collection_id
+      await newClip.save()
+      const clips = await Clip.find({clipCollection: req.params.collection_id})
+      res.status(201).json({...clipCollection.inspect(), ...{clips: clips}})
+    }
+  } catch(err) {
+    next(err)
   }
-  
-  ClipCollection.findById(req.params.collection_id)
-    .then(collection => {
-      if(!collection) {
-        res.status(404).end()
-      } else {
-        collection.clips.push(req.body)
-        return collection.save()
-      }
-    })
-    .then(collection => {
-      res.status(201).json(collection)
-    })
-    .catch(err => next(err))
 })
 
-app.get('/api/collections', csrfProtection, (req, res, next) => {
-  const PageSize = 9
-  
-  let pageIndex = 0
+app.get('/api/collections', csrfProtection, async (req, res, next) => {
   try {
-    pageIndex = req.query.page ? (Number(req.query.page) - 1) : 0
-  } catch(error) {
-    pageIndex = 0
-  }
-  
-  const countQuery = ClipCollection.countDocuments({})
-  const findQuery = ClipCollection.find({}, null, { limit: PageSize, skip: pageIndex * PageSize })
-  Promise.all([countQuery, findQuery])
-    .then(results => {
-      const [count, found] = results
-      const pages = Math.floor(count / PageSize) + ((count % PageSize > 0) ? 1 : 0)
-      
-      res.json({
-        total: count,
-        pages: pages,
-        page: pageIndex + 1,
-        results: found
-      })
+    const PageSize = 9
+    
+    let pageIndex = 0
+    try {
+      pageIndex = req.query.page ? (Number(req.query.page) - 1) : 0
+    } catch(error) {
+      pageIndex = 0
+    }
+    
+    const count = await ClipCollection.countDocuments({})
+    const pages = Math.floor(count / PageSize) + ((count % PageSize > 0) ? 1 : 0)
+    
+    const found = await ClipCollection.find({}, null, { limit: PageSize, skip: pageIndex * PageSize })
+    const clipPromises = found.map(found => {
+      return Clip.find({clipCollection: found._id})
     })
-    .catch(err => { next(err) })
+    const associatedClips = await Promise.all(clipPromises)
+    const foundObjs = found.map((collection, i) => { return {...collection.inspect(), ...{clips: associatedClips[i]} } } )
+
+    res.json({
+      total: count,
+      pages: pages,
+      page: pageIndex + 1,
+      results: foundObjs
+    })
+
+  } catch (err) {
+    next(err)
+  }
+
 })
 
 app.post('/api/collections', csrfProtection, (req, res, next) => {
