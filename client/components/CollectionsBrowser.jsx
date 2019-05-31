@@ -2,7 +2,8 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { serializeObj, getUrlQueryAsObj } from 'UrlHelper.jsx'
-import _ from 'underscore'
+import update from 'immutability-helper';
+import underscore from 'underscore'
 import AjaxAssistant from 'AjaxAssistant.jsx'
 import Paginator from 'components/Paginator.jsx'
 
@@ -12,10 +13,12 @@ class CollectionsBrowser extends Component {
     super(props)
     this.state = {
       collections: null,
-      retrieving: false,
+      busy: false,
       stats: {},
       error: ""
     }
+
+    this.onDelete = this.onDelete.bind(this)
   }
 
   retrieveIfNecessary() {
@@ -28,16 +31,36 @@ class CollectionsBrowser extends Component {
     }
 
     if(!this.state.stats.page || this.state.stats.page !== qPage) {
-      if(this.state.retrieving) return
+      if(this.state.busy) return
       
-      this.setState({retrieving: true, stats: {}, collections: null})
+      this.setState({busy: true, stats: {}, collections: null})
       const nextQuery = {page: qPage}
       new AjaxAssistant(this.props.$).get('/api/collections?' + serializeObj(nextQuery))
         .then(data => {
-          this.setState({retrieving: false, stats: _.pick(data, 'page', 'pages', 'total'), collections: data.results})
+          this.setState({busy: false, stats: underscore.pick(data, 'page', 'pages', 'total'), collections: data.results})
         })
         .catch(error => {
-          this.setState({retrieving: false, error})
+          this.setState({busy: false, error})
+        })
+    }
+  }
+
+  onDelete(e) {
+    e.preventDefault()
+    if(this.state.busy) return
+    
+    const refId = this.props.$(e.target).data('ref-id')
+    if(confirm("Are you sure you want to delete this?")) {
+      this.setState({busy: true})
+      new AjaxAssistant(this.props.$).delete('/api/collections/' + refId)
+        .then(_ => {
+          this.setState(prevState => {
+            const index = underscore.findIndex(prevState.collections, el => el._id === refId)
+            return update(prevState, {'busy': {$set: false}, 'collections': {$splice: [[index, 1]]}})
+          })
+        })
+        .catch(error => {
+          this.setState({busy: false, error})
         })
     }
   }
@@ -52,14 +75,14 @@ class CollectionsBrowser extends Component {
   
   render() {
 
-    const thumbnails = !this.state.collections ? "" : this.state.collections.map((c, i) => {
+    const thumbnails = !this.state.collections ? "" : this.state.collections.map((c) => {
       return (
-        <div key={i} className="collection-brief">
+        <div key={c._id} className="collection-brief">
           {c._id} - {c.name}
           <br/>
           Clips: {c.clips.length}
           <br/>
-          <Link to={`/collections/${c._id}`}>View</Link>  | <Link to={`/collections/${c._id}/edit`}>Edit</Link>
+          <Link to={`/collections/${c._id}`}>View</Link> | <Link to={`/collections/${c._id}/edit`}>Edit</Link> | <a href="#" data-ref-id={c._id} onClick={this.onDelete}>Delete</a>
         </div>
       )
     })
@@ -69,15 +92,15 @@ class CollectionsBrowser extends Component {
     )
     
     return (
-      <div className="collection-brief-container">
-
+      <div>
         {this.state.error !== "" ? <div className="alert alert-danger">
             {this.state.error}
         </div> : ""}
-        
-        {thumbnails}
 
-        {pagination}
+        <div className="collection-brief-container">
+          {thumbnails}
+          {pagination}
+        </div>
       </div>
     )
   }

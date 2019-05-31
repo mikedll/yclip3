@@ -23,6 +23,18 @@ export default class AjaxAssistant {
     reject(text)
   }
   
+  delete(path) {
+    return new Promise((resolve, reject) => {
+      this.$.ajax({
+        method: 'DELETE',
+        url: path,
+        beforeSend: (xhr) => { xhr.setRequestHeader('CSRF-Token', this.$('meta[name=csrf-token]').attr('content')) },
+        success: (data) => resolve(data),
+        error: (xhr) => this.handleError(xhr, reject)
+      })
+    })
+  }
+  
   post(path, data) {
     return new Promise((resolve, reject) => {
       if(!data) data = {}
