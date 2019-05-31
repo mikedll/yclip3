@@ -9,3 +9,7 @@ mongoose.connection.on('error', () => {
   throw new Error(`error occurred in database ${config.mongo.uri}`)
 });
 
+mongoose.connection.on('disconnected', () => {
+  console.log(`Disconnected from database ${config.mongo.uri}`)
+});
+
