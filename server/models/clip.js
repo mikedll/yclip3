@@ -2,8 +2,8 @@
 const mongoose = require('mongoose')
 
 const ClipSchema = new mongoose.Schema({
-  collection: {
-    type: mongoose.Schema.Types.ObjectID,
+  clipCollection: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'ClipCollection',
     required: true
   },

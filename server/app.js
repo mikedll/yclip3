@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser')
 const cons = require('consolidate')
 const csrf = require('csurf')
 const ClipCollection = require('./models/clipCollection.js')
+const Clip = require('./models/clip.js')
 const config = require('./config.js')
 
 const app = express()
@@ -36,21 +37,23 @@ app.get(/^\/((?!api).)*$/, csrfProtection, (req, res, next) => {
 
 const dataDir = path.join(__dirname, 'data')
 
-app.get('/api/collections/:id', csrfProtection, (req, res, next) => {
-  if(!/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
-    res.status(404).end()
-    return
-  }
+app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
+  try {
+    if(!/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
+      res.status(404).end()
+      return
+    }
 
-  ClipCollection.findById(req.params.id)
-    .then(collection => {
-      if(!collection) {
-        res.status(404).end()
-      } else {
-        res.json(collection)
-      }
-    })
-    .catch(err => next(err))
+    const clipCollection = await ClipCollection.findById(req.params.id)
+    if(!clipCollection) {
+      res.status(404).end()
+    } else {
+      const clips = await Clip.find({clipCollection: clipCollection._id})
+      res.json({ ...clipCollection.inspect(), ...{clips: clips} })
+    }
+  } catch(err) {
+    next(err)
+  }
 })
 
 app.post('/api/collections/:collection_id/clips', csrfProtection, (req, res, next) => {
