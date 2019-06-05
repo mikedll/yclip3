@@ -83,9 +83,9 @@ export default class CollectionEditor extends Component {
 
     var body = null
     if(this.state.collection) {
-      const clips = this.state.collection.clips.map((c, i) => {
+      const clips = this.state.collection.clips.map((c) => {
         return (
-          <div key={i}>
+          <div className="clip-container" key={c._id}>
             vid: {c.vid}
             <br/>
             start: {c.start}

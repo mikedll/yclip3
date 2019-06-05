@@ -20,7 +20,7 @@ export default class AjaxAssistant {
       }
     }
     
-    reject(text)
+    return reject(text)
   }
   
   delete(path) {
