@@ -24,7 +24,6 @@ export default class NewCollectionLink extends Component {
     new AjaxAssistant(this.props.$)
       .post('/api/collections')
       .then(data => {
-        console.log("Calling set state...")
         this.setState({busy: false, newCollectionMade: data._id})
       })
       .catch(error => this.setState({error, busy: false}))
