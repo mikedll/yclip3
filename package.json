@@ -10,7 +10,7 @@
     "build": "webpack --config webpack.config.js",
     "watch": "webpack --watch --config webpack.config.js",
     "test": "NODE_ENV=test mocha",
-    "ctest": "NODE_ENV=test mochapack --require test/components/setup.js --webpack-config ./webpack.config-test.js test/components/*.spec.js"
+    "ctest": "NODE_ENV=test mochapack --require test/components/setup.js --webpack-config ./webpack.config-test.js test/components/*.spec.jsx"
   },
   "dependencies": {
     "body-parser": "^1.19.0",

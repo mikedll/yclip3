@@ -7,7 +7,7 @@ export default class NewCollectionLink extends Component {
   constructor(props) {
     super(props)
     this.state = {}
-    this.onNewCollection = this.onNewCollection.bind(this)
+    this.onMakeNewCollection = this.onMakeNewCollection.bind(this)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -16,7 +16,7 @@ export default class NewCollectionLink extends Component {
     }
   }
   
-  onNewCollection(e) {
+  onMakeNewCollection(e) {
     e.preventDefault()
 
     if(this.state.busy) return
@@ -24,6 +24,7 @@ export default class NewCollectionLink extends Component {
     new AjaxAssistant(this.props.$)
       .post('/api/collections')
       .then(data => {
+        console.log("Calling set state...")
         this.setState({busy: false, newCollectionMade: data._id})
       })
       .catch(error => this.setState({error, busy: false}))
@@ -38,7 +39,7 @@ export default class NewCollectionLink extends Component {
     return (
       <li className='nav-item'>
         {redirects}
-        <a className="nav-link" href='#' onClick={this.onNewCollection}>New Compilation</a>
+        <a className="nav-link" href='#' onClick={this.onMakeNewCollection}>New Compilation</a>
       </li>
     )
   }
