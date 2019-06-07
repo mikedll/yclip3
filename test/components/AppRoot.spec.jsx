@@ -20,7 +20,7 @@ describe('<AppRoot />', () => {
     clips: []
   }
   
-  it.only('should render /collections without error', async () => {
+  it('should render /collections without error', async () => {
     let mock$ = spy()
     let mockW = spy()
     mock$.ajax = spy()
@@ -37,7 +37,7 @@ describe('<AppRoot />', () => {
       results: [col1, col2]
     })
     wrapper.update()
-    console.log(wrapper.html())
+    
     expect(wrapper.find('.navbar-nav li a')).to.have.lengthOf(3) // Home, Browse, New Collection
     expect(wrapper.find('.collection-brief')).to.have.lengthOf(2)
   })
