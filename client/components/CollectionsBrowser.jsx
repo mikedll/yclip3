@@ -50,7 +50,7 @@ class CollectionsBrowser extends Component {
     if(this.state.busy) return
     
     const refId = this.props.$(e.target).data('ref-id')
-    if(confirm("Are you sure you want to delete this?")) {
+    if(this.props.globalWindow.confirm("Are you sure you want to delete this?")) {
       this.setState({busy: true})
       new AjaxAssistant(this.props.$).delete('/api/collections/' + refId)
         .then(_ => {
@@ -82,7 +82,7 @@ class CollectionsBrowser extends Component {
           <br/>
           Clips: {c.clips.length}
           <br/>
-          <Link to={`/collections/${c._id}`}>View</Link> | <Link to={`/collections/${c._id}/edit`}>Edit</Link> | <a href="#" data-ref-id={c._id} onClick={this.onDelete}>Delete</a>
+          <Link to={`/collections/${c._id}`}>View</Link> | <Link to={`/collections/${c._id}/edit`}>Edit</Link> | <a href="#" className="btn-delete" data-ref-id={c._id} onClick={this.onDelete}>Delete</a>
         </div>
       )
     })

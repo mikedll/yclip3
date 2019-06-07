@@ -57,7 +57,7 @@ class AppRoot extends Component {
           
           <Switch>
             <PropsRoute path="/" exact component={welcome} $={jQuery}/>
-            <PropsRoute path="/collections" exact component={CollectionsBrowser} $={jQuery} />
+            <PropsRoute path="/collections" exact component={CollectionsBrowser} $={jQuery} globalWindow={window}/>
             <PropsRoute path="/collections/:id" exact component={CollectionViewer} $={jQuery} />
             <PropsRoute path="/collections/:id/edit" exact component={CollectionEditor} $={jQuery}/>
           </Switch>

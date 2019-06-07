@@ -1,7 +1,7 @@
 
 import React from 'react'
 import { mount } from 'enzyme'
-import { spy } from 'sinon'
+import { spy, stub } from 'sinon'
 import { expect } from 'chai'
 import { MemoryRouter } from 'react-router-dom'
 
@@ -12,11 +12,11 @@ describe('<CollectionsBrowser/>', function() {
   let clip1 = {
   }, clip2 = {
   }, col1 = {
-    _id: 'asdf2',
+    _id: 'asdf1',
     name: "",
     clips: []
   }, col2 = {
-    _id: "adsf1",
+    _id: "adsf2",
     name: "",
     clips: []
   }
@@ -42,16 +42,15 @@ describe('<CollectionsBrowser/>', function() {
     expect(wrapper.find('.collection-brief')).to.have.lengthOf(2)
   })
 
-  it.skip("should permit deletion of a clip collection", async () => {
-    let mock$ = spy()
+  it("should permit deletion of a clip collection", async () => {
+    let mock$ = stub().returns({data: function(ref) { return col2._id } })
+    let mockW = {confirm: function() { return true } }
     mock$.ajax = spy()
     const wrapper = mount(
       <MemoryRouter>
-        <CollectionsBrowser $={mock$}/>
+        <CollectionsBrowser $={mock$} globalWindow={mockW}/>
       </MemoryRouter>
     )
-
-    expect(mock$.ajax.calledWithMatch({url:'/api/collections?page=1'})).to.be.true
 
     await mock$.ajax.getCall(0).args[0].success({
       page: 1,
@@ -60,6 +59,15 @@ describe('<CollectionsBrowser/>', function() {
       results: [col1, col2]
     })
     wrapper.update()
-    expect(wrapper.find('.collection-brief').first()).to.have.lengthOf(2)
+
+    wrapper.find('.collection-brief a.btn-delete').last().simulate('click')
+
+    expect(mock$.ajax.calledWithMatch({method: 'DELETE', url: '/api/collections/' + col2._id}))
+
+    await mock$.ajax.getCall(1).args[0].success(null)
+    wrapper.update()
+    console.log(wrapper.html())
+    expect(wrapper.find('.collection-brief')).to.have.lengthOf(1)
+    expect(wrapper.find('.collection-brief').first().key()).to.equal(col1._id)
   })
 })
