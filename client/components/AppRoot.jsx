@@ -2,8 +2,6 @@
 import React, { Component } from 'react'
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 
-import jQuery from 'jquery'
-
 import CollectionViewer from 'components/CollectionViewer.jsx'
 import CollectionEditor from 'components/CollectionEditor.jsx'
 import NewCollectionLink from 'components/NewCollectionLink.jsx'
@@ -47,7 +45,7 @@ class AppRoot extends Component {
                 <MenuLink label="Browse" to='/collections'>Browse</MenuLink>
                 <Route path="*" render={routeProps => {
                   return (
-                    <NewCollectionLink $={jQuery} {...routeProps} />
+                    <NewCollectionLink $={this.props.jQuery} {...routeProps} />
                   )
                   }}>
                 </Route>
@@ -56,10 +54,10 @@ class AppRoot extends Component {
           </nav>
           
           <Switch>
-            <PropsRoute path="/" exact component={welcome} $={jQuery}/>
-            <PropsRoute path="/collections" exact component={CollectionsBrowser} $={jQuery} globalWindow={window}/>
-            <PropsRoute path="/collections/:id" exact component={CollectionViewer} $={jQuery} />
-            <PropsRoute path="/collections/:id/edit" exact component={CollectionEditor} $={jQuery}/>
+            <PropsRoute path="/" exact component={welcome} $={this.props.jQuery}/>
+            <PropsRoute path="/collections" exact component={CollectionsBrowser} $={this.props.jQuery} globalWindow={this.props.globalwindow}/>
+            <PropsRoute path="/collections/:id" exact component={CollectionViewer} $={this.props.jQuery} />
+            <PropsRoute path="/collections/:id/edit" exact component={CollectionEditor} $={this.props.jQuery}/>
           </Switch>
         </div>
       </Router>

@@ -66,7 +66,6 @@ describe('<CollectionsBrowser/>', function() {
 
     await mock$.ajax.getCall(1).args[0].success(null)
     wrapper.update()
-    console.log(wrapper.html())
     expect(wrapper.find('.collection-brief')).to.have.lengthOf(1)
     expect(wrapper.find('.collection-brief').first().key()).to.equal(col1._id)
   })

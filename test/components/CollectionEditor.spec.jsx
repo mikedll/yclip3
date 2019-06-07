@@ -67,11 +67,11 @@ describe('<CollectionEditor />', function() {
       duration: '5'
       }})).to.be.true
 
-    const clipColleciton2 = {
+    const clipCollection2 = {
       name: "Some collection",
       clips: [clip1, clip2, {_id: 'adsf3', vid: 'dfjlksdjf', start: 3, duration: 5}]
     }
-    await mock$.ajax.getCall(1).args[0].success(clipColleciton2)
+    await mock$.ajax.getCall(1).args[0].success(clipCollection2)
     wrapper.update()
     expect(wrapper.find('.clip-container')).to.have.lengthOf(3)
     expect(wrapper.find('.clip-container').last().text()).to.contain('vid: dfjlksdjf')

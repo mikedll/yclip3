@@ -9,14 +9,11 @@ import AppRoot from 'components/AppRoot.jsx'
 
 describe('<AppRoot />', () => {
 
-  it('should redirect to collection editor on new collection creation', () => {
+  it('should render without error', () => {
     let mock$ = spy()
+    let mockW = spy()
     mock$.ajax = spy()
-    let wrapper = mount(<AppRoot $={mock$}/>)
-    wrapper.find('form.collection input[name=name]').simulate('change', 'My Collection')
-    wrapper.find('button').simulate('click')
-    mock$.ajax.getCall(0).args[0].success({id: "d3r3"})
-    expect(wrapper.route.path).to.be.equal('/collections/d3r3/edit')
+    let wrapper = mount(<AppRoot $={mock$} globalWindow={mockW}/>)
   })
   
 })
