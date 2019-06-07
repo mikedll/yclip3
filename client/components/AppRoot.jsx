@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react'
-import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
+import { Link, Route, Switch } from 'react-router-dom';
 
 import CollectionViewer from 'components/CollectionViewer.jsx'
 import CollectionEditor from 'components/CollectionEditor.jsx'
@@ -32,35 +32,33 @@ class AppRoot extends Component {
     );
 
     return (      
-      <Router>
-        <div>
+      <div>
 
-          <nav className="navbar navbar-expand-lg navbar-dark">
-            <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-              <span className="navbar-toggler-icon"></span>
-            </button>
-            <div className="collapse navbar-collapse" id="navbarNav">
-              <ul className="navbar-nav">
-                <MenuLink label="Home" to='/'>Home</MenuLink>
-                <MenuLink label="Browse" to='/collections'>Browse</MenuLink>
-                <Route path="*" render={routeProps => {
-                  return (
-                    <NewCollectionLink $={this.props.jQuery} {...routeProps} />
-                  )
-                  }}>
-                </Route>
-              </ul>
-            </div>
-          </nav>
-          
-          <Switch>
-            <PropsRoute path="/" exact component={welcome} $={this.props.jQuery}/>
-            <PropsRoute path="/collections" exact component={CollectionsBrowser} $={this.props.jQuery} globalWindow={this.props.globalWindow}/>
-            <PropsRoute path="/collections/:id" exact component={CollectionViewer} $={this.props.jQuery} />
-            <PropsRoute path="/collections/:id/edit" exact component={CollectionEditor} $={this.props.jQuery}/>
-          </Switch>
-        </div>
-      </Router>
+        <nav className="navbar navbar-expand-lg navbar-dark">
+          <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className="collapse navbar-collapse" id="navbarNav">
+            <ul className="navbar-nav">
+              <MenuLink label="Home" to='/'>Home</MenuLink>
+              <MenuLink label="Browse" to='/collections'>Browse</MenuLink>
+              <Route path="*" render={routeProps => {
+                return (
+                  <NewCollectionLink $={this.props.jQuery} {...routeProps} />
+                )
+                }}>
+              </Route>
+            </ul>
+          </div>
+        </nav>
+
+        <Switch>
+          <PropsRoute path="/" exact component={welcome} $={this.props.jQuery}/>
+          <PropsRoute path="/collections" exact component={CollectionsBrowser} $={this.props.jQuery} globalWindow={this.props.globalWindow}/>
+          <PropsRoute path="/collections/:id" exact component={CollectionViewer} $={this.props.jQuery} />
+          <PropsRoute path="/collections/:id/edit" exact component={CollectionEditor} $={this.props.jQuery}/>
+        </Switch>
+      </div>
     )
   }
   

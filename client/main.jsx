@@ -1,7 +1,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom'
-import AppRoot from './components/AppRoot.jsx'
+import AppRootContainer from './components/AppRootContainer.jsx'
 
 import jQuery from 'jquery'
 
@@ -27,5 +27,5 @@ addEventListener('DOMContentLoaded', () => {
   const firstScriptTag = document.getElementsByTagName('script')[0]
   firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)    
   
-  ReactDOM.render(<AppRoot jQuery={jQuery} globalWindow={window}/>, document.querySelector('.player-container'))
+  ReactDOM.render(<AppRootContainer jQuery={jQuery} globalWindow={window}/>, document.querySelector('.player-container'))
 })
