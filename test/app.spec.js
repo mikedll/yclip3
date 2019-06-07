@@ -6,8 +6,9 @@ const srcDir = path.join(__dirname, '../server/')
 const app = require(path.join(srcDir, 'app.js'))
 const mongoose = require('mongoose')
 const ClipCollection = require(path.join(srcDir, 'models/clipCollection.js'))
+const Clip = require(path.join(srcDir, 'models/clip.js'))
 const config = require(path.join(srcDir, 'config.js'))
-const _ = require('underscore')
+const underscore = require('underscore')
 
 describe('App', () => {
 
@@ -31,9 +32,9 @@ describe('App', () => {
 
   after(() => { return mongoose.disconnect() } )
 
-  it.only('should list compilations with page support', () => {
-    const saves = _.times(19, (i) => {
-      let collection = new ClipCollection({name: "nice songs " + i, clips: [clip1, clip2]})
+  it('should list compilations with page support', () => {
+    const saves = underscore.times(19, (i) => {
+      let collection = new ClipCollection({name: "nice songs " + i})
       return collection.save()
     })
     return Promise.all(saves)
@@ -49,9 +50,9 @@ describe('App', () => {
       })
   })
 
-  it.only('should calculate even number of pages correctly', () => {
-    const saves = _.times(18, (i) => {
-      let collection = new ClipCollection({name: "nice songs " + i, clips: [clip1, clip2]})
+  it('should calculate even number of pages correctly', () => {
+    const saves = underscore.times(18, (i) => {
+      let collection = new ClipCollection({name: "nice songs " + i})
       return collection.save()
     })
     return Promise.all(saves)
@@ -71,11 +72,11 @@ describe('App', () => {
       })
       .then((response) => {
         expect(response.status).to.equal(201)
-        return ClipCollection.findById(collection._id)
+        return Clip.find({clipCollection: collection._id})
       })
-      .then((collectionUpdated) => {
-        expect(collectionUpdated.clips.length).to.equal(1)
-        expect(collectionUpdated.clips[0].vid).to.equal("Iwuy4hHO3YQ")
+      .then((clips) => {
+        expect(clips.length).to.equal(1)
+        expect(clips[0].vid).to.equal("Iwuy4hHO3YQ")
       })
   })
 
@@ -89,19 +90,27 @@ describe('App', () => {
         return request(app).post('/api/collections/' + collection._id + '/clips').send(clip2)
       })
       .then((response) => {
-        return ClipCollection.findById(collection._id)
+        return Clip.find({clipCollection: collection._id}).sort('createdAt')
       })
-      .then((collectionUpdated) => {
-        expect(collectionUpdated.clips.length).to.equal(2)
-        expect(collectionUpdated.clips[0].vid).to.equal("Iwuy4hHO3YQ")
-        expect(collectionUpdated.clips[1].vid).to.equal("dQw4w9WgXcQ")
+      .then((clips) => {
+        expect(clips.length).to.equal(2)
+        expect(clips[0].vid).to.equal("Iwuy4hHO3YQ")
+        expect(clips[1].vid).to.equal("dQw4w9WgXcQ")
       })    
   })
 
   it('should return a collection', () => {
-    const collection = new ClipCollection({name: "nice songs", clips: [clip1, clip2]})
+    let savedClips = []
+    const collection = new ClipCollection({name: "nice songs"})
     return collection.save()
       .then(collection => {
+        [clip1, clip2].forEach(async (clip) => {
+          const newClip = Clip(clip)
+          newClip.clipCollection = collection._id
+          await newClip.save()
+          savedClips.push(newClip)
+        })
+
         return request(app).get('/api/collections/' + collection._id)
       })
       .then(response => {
@@ -109,7 +118,7 @@ describe('App', () => {
         
         expect(response.body._id).to.equal(collection._id.toString())
         expect(response.body.clips.length).to.equal(2)
-        expect(response.body.clips[0]._id).to.equal(collection.clips[0]._id.toString())
+        expect(response.body.clips[0]._id).to.equal(savedClips[0]._id.toString())
       })
     
   })

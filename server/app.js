@@ -48,7 +48,7 @@ app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
     if(!clipCollection) {
       res.status(404).end()
     } else {
-      const clips = await Clip.find({clipCollection: clipCollection._id})
+      const clips = await Clip.find({clipCollection: clipCollection._id}).sort('createdAt')
       res.json({ ...clipCollection.inspect(), ...{clips: clips} })
     }
   } catch(err) {
