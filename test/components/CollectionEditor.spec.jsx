@@ -77,7 +77,7 @@ describe('<CollectionEditor />', function() {
     expect(wrapper.find('.clip-container').last().text()).to.contain('dfjlksdjf')
   })
 
-  it.only('should render start and end times', async() => {
+  it('should render start and end times', async() => {
     let mock$ = spy()
     mock$.ajax = spy()
     const matchProps = { params: { id: 1 } }
@@ -92,8 +92,7 @@ describe('<CollectionEditor />', function() {
     
     const secondClip = wrapper.find('.clip-container').last()
     expect(secondClip.find('td').at(1).text()).to.equal('3:00')
-    expect(secondClip.find('td').at(2).text()).to.equal('3:35')
-    
+    expect(secondClip.find('td').at(2).text()).to.equal('3:35')    
   })
 
   it('should permit name editing', async () => {
@@ -107,6 +106,21 @@ describe('<CollectionEditor />', function() {
 
     wrapper.find('.name-container').simulate('click')
     expect(wrapper.find('.name-editor')).to.have.lengthOf(1)
+    wrapper.find('.name-editor').find('input').simulate('change', {target: {name: 'collection[name]', value: 'nice poems'}})
+    wrapper.find('.name-editor form').simulate('submit')
+
+    expect(mock$.ajax.calledWithMatch({
+      url: '/api/collections/' + 1,
+      method: 'PUT',
+      data: {
+        name: 'nice poems'
+    }})).to.be.true
+
+    clipCollection1.name = 'nice poems'
+    await mock$.ajax.getCall(1).args[0].success(clipCollection1)
+    wrapper.update()
+    
+    expect(wrapper.find('.name-editor')).to.have.lengthOf(0)
 
   })
 })
