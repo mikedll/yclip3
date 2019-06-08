@@ -6,8 +6,12 @@ const expect = require('chai').expect
 
 describe('Clip', function() {
 
-  it.only('should parse ending and beginning into start/duration', () => {
+  it('should parse ending and beginning into start/duration', () => {
     const clip = new Clip()
+    clip.parseStartEnd('32', '38')
+    expect(clip.start).to.equal(32)
+    expect(clip.duration).to.equal(6)
+    
     clip.parseStartEnd('1:32', '1:45')
     expect(clip.start).to.equal(92)
     expect(clip.duration).to.equal(13)

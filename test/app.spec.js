@@ -17,9 +17,9 @@ describe('App', () => {
     start: 34,
     duration: 3
   }, clip2 = {
-    "vid":"dQw4w9WgXcQ",
-    "start":43,
-    "duration":3
+    vid:"dQw4w9WgXcQ",
+    start: 43,
+    duration: 6
   }
   
   before(() => {
@@ -68,7 +68,12 @@ describe('App', () => {
     const collection = new ClipCollection({name: "nice songs"})
     return collection.save()
       .then(collection => {
-        return request(app).post('/api/collections/' + collection._id + '/clips').send(clip1)
+        const clip1b = {
+          vid: clip1.vid,
+          start: "34",
+          end: "37"
+        }
+        return request(app).post('/api/collections/' + collection._id + '/clips').send(clip1b)
       })
       .then((response) => {
         expect(response.status).to.equal(201)
@@ -82,12 +87,22 @@ describe('App', () => {
 
   it('should save many clips as needed', function() {
     const collection = new ClipCollection({name: "nice songs"})
+    const clip1b = {
+      vid: clip1.vid,
+      start: "34",
+      end: "37"
+    }
+    const clip2b = {
+      vid: clip2.vid,
+      start: "43",
+      end: "49"
+    }
     return collection.save()
       .then(collection => {
-        return request(app).post('/api/collections/' + collection._id + '/clips').send(clip1)
+        return request(app).post('/api/collections/' + collection._id + '/clips').send(clip1b)
       })
       .then((response) => {
-        return request(app).post('/api/collections/' + collection._id + '/clips').send(clip2)
+        return request(app).post('/api/collections/' + collection._id + '/clips').send(clip2b)
       })
       .then((response) => {
         return Clip.find({clipCollection: collection._id}).sort('createdAt')

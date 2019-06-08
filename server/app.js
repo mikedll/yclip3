@@ -88,6 +88,7 @@ app.post('/api/collections/:collection_id/clips', csrfProtection, async (req, re
     } else {
       let newClip = new Clip()
       newClip.clipCollection = req.params.collection_id
+      newClip.vid = req.body.vid
       newClip.parseStartEnd(req.body.start, req.body.end)
       await newClip.save()
       const clips = await Clip.find({clipCollection: req.params.collection_id})

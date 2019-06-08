@@ -47,7 +47,7 @@ describe('<CollectionEditor />', function() {
     expect(wrapper.find('.clip-container')).to.have.lengthOf(2)
   })
   
-  it.only("should record a new clip", async () => {
+  it("should record a new clip", async () => {
     let mock$ = spy()
     mock$.ajax = spy()
     const matchProps = { params: { id: 1 } }
