@@ -19,6 +19,7 @@ export default class CollectionEditor extends Component {
       this.state.collection = props.collection
     }
 
+    this.tbodyEl = null
     this.onSubmit = this.onSubmit.bind(this)
     this.onChange = this.onChange.bind(this)
     this.onNameSubmit = this.onNameSubmit.bind(this)
@@ -28,10 +29,8 @@ export default class CollectionEditor extends Component {
 
   fetchCollection() {
     new AjaxAssistant(this.props.$).get('/api/collections/' + this.props.match.params.id)
-      .then(data => {
-        this.setState(prevState => {
-          return { ...prevState, ...{ collection: { name: data.name, clips: data.clips } } }
-        })
+      .then(collection => {
+        this.setState({collection})
       })
       .catch(error => {
         this.setState({error})
@@ -50,7 +49,39 @@ export default class CollectionEditor extends Component {
       this.fetchCollection()
     }
   }
+
+  sortChanged(e, ui) {
+    let idToPos = {}
+    this.props.$(this.tbodyEl).find('tr').each((i, el) => {
+      idToPos[this.props.$(el).data('ref-id')] = i
+    })
+
+    new AjaxAssistant(this.props.$).put('/api/collections/' + this.state.collection._id + '/order')
+      .then((collection) => {
+        this.setState({collection})
+      })
+      .catch((error) => {
+        this.setState({error})
+      })
+  }
   
+  componentDidUpdate() {
+    const $this = this
+    if(this.tbodyEl) {
+      this.props.$(this.tbodyEl).sortable({
+        stop: function(e, ui) {
+          $this.sortChanged(e, ui)
+        }
+      })
+    }
+  }
+  
+  componentWillUnmount() {
+    if(this.tbodyEl) {
+      this.props.$(this.tbodyEl).sortable('destroy')
+    }
+  }
+ 
   onChange(e) {
     const target = e.target
     const name = target.name
@@ -174,10 +205,10 @@ export default class CollectionEditor extends Component {
                 <th>End</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody ref={el => this.tbodyEl = el}>
               {this.state.collection.clips.map((c) => {
                 return (
-                  <tr className="clip-container" key={c._id}>
+                  <tr className="clip-container" key={c._id} data-ref-id={c._id}>
                     <td>{c.vid}</td>
                     <td>{this.timerFormatted(c.start)}</td>
                     <td>{this.timerFormatted(c.start + c.duration)}</td>

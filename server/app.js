@@ -48,7 +48,7 @@ app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
     if(!clipCollection) {
       res.status(404).end()
     } else {
-      const clips = await Clip.find({clipCollection: clipCollection._id}).sort('createdAt')
+      const clips = await Clip.find({clipCollection: clipCollection._id}).sort('position')
       res.json({ ...clipCollection.inspect(), ...{clips: clips} })
     }
   } catch(err) {
@@ -70,7 +70,32 @@ app.put('/api/collections/:collection_id', csrfProtection, async (req, res, next
     } else {
       clipCollection.name = req.body.name
       await clipCollection.save()
+      const clips = await Clip.find({clipCollection: req.params.collection_id}).sort('position')
+      res.status(200).json({...clipCollection.inspect(), ...{clips: clips}})
+    }
+  } catch(err) {
+    next(err)
+  }
+})
+
+app.put('/api/collections/:collection_id/order', csrfProtection, async (req, res, next) => {
+  try {
+    if(!/^[0-9a-fA-F]{24}$/.test(req.params.collection_id)) {
+      res.status(404).end()
+      return
+    }
+
+    const clipCollection = await ClipCollection.findById(req.params.collection_id)
+    if(!clipCollection) {
+      res.status(404).end()
+    } else {
       const clips = await Clip.find({clipCollection: req.params.collection_id})
+      clips.forEach(async (clip) => {
+        clip.position = req.body[clip._id]
+        console.log(clip.vid, clip.position)
+        await clip.save()
+      })
+      clips.sort((l, r) => l.position - r.position)
       res.status(200).json({...clipCollection.inspect(), ...{clips: clips}})
     }
   } catch(err) {

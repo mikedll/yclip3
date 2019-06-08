@@ -64,7 +64,7 @@ describe('App', () => {
       })
   })
 
-  it.only('should permit name editing', async () => {
+  it('should permit name editing', async () => {
     const collection = new ClipCollection({name: "nice songs"})
     await collection.save()
 
@@ -159,4 +159,28 @@ describe('App', () => {
         expect(collection).to.not.be.undefined
       })
   })
+
+  it('should permit reordering', async () => {
+    const collection = new ClipCollection({name: "nice songs"})
+    await collection.save()
+
+    const savedClips = await Promise.all([clip1, clip2].map(async (clip) => {
+      let newClip = new Clip(clip)
+      newClip.clipCollection = collection._id
+      return await newClip.save()
+    }))
+    
+    const ordering = {
+      [savedClips[0]._id]: 1,
+      [savedClips[1]._id]: 0
+    }
+    
+    const response = await request(app).put('/api/collections/' + collection._id + '/order').send(ordering)
+    expect(response.status).to.equal(200)
+
+    const foundClips = await Clip.find({clipCollection: collection._id}).sort('position')
+    expect(foundClips[0].vid).to.equal("dQw4w9WgXcQ")
+    expect(foundClips[1].vid).to.equal("Iwuy4hHO3YQ")
+  })
+  
 })
