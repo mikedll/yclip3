@@ -90,13 +90,17 @@ app.put('/api/collections/:collection_id/order', csrfProtection, async (req, res
       res.status(404).end()
     } else {
       const clips = await Clip.find({clipCollection: req.params.collection_id})
-      clips.forEach(async (clip) => {
-        clip.position = req.body[clip._id]
-        console.log(clip.vid, clip.position)
-        await clip.save()
-      })
-      clips.sort((l, r) => l.position - r.position)
-      res.status(200).json({...clipCollection.inspect(), ...{clips: clips}})
+
+      try {
+        const updatedClips = await Promise.all(clips.map((clip) => {
+          clip.position = req.body[clip._id]
+          return clip.save()
+        }))
+        updatedClips.sort((l, r) => l.position - r.position)
+        res.status(200).json({...clipCollection.inspect(), ...{clips: clips}})
+      } catch (err) {
+        next(err)
+      }
     }
   } catch(err) {
     next(err)

@@ -56,7 +56,7 @@ export default class CollectionEditor extends Component {
       idToPos[this.props.$(el).data('ref-id')] = i
     })
 
-    new AjaxAssistant(this.props.$).put('/api/collections/' + this.state.collection._id + '/order')
+    new AjaxAssistant(this.props.$).put('/api/collections/' + this.state.collection._id + '/order', idToPos)
       .then((collection) => {
         this.setState({collection})
       })
