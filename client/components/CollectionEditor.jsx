@@ -10,7 +10,7 @@ export default class CollectionEditor extends Component {
     this.state = {
       vid: "",
       start: "",
-      duration: "",
+      end: "",
       error: ""
     }
 
@@ -62,11 +62,11 @@ export default class CollectionEditor extends Component {
     new AjaxAssistant(this.props.$).post(`/api/collections/${this.props.match.params.id}/clips`, {
         vid: this.state.vid,
         start: this.state.start,
-        duration: this.state.duration
+        end: this.state.end
       })
       .then(data => {
         this.setState(prevState => {
-          return { ...update(prevState, {collection: {$set: data}}), ...{ vid: "", start: "", duration: "", error: ""} }
+          return { ...update(prevState, {collection: {$set: data}}), ...{ vid: "", start: "", end: "", error: ""} }
         })
       })
       .catch(error => {
@@ -125,10 +125,10 @@ export default class CollectionEditor extends Component {
               <input type="text" name="vid" value={this.state.vid} onChange={this.onChange} placeholder="Video ID" className="form-control"/>
             </div>
             <div className="form-group col-md-3">
-              <input type="text" name="start" value={this.state.start} onChange={this.onChange} placeholder="Start (seconds)" className="form-control"/>
+              <input type="text" name="start" value={this.state.start} onChange={this.onChange} placeholder="Start (HH:MM:SS)" className="form-control"/>
             </div>
             <div className="form-group col-md-3">
-              <input type="text" name="duration" value={this.state.duration} onChange={this.onChange} placeholder="Duration (seconds)" className="form-control"/>
+              <input type="text" name="end" value={this.state.end} onChange={this.onChange} placeholder="End (HH:MM:SS)" className="form-control"/>
             </div>
 
             <div className="col-auto">

@@ -86,8 +86,9 @@ app.post('/api/collections/:collection_id/clips', csrfProtection, async (req, re
     if(!clipCollection) {
       res.status(404).end()
     } else {
-      let newClip = new Clip(req.body)
+      let newClip = new Clip()
       newClip.clipCollection = req.params.collection_id
+      newClip.parseStartEnd(req.body.start, req.body.end)
       await newClip.save()
       const clips = await Clip.find({clipCollection: req.params.collection_id})
       res.status(201).json({...clipCollection.inspect(), ...{clips: clips}})
