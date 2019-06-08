@@ -28,7 +28,8 @@ const ClipSchema = new mongoose.Schema({
 
 ClipSchema.methods.parseStartEnd = function(sStart, sEnd) {
   const round3 = (input) => {
-    return +(Math.round(input + "e+3")  + "e-3")    
+    // https://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places-only-if-necessary
+    return +(Math.round(input + "e+3")  + "e-3")
   }
   const toSeconds = (input) => {
     let secondsSlot = -1, minutesSlot = -1, hoursSlot = -1, seconds = 0
@@ -56,7 +57,6 @@ ClipSchema.methods.parseStartEnd = function(sStart, sEnd) {
     if(minutesSlot !== -1) seconds += parseInt(slots[minutesSlot]) * 60
     if(secondsSlot !== -1) seconds += parseFloat(slots[secondsSlot])
 
-    // https://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places-only-if-necessary
     return seconds
   }
   

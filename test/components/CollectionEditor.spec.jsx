@@ -12,13 +12,13 @@ describe('<CollectionEditor />', function() {
   let clip1 = {
     _id: "asdf1",
     vid:"Iwuy4hHO3YQ",
-    start: 34,
-    duration: 3
+    start: 5399,
+    duration: 46.331
   }, clip2 = {
     _id: "asdf2",
     "vid":"dQw4w9WgXcQ",
-    "start":43,
-    "duration":3
+    "start":180,
+    "duration":35
   }, clipCollection1 = {
     name: "Some collection",
     clips: [clip1, clip2]
@@ -55,25 +55,44 @@ describe('<CollectionEditor />', function() {
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     
     wrapper.find('form input[name="vid"]').simulate('change', {target: { name: 'vid', value: 'dfjlksdjf' }})
-    wrapper.find('form input[name="start"]').simulate('change', {target: { name: 'start', value: '3' }})
-    wrapper.find('form input[name="end"]').simulate('change', {target: { name: 'end', value: '5' }})
+    wrapper.find('form input[name="start"]').simulate('change', {target: { name: 'start', value: '3:00' }})
+    wrapper.find('form input[name="end"]').simulate('change', {target: { name: 'end', value: '3:35' }})
     wrapper.find('form').simulate('submit')
 
     expect(mock$.ajax.calledWithMatch({
       url: '/api/collections/' + 1 + '/clips',
       data: {
       vid: 'dfjlksdjf',
-      start: '3',
-      end: '5'
+      start: '3:00',
+      end: '3:35'
       }})).to.be.true
 
     const clipCollection2 = {
       name: "Some collection",
-      clips: [clip1, clip2, {_id: 'adsf3', vid: 'dfjlksdjf', start: 3, duration: 2}]
+      clips: [clip1, clip2, {_id: 'adsf3', vid: 'dfjlksdjf', start: 180, duration: 35}]
     }
     await mock$.ajax.getCall(1).args[0].success(clipCollection2)
     wrapper.update()
     expect(wrapper.find('.clip-container')).to.have.lengthOf(3)
     expect(wrapper.find('.clip-container').last().text()).to.contain('dfjlksdjf')
+  })
+
+  it('should render start and end times', async() => {
+    let mock$ = spy()
+    mock$.ajax = spy()
+    const matchProps = { params: { id: 1 } }
+    let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
+    
+    await mock$.ajax.getCall(0).args[0].success(clipCollection1)
+    wrapper.update()
+
+    const firstClip = wrapper.find('.clip-container').first()
+    expect(firstClip.find('td').at(1).text()).to.equal('1:29:59')
+    expect(firstClip.find('td').at(2).text()).to.equal('1:30:45.331')
+    
+    const secondClip = wrapper.find('.clip-container').last()
+    expect(secondClip.find('td').at(1).text()).to.equal('3:00')
+    expect(secondClip.find('td').at(2).text()).to.equal('3:35')
+    
   })
 })

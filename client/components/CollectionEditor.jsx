@@ -73,6 +73,33 @@ export default class CollectionEditor extends Component {
         this.setState({error})
       })
   }
+
+  timerFormatted(time) {
+    const hours = Math.floor(time / (60 * 60))
+    let remaining = time - (hours * 60 * 60)
+    const minutes = Math.floor(remaining / 60)
+    const seconds = remaining - (minutes * 60)
+    const secondsRounded = +(Math.round(seconds + "e+3")  + "e-3")
+    let ret = String(secondsRounded)
+
+    if(minutes > 0 || hours > 0) {
+      if(ret.length < 2) {
+        ret = '0' + ret
+      }
+
+      ret = minutes + ':' + ret
+    }
+
+    if(hours > 0) {
+      if(String(minutes).length < 2) {
+        ret = '0' + ret
+      }
+
+      ret = hours + ':' + ret
+    }
+
+    return ret
+  }
   
   render() {
     const error = this.state.error !== "" ? (
@@ -101,8 +128,8 @@ export default class CollectionEditor extends Component {
                 return (
                   <tr className="clip-container" key={c._id}>
                     <td>{c.vid}</td>
-                    <td>{c.start}</td>
-                    <td>{c.start + c.duration}</td>
+                    <td>{this.timerFormatted(c.start)}</td>
+                    <td>{this.timerFormatted(c.start + c.duration)}</td>
                   </tr>
                 )
               })}
