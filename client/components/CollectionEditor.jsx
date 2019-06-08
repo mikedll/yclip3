@@ -11,7 +11,8 @@ export default class CollectionEditor extends Component {
       vid: "",
       start: "",
       end: "",
-      error: ""
+      error: "",
+      editingName: false
     }
 
     if(this.props.collection) {
@@ -20,12 +21,15 @@ export default class CollectionEditor extends Component {
 
     this.onSubmit = this.onSubmit.bind(this)
     this.onChange = this.onChange.bind(this)
+    this.onNameSubmit = this.onNameSubmit.bind(this)
   }
 
   fetchCollection() {
     new AjaxAssistant(this.props.$).get('/api/collections/' + this.props.match.params.id)
       .then(data => {
+
         this.setState(prevState => {
+          console.log('data2=', data)
           return { ...prevState, ...{ collection: { name: data.name, clips: data.clips } } }
         })
       })
@@ -52,7 +56,36 @@ export default class CollectionEditor extends Component {
     const name = target.name
     const value = target.value
 
-    this.setState({[name]: value})
+    if(name === 'collection[name]') {
+      this.setState((prevState) => {
+        return update(prevState, {'collection': {'name': {$set: value}}})
+      })
+    } else {
+      this.setState({[name]: value})
+    }
+  }
+
+  onNameClick(e) {
+    e.preventDefault()
+    this.setState({editingName: true})
+  }
+  
+  onNameSubmit(e) {
+    e.preventDefault()
+
+    this.setState({error: ""})
+    new AjaxAssistant(this.props.$).put(`/api/collections/${this.props.match.params.id}`, {
+        name: this.state.collection.name
+      })
+      .then(data => {
+        this.setState(prevState => {
+          return { ...update(prevState, {collection: {$set: data}}), ...{ editingName: false } }
+        })
+      })
+      .catch(error => {
+        this.setState({error})
+      })
+    
   }
   
   onSubmit(e) {
@@ -108,10 +141,24 @@ export default class CollectionEditor extends Component {
 
     var body = null
     if(this.state.collection) {
+
+      const nameSection = this.state.editingName ? (
+        <div className="name-container" onClick={this.onNameClick}>
+          Collection: <strong>{this.state.collection.name}</strong>
+        </div>
+      ) : (
+        <div className="name-editor">
+          <form onSubmit={this.onNameSubmit}>
+            <input type="text" name="collection[name]" value={this.collection.name} onChange={this.onChange} placeholder="Collection Name" className="form-control"/>
+            <button type="submit" className="btn btn-primary">Save</button>
+          </form>
+        </div>
+      )
+
       
       body = (
         <div>
-          Collection: <strong>{this.state.collection.name}</strong>
+          {nameSection}
 
           <table className="table clips-table">
             <thead>

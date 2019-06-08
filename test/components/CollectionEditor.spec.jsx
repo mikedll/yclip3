@@ -77,7 +77,7 @@ describe('<CollectionEditor />', function() {
     expect(wrapper.find('.clip-container').last().text()).to.contain('dfjlksdjf')
   })
 
-  it('should render start and end times', async() => {
+  it.only('should render start and end times', async() => {
     let mock$ = spy()
     mock$.ajax = spy()
     const matchProps = { params: { id: 1 } }
@@ -94,5 +94,19 @@ describe('<CollectionEditor />', function() {
     expect(secondClip.find('td').at(1).text()).to.equal('3:00')
     expect(secondClip.find('td').at(2).text()).to.equal('3:35')
     
+  })
+
+  it('should permit name editing', async () => {
+    let mock$ = spy()
+    mock$.ajax = spy()
+    const matchProps = { params: { id: 1 } }
+    let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
+    
+    await mock$.ajax.getCall(0).args[0].success(clipCollection1)
+    wrapper.update()
+
+    wrapper.find('.name-container').simulate('click')
+    expect(wrapper.find('.name-editor')).to.have.lengthOf(1)
+
   })
 })

@@ -63,6 +63,16 @@ describe('App', () => {
         expect(response.body.pages).to.equal(2)
       })
   })
+
+  it.only('should permit name editing', async () => {
+    const collection = new ClipCollection({name: "nice songs"})
+    await collection.save()
+
+    const response = await request(app).put('/api/collections/' + collection._id).send({name: "nice poems"})
+    expect(response.status).to.equal(200)
+    const collectionFound = await ClipCollection.findOne({_id: collection._id})
+    expect(collectionFound.name).to.equal('nice poems')
+  })
   
   it('should save a new clip in a collection', function() {
     const collection = new ClipCollection({name: "nice songs"})

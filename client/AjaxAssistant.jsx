@@ -23,6 +23,17 @@ export default class AjaxAssistant {
     return reject(text)
   }
   
+  get(path) {
+    return new Promise((resolve, reject) => {
+      this.$.ajax({
+        url: path,
+        dataType: 'JSON',
+        success: (data) => resolve(data),
+        error: (xhr) => this.handleError(xhr, reject)
+      })
+    })
+  }
+
   delete(path) {
     return new Promise((resolve, reject) => {
       this.$.ajax({
@@ -50,14 +61,18 @@ export default class AjaxAssistant {
     })
   }
   
-  get(path) {
+  put(path, data) {
     return new Promise((resolve, reject) => {
+      if(!data) data = {}
       this.$.ajax({
+        method: 'PUT',
         url: path,
         dataType: 'JSON',
+        data: data,
+        beforeSend: (xhr) => { xhr.setRequestHeader('CSRF-Token', this.$('meta[name=csrf-token]').attr('content')) },
         success: (data) => resolve(data),
         error: (xhr) => this.handleError(xhr, reject)
       })
     })
-  }
+  }  
 }

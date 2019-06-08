@@ -56,6 +56,28 @@ app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
   }
 })
 
+
+app.put('/api/collections/:collection_id', csrfProtection, async (req, res, next) => {
+  try {
+    if(!/^[0-9a-fA-F]{24}$/.test(req.params.collection_id)) {
+      res.status(404).end()
+      return
+    }
+
+    const clipCollection = await ClipCollection.findById(req.params.collection_id)
+    if(!clipCollection) {
+      res.status(404).end()
+    } else {
+      clipCollection.name = req.body.name
+      await clipCollection.save()
+      const clips = await Clip.find({clipCollection: req.params.collection_id})
+      res.status(200).json({...clipCollection.inspect(), ...{clips: clips}})
+    }
+  } catch(err) {
+    next(err)
+  }
+})
+
 app.delete('/api/collections/:id', csrfProtection, async (req, res, next) => {
   try {
     if(!/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
