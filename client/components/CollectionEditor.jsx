@@ -83,25 +83,32 @@ export default class CollectionEditor extends Component {
 
     var body = null
     if(this.state.collection) {
-      const clips = this.state.collection.clips.map((c) => {
-        return (
-          <div className="clip-container" key={c._id}>
-            vid: {c.vid}
-            <br/>
-            start: {c.start}
-            <br/>
-            duration: {c.duration}
-          </div>
-        )
-      })
+      
       body = (
         <div>
-          Collection:
-          <strong>
-            {this.state.collection.name}
-          </strong>
+          Collection: <strong>{this.state.collection.name}</strong>
 
-          {clips}
+          <table className="table clips-table">
+            <thead>
+              <tr>
+                <th>Video ID</th>
+                <th>Start</th>
+                <th>End</th>
+              </tr>
+            </thead>
+            <tbody>
+              {this.state.collection.clips.map((c) => {
+                return (
+                  <tr className="clip-container" key={c._id}>
+                    <td>{c.vid}</td>
+                    <td>{c.start}</td>
+                    <td>{c.start + c.duration}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+          
         </div>
       )
     }
@@ -113,12 +120,22 @@ export default class CollectionEditor extends Component {
         {body}
         
         <form onSubmit={this.onSubmit}>
-          Video Id: <input type="text" name="vid" value={this.state.vid} onChange={this.onChange}/>
-          Start (seconds): <input type="text" name="start" value={this.state.start} onChange={this.onChange}/>
-          Duration (seconds): <input type="text" name="duration" value={this.state.duration} onChange={this.onChange}/>
+          <div className="form-row">
+            <div className="form-group col-md-4">
+              <input type="text" name="vid" value={this.state.vid} onChange={this.onChange} placeholder="Video ID" className="form-control"/>
+            </div>
+            <div className="form-group col-md-3">
+              <input type="text" name="start" value={this.state.start} onChange={this.onChange} placeholder="Start (seconds)" className="form-control"/>
+            </div>
+            <div className="form-group col-md-3">
+              <input type="text" name="duration" value={this.state.duration} onChange={this.onChange} placeholder="Duration (seconds)" className="form-control"/>
+            </div>
 
-          <br/>
-          <button type="submit" className="btn btn-primary">Add Clip</button>
+            <div className="col-auto">
+              <button type="submit" className="btn btn-primary">Add Clip</button>
+            </div>
+          </div>
+          
         </form>
       </div>
     )    

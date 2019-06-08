@@ -74,6 +74,6 @@ describe('<CollectionEditor />', function() {
     await mock$.ajax.getCall(1).args[0].success(clipCollection2)
     wrapper.update()
     expect(wrapper.find('.clip-container')).to.have.lengthOf(3)
-    expect(wrapper.find('.clip-container').last().text()).to.contain('vid: dfjlksdjf')
+    expect(wrapper.find('.clip-container').last().text()).to.contain('dfjlksdjf')
   })
 })
