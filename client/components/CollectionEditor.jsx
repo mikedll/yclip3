@@ -82,13 +82,11 @@ export default class CollectionEditor extends Component {
     const secondsRounded = +(Math.round(seconds + "e+3")  + "e-3")
     let ret = String(secondsRounded)
 
-    if(minutes > 0 || hours > 0) {
-      if(ret.length < 2) {
-        ret = '0' + ret
-      }
-
-      ret = minutes + ':' + ret
+    if(ret.length < 2) {
+      ret = '0' + ret
     }
+
+    ret = minutes + ':' + ret
 
     if(hours > 0) {
       if(String(minutes).length < 2) {
