@@ -69,6 +69,14 @@ ClipSchema.methods.parseStartEnd = function(sStart, sEnd) {
   this.duration = round3(toSeconds(sEnd) - this.start)
 }
 
+ClipSchema.query.defaultOrder = function() {
+  return this.sort('position')
+}
+
+ClipSchema.query.forCollection = function(id) {
+  return this.find({clipCollection: id}).defaultOrder()
+}
+
 const Clip = mongoose.model('Clip', ClipSchema)
 
 module.exports = Clip

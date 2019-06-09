@@ -182,5 +182,23 @@ describe('App', () => {
     expect(foundClips[0].vid).to.equal("dQw4w9WgXcQ")
     expect(foundClips[1].vid).to.equal("Iwuy4hHO3YQ")
   })
-  
+
+  it('should permit clip deletion', async () => {
+    const collection = new ClipCollection({name: "nice songs"})
+    await collection.save()
+
+    const savedClips = await Promise.all([clip1, clip2].map(async (clip) => {
+      let newClip = new Clip(clip)
+      newClip.clipCollection = collection._id
+      return await newClip.save()
+    }))
+        
+    const response = await request(app).delete('/api/collections/' + collection._id + '/clips/' + savedClips[0]._id)
+    expect(response.status).to.equal(200)
+
+    const foundClips = await Clip.find({clipCollection: collection._id})
+    expect(foundClips).to.have.lengthOf(1)
+    expect(foundClips[0].vid).to.equal("dQw4w9WgXcQ")
+  })
+
 })

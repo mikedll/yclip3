@@ -37,9 +37,11 @@ app.get(/^\/((?!api).)*$/, csrfProtection, (req, res, next) => {
 
 const dataDir = path.join(__dirname, 'data')
 
+const idRegex = /^[0-9a-fA-F]{24}$/
+
 app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
   try {
-    if(!/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
+    if(!idRegex.test(req.params.id)) {
       res.status(404).end()
       return
     }
@@ -48,7 +50,7 @@ app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
     if(!clipCollection) {
       res.status(404).end()
     } else {
-      const clips = await Clip.find({clipCollection: clipCollection._id}).sort('position')
+      const clips = await Clip.find().forCollection(clipCollection._id)
       res.json({ ...clipCollection.inspect(), ...{clips: clips} })
     }
   } catch(err) {
@@ -59,7 +61,7 @@ app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
 
 app.put('/api/collections/:collection_id', csrfProtection, async (req, res, next) => {
   try {
-    if(!/^[0-9a-fA-F]{24}$/.test(req.params.collection_id)) {
+    if(!idRegex.test(req.params.collection_id)) {
       res.status(404).end()
       return
     }
@@ -70,7 +72,7 @@ app.put('/api/collections/:collection_id', csrfProtection, async (req, res, next
     } else {
       clipCollection.name = req.body.name
       await clipCollection.save()
-      const clips = await Clip.find({clipCollection: req.params.collection_id}).sort('position')
+      const clips = await Clip.find().forCollection(req.params.collection_id)
       res.status(200).json({...clipCollection.inspect(), ...{clips: clips}})
     }
   } catch(err) {
@@ -80,7 +82,7 @@ app.put('/api/collections/:collection_id', csrfProtection, async (req, res, next
 
 app.put('/api/collections/:collection_id/order', csrfProtection, async (req, res, next) => {
   try {
-    if(!/^[0-9a-fA-F]{24}$/.test(req.params.collection_id)) {
+    if(!idRegex.test(req.params.collection_id)) {
       res.status(404).end()
       return
     }
@@ -89,7 +91,7 @@ app.put('/api/collections/:collection_id/order', csrfProtection, async (req, res
     if(!clipCollection) {
       res.status(404).end()
     } else {
-      const clips = await Clip.find({clipCollection: req.params.collection_id})
+      const clips = await Clip.find().forCollection(req.params.collection_id)
 
       try {
         const updatedClips = await Promise.all(clips.map((clip) => {
@@ -150,6 +152,25 @@ app.post('/api/collections/:collection_id/clips', csrfProtection, async (req, re
   }
 })
 
+app.delete('/api/collections/:collection_id/clips/:id', csrfProtection, async (req, res, next) => {
+  try {
+    if(!idRegex.test(req.params.collection_id) || !idRegex.test(req.params.id)) {
+      res.status(404).end()
+      return
+    }
+
+    const clip = await Clip.findOne({_id: req.params.id, clipCollection: req.params.collection_id})
+    if(!clip) {
+      res.status(404).end()
+    } else {
+      await Clip.deleteOne({_id: clip._id})
+      res.status(200).end()
+    }
+  } catch(err) {
+    next(err)
+  }
+})
+
 app.get('/api/collections', csrfProtection, async (req, res, next) => {
   try {
     const PageSize = 9
@@ -165,17 +186,14 @@ app.get('/api/collections', csrfProtection, async (req, res, next) => {
     const pages = Math.floor(count / PageSize) + ((count % PageSize > 0) ? 1 : 0)
     
     const found = await ClipCollection.find({}, null, { limit: PageSize, skip: pageIndex * PageSize })
-    const clipPromises = found.map(found => {
-      return Clip.find({clipCollection: found._id})
-    })
-    const associatedClips = await Promise.all(clipPromises)
-    const foundObjs = found.map((collection, i) => { return {...collection.inspect(), ...{clips: associatedClips[i]} } } )
+    const associatedClips = await Promise.all(found.map(collection => Clip.find().forCollection(collection._id)))
+    const foundWithClips = found.map((collection, i) => { return {...collection.inspect(), ...{clips: associatedClips[i]} } } )
 
     res.json({
       total: count,
       pages: pages,
       page: pageIndex + 1,
-      results: foundObjs
+      results: foundWithClips
     })
 
   } catch (err) {
