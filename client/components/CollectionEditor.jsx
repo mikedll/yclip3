@@ -1,6 +1,6 @@
 import update from 'immutability-helper';
 import React, { Component } from 'react'
-
+import underscore from 'underscore'
 import AjaxAssistant from 'AjaxAssistant.jsx'
 
 export default class CollectionEditor extends Component {
@@ -20,11 +20,12 @@ export default class CollectionEditor extends Component {
     }
 
     this.tbodyEl = null
-    this.onSubmit = this.onSubmit.bind(this)
+    this.onNewClipSubmit = this.onNewClipSubmit.bind(this)
     this.onChange = this.onChange.bind(this)
     this.onNameSubmit = this.onNameSubmit.bind(this)
     this.onNameClick = this.onNameClick.bind(this)
     this.onNameEditCancel = this.onNameEditCancel.bind(this)
+    this.onDelete = this.onDelete.bind(this)
   }
 
   fetchCollection() {
@@ -124,7 +125,7 @@ export default class CollectionEditor extends Component {
     
   }
   
-  onSubmit(e) {
+  onNewClipSubmit(e) {
     e.preventDefault()
 
     this.setState({error: ""})
@@ -167,6 +168,17 @@ export default class CollectionEditor extends Component {
 
     return ret
   }
+
+  onDelete(e, id) {
+    new AjaxAssistant(this.props.$).delete('/api/collections/' + this.state.collection._id + '/clips/' + id)
+      .then(_ => {
+        const index = underscore.findIndex(this.state.collection.clips, (c) => c._id == id)
+        this.setState(prevState => update(prevState, {collection: {clips: {$splice: [[index, 1]]}}}))
+      })
+      .catch(error => {
+        this.setState(error)
+      })
+  }
   
   render() {
     const error = this.state.error !== "" ? (
@@ -203,6 +215,7 @@ export default class CollectionEditor extends Component {
                 <th>Video ID</th>
                 <th>Start</th>
                 <th>End</th>
+                <th></th>
               </tr>
             </thead>
             <tbody ref={el => this.tbodyEl = el}>
@@ -212,6 +225,7 @@ export default class CollectionEditor extends Component {
                     <td>{c.vid}</td>
                     <td>{this.timerFormatted(c.start)}</td>
                     <td>{this.timerFormatted(c.start + c.duration)}</td>
+                    <td><button className="btn btn-danger btn-delete" onClick={(e) => this.onDelete(e, c._id)}><i className="fas fa-trash"></i></button></td>
                   </tr>
                 )
               })}
@@ -228,7 +242,7 @@ export default class CollectionEditor extends Component {
 
         {body}
         
-        <form onSubmit={this.onSubmit}>
+        <form onSubmit={this.onNewClipSubmit}>
           <div className="form-row">
             <div className="form-group col-md-4">
               <input type="text" name="vid" value={this.state.vid} onChange={this.onChange} placeholder="Video ID" className="form-control"/>

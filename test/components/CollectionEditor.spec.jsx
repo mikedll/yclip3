@@ -20,6 +20,7 @@ describe('<CollectionEditor />', function() {
     "start":180,
     "duration":35
   }, clipCollection1 = {
+    _id: "asdf0",
     name: "Some collection",
     clips: [clip1, clip2]
   }
@@ -123,4 +124,29 @@ describe('<CollectionEditor />', function() {
     expect(wrapper.find('.name-editor')).to.have.lengthOf(0)
 
   })
+
+  it.only('should permit clip deletion', async () => {
+    let mock$ = stub().returns({sortable: spy()})
+    mock$.ajax = spy()
+    const matchProps = { params: { id: clipCollection1._id } }
+    let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
+    
+    await mock$.ajax.getCall(0).args[0].success(clipCollection1)
+    wrapper.update()
+
+    expect(wrapper.find('.clip-container')).to.have.lengthOf(2)
+    wrapper.find('.clip-container .btn-delete').first().simulate('click')
+
+    expect(mock$.ajax.calledWithMatch({
+      url: '/api/collections/' + clipCollection1._id + '/clips/' + clip1._id,
+      method: 'DELETE',
+    })).to.be.true
+
+    await mock$.ajax.getCall(1).args[0].success(null)
+    wrapper.update()
+    
+    expect(wrapper.find('.clip-container')).to.have.lengthOf(1)
+    expect(wrapper.find('.clip-container').key()).to.equal(clip2._id)
+  })
+  
 })
