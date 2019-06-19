@@ -32,7 +32,7 @@ if(config.env === "test") {
 const csrfProtection = csrf(csrfOpts)
 
 app.get(/^\/((?!api).)*$/, csrfProtection, (req, res, next) => {
-  res.render('index', { csrfToken: req.csrfToken() })
+  res.render('index', { csrfToken: req.csrfToken(), googleClientId: config.googleClientId })
 })
 
 const dataDir = path.join(__dirname, 'data')

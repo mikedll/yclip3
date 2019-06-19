@@ -15,7 +15,8 @@ const envVarsSchema = Joi.object({
   MONGO_DATABASE: Joi.string()
     .description("Mongo database name")
     .default("yclip3dev"),
-  MONGODB_URI: Joi.string()
+  MONGODB_URI: Joi.string(),
+  GOOGLE_SIGNIN_CLIENT_ID: Joi.string().required()
 }).unknown().required().when(
   Joi.object({
     NODE_ENV: Joi.exist().equal('test')
@@ -32,6 +33,7 @@ if(error) {
 }
 
 const config = {
+  googleClientId: envVars.GOOGLE_SIGNIN_CLIENT_ID,
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   mongo: {

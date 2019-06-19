@@ -9,3 +9,5 @@ test/components.js
 .emacs.desktop.lock
 
 static/js
+
+.envrc

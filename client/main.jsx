@@ -21,6 +21,15 @@ window.dout = function(s) {
   console.log(s)
 }
 
+window.gOnGoogleSignInUser = null
+window.onGoogleSignInHook = null
+window.gOnSignIn = function(googleUser) {
+  if(!window.onGoogleSignInHook)
+    window.onGoogleSignInUser = googleUser
+  else
+    window.onGoogleSignInHook(googleUser)
+}
+
 addEventListener('DOMContentLoaded', () => {
 
   let tag = document.createElement('script')

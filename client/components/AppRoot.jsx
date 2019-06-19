@@ -19,8 +19,23 @@ const PropsRoute = ({ component, ...rest }) => {
 class AppRoot extends Component {
   constructor(props) {
     super(props)
+
+    this.onGoogleSignIn = this.onGoogleSignIn.bind(this)
   }
 
+  componentDidMount() {
+    if(window.gOnGoogleSignInUser) {
+      this.onGoogleSigninUser(window.gOnGoogleSigninUser)
+      window.gOnGoogleSigninUser = null
+    }
+    else
+      window.onGoogleSignInHook = (googleUser) => this.onGoogleSignIn(googleUser)
+  }
+  
+  onGoogleSignIn(googleUser) {
+    const idToken = googleUser.getAuthResponse().id_token
+  }
+  
   render() {
     const welcome = () => (<div>Welcome to the application.</div>)
     const MenuLink = ({ label, to }) => (
@@ -49,6 +64,8 @@ class AppRoot extends Component {
                 }}>
               </Route>
             </ul>
+
+            <div className="g-signin2" data-onsuccess="gOnSignIn" data-theme="dark"></div>
           </div>
         </nav>
 
