@@ -54,7 +54,7 @@ class AppRoot extends Component {
             <span className="navbar-toggler-icon"></span>
           </button>
           <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav">
+            <ul className="navbar-nav mr-auto">
               <MenuLink label="Home" to='/'>Home</MenuLink>
               <MenuLink label="Browse" to='/collections'>Browse</MenuLink>
               <Route path="*" render={routeProps => {
