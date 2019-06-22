@@ -7,7 +7,10 @@ const cons = require('consolidate')
 const csrf = require('csurf')
 const ClipCollection = require('./models/clipCollection.js')
 const Clip = require('./models/clip.js')
+const User = require('./models/user.js')
 const config = require('./config.js')
+const { OAuth2Client } = require('google-auth-library')
+const cookieSession = require('cookie-session')
 
 const app = express()
 app.engine('mustache', cons.mustache)
@@ -19,6 +22,12 @@ app.use(express.static(path.join(__dirname, '../static')))
 app.use(express.json())
 
 app.use(cookieParser())
+
+app.use(cookieSession({
+  name: 'yclip3session',
+  keys: [config.cookieSecret],
+  maxAge: 14 * 24 * 60 * 60 * 1000
+}))
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -39,6 +48,34 @@ const dataDir = path.join(__dirname, 'data')
 
 const idRegex = /^[0-9a-fA-F]{24}$/
 
+app.post('/api/signin', async(req, res, next) => {
+  const client = new OAuth2Client(config.googleClientId)
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: req.body.token,
+      audience: config.googleClientId
+    })
+
+    const payload = ticket.getPayload()
+
+    let user = await User.findOne({vendor: 'Google', vendorId: payload['sub']})
+    if(!user) {
+      user = new User({
+        vendor: 'Google',
+        vendorId: payload['sub'],
+        name: payload['name'],
+        email: payload['email']
+      })
+      await user.save()
+    }    
+    req.session['userId'] = user._id
+
+    res.json(user)
+  } catch(err) {
+    console.error(err)
+    next(err)
+  }
+})
 app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
   try {
     if(!idRegex.test(req.params.id)) {

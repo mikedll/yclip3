@@ -2,6 +2,7 @@
 import React, { Component } from 'react'
 import { Link, Route, Switch } from 'react-router-dom';
 
+import AjaxAssistant from 'AjaxAssistant.jsx'
 import CollectionViewer from 'components/CollectionViewer.jsx'
 import CollectionEditor from 'components/CollectionEditor.jsx'
 import NewCollectionLink from 'components/NewCollectionLink.jsx'
@@ -19,7 +20,11 @@ const PropsRoute = ({ component, ...rest }) => {
 class AppRoot extends Component {
   constructor(props) {
     super(props)
-
+    this.state = {
+      user: null,
+      error: null
+    }
+    
     this.onGoogleSignIn = this.onGoogleSignIn.bind(this)
   }
 
@@ -34,6 +39,9 @@ class AppRoot extends Component {
   
   onGoogleSignIn(googleUser) {
     const idToken = googleUser.getAuthResponse().id_token
+    new AjaxAssistant(this.props.jQuery).post('/api/signin', {token: idToken})
+      .then(user => this.setState({user}))
+      .catch(error => this.setState({error}))
   }
   
   render() {
@@ -65,7 +73,11 @@ class AppRoot extends Component {
               </Route>
             </ul>
 
-            <div className="g-signin2" data-onsuccess="gOnSignIn" data-theme="dark"></div>
+            <div>
+              {this.state.user ? this.state.user.name : ""}
+              <div className="g-signin2" data-onsuccess="gOnSignIn" data-theme="dark"></div>
+            </div>
+            
           </div>
         </nav>
 
