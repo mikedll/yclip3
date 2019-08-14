@@ -76,6 +76,7 @@ app.post('/api/signin', async(req, res, next) => {
     next(err)
   }
 })
+
 app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
   try {
     if(!idRegex.test(req.params.id)) {
@@ -94,7 +95,6 @@ app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
     next(err)
   }
 })
-
 
 app.put('/api/collections/:collection_id', csrfProtection, async (req, res, next) => {
   try {
@@ -209,6 +209,20 @@ app.delete('/api/collections/:collection_id/clips/:id', csrfProtection, async (r
 })
 
 app.get('/api/collections', csrfProtection, async (req, res, next) => {
+  let user = null;
+  
+  if(!req.session['userId']) {
+    res.status(403).end()
+    return
+  }
+
+  user = User.findById(req.session['userId'])
+
+  if(!user) {
+    res.status(403).end()
+    return
+  }
+  
   try {
     const PageSize = 9
     

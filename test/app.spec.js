@@ -1,14 +1,20 @@
 
-const request = require('supertest')
+const session = require('supertest-session');
 const expect = require('chai').expect
 const path = require('path')
 const srcDir = path.join(__dirname, '../server/')
 const app = require(path.join(srcDir, 'app.js'))
 const mongoose = require('mongoose')
+const User = require(path.join(srcDir, 'models/user.js'))
 const ClipCollection = require(path.join(srcDir, 'models/clipCollection.js'))
 const Clip = require(path.join(srcDir, 'models/clip.js'))
 const config = require(path.join(srcDir, 'config.js'))
 const underscore = require('underscore')
+
+app.post('/api/testsignin', (req, res, next) => {
+  req.session['userId'] = req.body.userId
+  res.status(200).end()
+})
 
 describe('App', () => {
 
@@ -32,20 +38,49 @@ describe('App', () => {
 
   after(() => { return mongoose.disconnect() } )
 
-  it('should list compilations with page support', () => {
+  it('should require login to see collections', () => {
     const saves = underscore.times(19, (i) => {
-      let collection = new ClipCollection({name: "nice songs " + i})
+      let collection = new ClipCollection({name: "nice song choruses " + i})
       return collection.save()
     })
     return Promise.all(saves)
-      .then(saved => {
-        return request(app).get('/api/collections?page=2')
+      .then(_ => {
+        return session(app).get('/api/collections?page=2')
       })
       .then(response => {
+        expect(response.status).to.equal(403)
+      })
+  })
+  
+  it('should list compilations with page support', () => {
+    let wrappedApp = session(app)
+    
+    const saves = underscore.times(19, (i) => {
+      let collection = new ClipCollection({name: "nice song choruses " + i})
+      return collection.save()
+    })
+    return Promise.all(saves)
+      .then(_ => {
+        let user = new User({
+          vendor: 'Google',
+          vendorId: '342093502350235',
+          email: 'mike@example.com',
+          name:'Mike Rivers'
+        })
+        return user.save()
+      })
+      .then(user => {
+        return wrappedApp.post('/api/testsignin').send({userId: user._id})
+      })
+      .then(response => {
+        return wrappedApp.get('/api/collections?page=2')
+      })
+      .then(response => {
+        expect(response.status).to.equal(200)
         expect(response.body.total).to.equal(19)
         expect(response.body.pages).to.equal(3)
         expect(response.body.page).to.equal(2)
-        expect(response.body.results[0].name).to.equal("nice songs 9")
+        expect(response.body.results[0].name).to.equal("nice song choruses 9")
         expect(response.body.results.length).to.equal(9)
       })
   })
