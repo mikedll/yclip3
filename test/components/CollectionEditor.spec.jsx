@@ -125,7 +125,7 @@ describe('<CollectionEditor />', function() {
 
   })
 
-  it.only('should permit clip deletion', async () => {
+  it('should permit clip deletion', async () => {
     let mock$ = stub().returns({sortable: spy()})
     mock$.ajax = spy()
     const matchProps = { params: { id: clipCollection1._id } }
