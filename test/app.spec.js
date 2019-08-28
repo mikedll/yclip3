@@ -209,6 +209,7 @@ describe('App', () => {
       })
       .then(response => {
         expect(response.status).to.equal(201)
+        expect(response.body.userId).to.equal(user1._id.toString())
         return ClipCollection.findById(response.body._id)
       })
       .then(collection =>{
