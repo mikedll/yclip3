@@ -248,19 +248,26 @@ async function withPages(req, res, next, mongoQuery) {
   }
 }
 
-app.get('/api/me/collections', csrfProtection, async(req, res, next) => {
+async function requireUser(req, res) {
   let user = null;
   
   if(!req.session['userId']) {
     res.status(403).end()
-    return
+    return null
   }
 
   user = await User.findById(req.session['userId'])
   if(!user) {
     res.status(403).end()
-    return
+    return null
   }
+
+  return user
+}
+
+app.get('/api/me/collections', csrfProtection, async(req, res, next) => {
+  let user = await requireUser(req, res)
+  if(!user) return
 
   withPages(req, res, next, {userId: user._id})
 })
@@ -269,8 +276,11 @@ app.get('/api/collections', csrfProtection, async (req, res, next) => {
   withPages(req, res, next, {isPublic: true})
 })
 
-app.post('/api/collections', csrfProtection, (req, res, next) => {
-  const clipCollection = new ClipCollection({name: ""})
+app.post('/api/me/collections', csrfProtection, async (req, res, next) => {
+  let user = await requireUser(req, res)
+  if(!user) return
+  
+  const clipCollection = new ClipCollection({userId: user._id, name: ""})
   clipCollection.save()
     .then(collection => res.status(201).json(collection))
     .catch(err => { next(err) })

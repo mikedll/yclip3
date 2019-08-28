@@ -104,7 +104,7 @@ describe('App', () => {
 
   it('should calculate even number of pages correctly', () => {
     const saves = underscore.times(18, (i) => {
-      let collection = new ClipCollection({userId: user1._id, name: "nice songs " + i})
+      let collection = new ClipCollection({userId: user1._id, name: "nice songs " + i, isPublic: true})
       return collection.save()
     })
     return Promise.all(saves)
@@ -201,7 +201,12 @@ describe('App', () => {
   })
 
   it('should create a new collection', () => {
-    return session(app).post('/api/collections')
+    let wrappedApp = session(app)
+    
+    return wrappedApp.post('/api/testsignin').send({userId: user1._id})
+      .then(_ => {
+        return wrappedApp.post('/api/me/collections')
+      })
       .then(response => {
         expect(response.status).to.equal(201)
         return ClipCollection.findById(response.body._id)
