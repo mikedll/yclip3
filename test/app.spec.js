@@ -23,7 +23,7 @@ describe('App', () => {
     vendorId: 'asdf1234',
     email: 'mike@example.com',
     name: "Mike Rivers",
-  }, clip1 = {
+  }, user1 = null, clip1 = {
     vid:"Iwuy4hHO3YQ",
     start: 34,
     duration: 3
@@ -39,20 +39,20 @@ describe('App', () => {
 
   beforeEach(() => {
     return ClipCollection.deleteMany({})
+      .then(_ => {
+        user1 = new User(user1attrs)
+        return user1.save()
+      })
   })
 
   after(() => { return mongoose.disconnect() } )
 
   it('should require login to see owned collections', () => {
-    const user1 = new User(user1attrs)
-    return user1.save()
-      .then(user1 => {
-        const saves = underscore.times(19, (i) => {
-          let collection = new ClipCollection({userId: user1._id, name: "nice song choruses " + i, isPublic: false})
-          return collection.save()
-        })
-        return Promise.all(saves)
-      })
+    const saves = underscore.times(19, (i) => {
+      let collection = new ClipCollection({userId: user1._id, name: "nice song choruses " + i})
+      return collection.save()
+    })
+    return Promise.all(saves)
       .then(_ => {
         return session(app).get('/api/me/collections?page=2')
       })
@@ -65,15 +65,11 @@ describe('App', () => {
   it('should list owned compilations with page support', () => {
     let wrappedApp = session(app)
     
-    let user1 = new User(user1attrs)
-    return user1.save()
-      .then(_ => {
-        const saves = underscore.times(19, (i) => {
-          let collection = new ClipCollection({userId: user1._id, name: "nice song choruses " + i, isPublic: false})
-          return collection.save()
-        })
-        return Promise.all(saves)
-      })
+    const saves = underscore.times(19, (i) => {
+      let collection = new ClipCollection({userId: user1._id, name: "nice song choruses " + i})
+      return collection.save()
+    })
+    return Promise.all(saves)
       .then(collections => {
         return wrappedApp.post('/api/testsignin').send({userId: user1._id})
       })
@@ -91,16 +87,12 @@ describe('App', () => {
   })
 
   it('should list public compilations without requiring login', () => {
-    const user1 = new User(user1attrs)
-    return user1.save()
-      .then(user1 => {
-        const saves = underscore.times(19, (i) => {
-          let collection = new ClipCollection({userId: user1._id, name: "nice song choruses " + i, isPublic: false})
-          if(i % 5 === 0) collection.isPublic = true
-          return collection.save()
-        })
-        return Promise.all(saves)
-      })
+    const saves = underscore.times(19, (i) => {
+      let collection = new ClipCollection({userId: user1._id, name: "nice song choruses " + i})
+      if(i % 5 === 0) collection.isPublic = true
+      return collection.save()
+    })
+    return Promise.all(saves)
       .then(_ => {
         return session(app).get('/api/collections')
       })
@@ -112,7 +104,7 @@ describe('App', () => {
 
   it('should calculate even number of pages correctly', () => {
     const saves = underscore.times(18, (i) => {
-      let collection = new ClipCollection({name: "nice songs " + i})
+      let collection = new ClipCollection({userId: user1._id, name: "nice songs " + i})
       return collection.save()
     })
     return Promise.all(saves)
@@ -125,7 +117,7 @@ describe('App', () => {
   })
 
   it('should permit name editing', async () => {
-    const collection = new ClipCollection({name: "nice songs"})
+    const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
     await collection.save()
 
     const response = await session(app).put('/api/collections/' + collection._id).send({name: "nice poems"})
@@ -135,7 +127,7 @@ describe('App', () => {
   })
   
   it('should save a new clip in a collection', function() {
-    const collection = new ClipCollection({name: "nice songs"})
+    const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
     return collection.save()
       .then(collection => {
         const clip1b = {
@@ -156,7 +148,7 @@ describe('App', () => {
   })
 
   it('should save many clips as needed', function() {
-    const collection = new ClipCollection({name: "nice songs"})
+    const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
     const clip1b = {
       vid: clip1.vid,
       start: "34",
@@ -186,7 +178,7 @@ describe('App', () => {
 
   it('should return a collection', () => {
     let savedClips = []
-    const collection = new ClipCollection({name: "nice songs"})
+    const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
     return collection.save()
       .then(collection => {
         [clip1, clip2].forEach(async (clip) => {
@@ -221,7 +213,7 @@ describe('App', () => {
   })
 
   it('should permit reordering', async () => {
-    const collection = new ClipCollection({name: "nice songs"})
+    const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
     await collection.save()
 
     const savedClips = await Promise.all([clip1, clip2].map(async (clip) => {
@@ -244,7 +236,7 @@ describe('App', () => {
   })
 
   it('should permit clip deletion', async () => {
-    const collection = new ClipCollection({name: "nice songs"})
+    const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
     await collection.save()
 
     const savedClips = await Promise.all([clip1, clip2].map(async (clip) => {
