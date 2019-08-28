@@ -22,7 +22,7 @@ export default class NewCollectionLink extends Component {
     if(this.state.busy) return
     this.setState({busy: true})
     new AjaxAssistant(this.props.$)
-      .post('/api/collections')
+      .post('/api/me/collections')
       .then(data => {
         this.setState({busy: false, newCollectionMade: data._id})
       })
