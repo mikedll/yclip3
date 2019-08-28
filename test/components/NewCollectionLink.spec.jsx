@@ -22,7 +22,7 @@ describe('<NewCollectionLink/>', function() {
     const wrapper = mount(<NewCollectionLink $={mock$}/>)
 
     wrapper.find('a').simulate('click')
-    expect(mock$.ajax.calledWithMatch({method: 'POST', url: '/api/collections'})).to.be.true
+    expect(mock$.ajax.calledWithMatch({method: 'POST', url: '/api/me/collections'})).to.be.true
   })
 
   // This one causes infinite loop from redirect -mikedll, 6/4/2019.
