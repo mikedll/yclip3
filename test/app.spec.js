@@ -18,7 +18,12 @@ app.post('/api/testsignin', (req, res, next) => {
 
 describe('App', () => {
 
-  let clip1 = {
+  let user1attrs = {
+    vendor: 'Unknown',
+    vendorId: 'asdf1234',
+    email: 'mike@example.com',
+    name: "Mike Rivers",
+  }, clip1 = {
     vid:"Iwuy4hHO3YQ",
     start: 34,
     duration: 3
@@ -38,50 +43,70 @@ describe('App', () => {
 
   after(() => { return mongoose.disconnect() } )
 
-  it('should require login to see collections', () => {
-    const saves = underscore.times(19, (i) => {
-      let collection = new ClipCollection({name: "nice song choruses " + i})
-      return collection.save()
-    })
-    return Promise.all(saves)
+  it('should require login to see owned collections', () => {
+    const user1 = new User(user1attrs)
+    return user1.save()
+      .then(user1 => {
+        const saves = underscore.times(19, (i) => {
+          let collection = new ClipCollection({userId: user1._id, name: "nice song choruses " + i, isPublic: false})
+          return collection.save()
+        })
+        return Promise.all(saves)
+      })
       .then(_ => {
-        return session(app).get('/api/collections?page=2')
+        return session(app).get('/api/me/collections?page=2')
       })
       .then(response => {
         expect(response.status).to.equal(403)
       })
   })
+
   
-  it('should list compilations with page support', () => {
+  it('should list owned compilations with page support', () => {
     let wrappedApp = session(app)
     
-    const saves = underscore.times(19, (i) => {
-      let collection = new ClipCollection({name: "nice song choruses " + i})
-      return collection.save()
-    })
-    return Promise.all(saves)
+    let user1 = new User(user1attrs)
+    return user1.save()
       .then(_ => {
-        let user = new User({
-          vendor: 'Google',
-          vendorId: '342093502350235',
-          email: 'mike@example.com',
-          name:'Mike Rivers'
+        const saves = underscore.times(19, (i) => {
+          let collection = new ClipCollection({userId: user1._id, name: "nice song choruses " + i, isPublic: false})
+          return collection.save()
         })
-        return user.save()
+        return Promise.all(saves)
       })
-      .then(user => {
-        return wrappedApp.post('/api/testsignin').send({userId: user._id})
+      .then(collections => {
+        return wrappedApp.post('/api/testsignin').send({userId: user1._id})
       })
       .then(response => {
-        return wrappedApp.get('/api/collections?page=2')
+        return wrappedApp.get('/api/me/collections?page=2')
       })
       .then(response => {
         expect(response.status).to.equal(200)
         expect(response.body.total).to.equal(19)
         expect(response.body.pages).to.equal(3)
         expect(response.body.page).to.equal(2)
-        expect(response.body.results[0].name).to.equal("nice song choruses 9")
+        expect(response.body.results[0].name).to.include("nice song choruses")
         expect(response.body.results.length).to.equal(9)
+      })
+  })
+
+  it('should list public compilations without requiring login', () => {
+    const user1 = new User(user1attrs)
+    return user1.save()
+      .then(user1 => {
+        const saves = underscore.times(19, (i) => {
+          let collection = new ClipCollection({userId: user1._id, name: "nice song choruses " + i, isPublic: false})
+          if(i % 5 === 0) collection.isPublic = true
+          return collection.save()
+        })
+        return Promise.all(saves)
+      })
+      .then(_ => {
+        return session(app).get('/api/collections')
+      })
+      .then(response => {
+        expect(response.status).to.equal(200)
+        expect(response.body.results.length).to.equal(4)
       })
   })
 
@@ -92,7 +117,7 @@ describe('App', () => {
     })
     return Promise.all(saves)
       .then(saved => {
-        return request(app).get('/api/collections?page=2')
+        return session(app).get('/api/collections?page=2')
       })
       .then(response => {
         expect(response.body.pages).to.equal(2)
@@ -103,7 +128,7 @@ describe('App', () => {
     const collection = new ClipCollection({name: "nice songs"})
     await collection.save()
 
-    const response = await request(app).put('/api/collections/' + collection._id).send({name: "nice poems"})
+    const response = await session(app).put('/api/collections/' + collection._id).send({name: "nice poems"})
     expect(response.status).to.equal(200)
     const collectionFound = await ClipCollection.findOne({_id: collection._id})
     expect(collectionFound.name).to.equal('nice poems')
@@ -118,7 +143,7 @@ describe('App', () => {
           start: "34",
           end: "37"
         }
-        return request(app).post('/api/collections/' + collection._id + '/clips').send(clip1b)
+        return session(app).post('/api/collections/' + collection._id + '/clips').send(clip1b)
       })
       .then((response) => {
         expect(response.status).to.equal(201)
@@ -144,10 +169,10 @@ describe('App', () => {
     }
     return collection.save()
       .then(collection => {
-        return request(app).post('/api/collections/' + collection._id + '/clips').send(clip1b)
+        return session(app).post('/api/collections/' + collection._id + '/clips').send(clip1b)
       })
       .then((response) => {
-        return request(app).post('/api/collections/' + collection._id + '/clips').send(clip2b)
+        return session(app).post('/api/collections/' + collection._id + '/clips').send(clip2b)
       })
       .then((response) => {
         return Clip.find({clipCollection: collection._id}).sort('createdAt')
@@ -171,7 +196,7 @@ describe('App', () => {
           savedClips.push(newClip)
         })
 
-        return request(app).get('/api/collections/' + collection._id)
+        return session(app).get('/api/collections/' + collection._id)
       })
       .then(response => {
         expect(response.status).to.equal(200)
@@ -184,7 +209,7 @@ describe('App', () => {
   })
 
   it('should create a new collection', () => {
-    return request(app).post('/api/collections')
+    return session(app).post('/api/collections')
       .then(response => {
         expect(response.status).to.equal(201)
         return ClipCollection.findById(response.body._id)
@@ -210,7 +235,7 @@ describe('App', () => {
       [savedClips[1]._id]: 0
     }
     
-    const response = await request(app).put('/api/collections/' + collection._id + '/order').send(ordering)
+    const response = await session(app).put('/api/collections/' + collection._id + '/order').send(ordering)
     expect(response.status).to.equal(200)
 
     const foundClips = await Clip.find({clipCollection: collection._id}).sort('position')
@@ -228,7 +253,7 @@ describe('App', () => {
       return await newClip.save()
     }))
         
-    const response = await request(app).delete('/api/collections/' + collection._id + '/clips/' + savedClips[0]._id)
+    const response = await session(app).delete('/api/collections/' + collection._id + '/clips/' + savedClips[0]._id)
     expect(response.status).to.equal(200)
 
     const foundClips = await Clip.find({clipCollection: collection._id})

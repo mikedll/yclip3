@@ -60,16 +60,26 @@ app.post('/api/signin', async(req, res, next) => {
 
     let user = await User.findOne({vendor: 'Google', vendorId: payload['sub']})
     if(!user) {
-      user = new User({
-        vendor: 'Google',
-        vendorId: payload['sub'],
-        name: payload['name'],
-        email: payload['email']
-      })
-      await user.save()
-    }    
-    req.session['userId'] = user._id
+      // Do we have the user on record with the given email?
+      let user = await User.findOne({email: payload['email']})      
+      if(!user) {
+        // New user.
+        user = new User({
+          vendor: 'Google',
+          vendorId: payload['sub'],
+          name: payload['name'],
+          email: payload['email']
+        })
+        await user.save()
+      } else {
+        // On record with the given email. Overwrite vendorId (sub).
+        user.vendor = 'Google'
+        user.vendorId = payload['sub']
+        user.name = payload['name']
+      }
+    }
 
+    req.session['userId'] = user._id
     res.json(user)
   } catch(err) {
     console.error(err)
@@ -208,21 +218,7 @@ app.delete('/api/collections/:collection_id/clips/:id', csrfProtection, async (r
   }
 })
 
-app.get('/api/collections', csrfProtection, async (req, res, next) => {
-  let user = null;
-  
-  if(!req.session['userId']) {
-    res.status(403).end()
-    return
-  }
-
-  user = User.findById(req.session['userId'])
-
-  if(!user) {
-    res.status(403).end()
-    return
-  }
-  
+async function withPages(req, res, next, mongoQuery) {
   try {
     const PageSize = 9
     
@@ -232,11 +228,11 @@ app.get('/api/collections', csrfProtection, async (req, res, next) => {
     } catch(error) {
       pageIndex = 0
     }
-    
-    const count = await ClipCollection.countDocuments({})
+
+    const count = await ClipCollection.countDocuments(mongoQuery)
     const pages = Math.floor(count / PageSize) + ((count % PageSize > 0) ? 1 : 0)
     
-    const found = await ClipCollection.find({}, null, { limit: PageSize, skip: pageIndex * PageSize })
+    const found = await ClipCollection.find(mongoQuery, null, { limit: PageSize, skip: pageIndex * PageSize })
     const associatedClips = await Promise.all(found.map(collection => Clip.find().forCollection(collection._id)))
     const foundWithClips = found.map((collection, i) => { return {...collection.inspect(), ...{clips: associatedClips[i]} } } )
 
@@ -250,7 +246,27 @@ app.get('/api/collections', csrfProtection, async (req, res, next) => {
   } catch (err) {
     next(err)
   }
+}
 
+app.get('/api/me/collections', csrfProtection, async(req, res, next) => {
+  let user = null;
+  
+  if(!req.session['userId']) {
+    res.status(403).end()
+    return
+  }
+
+  user = await User.findById(req.session['userId'])
+  if(!user) {
+    res.status(403).end()
+    return
+  }
+
+  withPages(req, res, next, {userId: user._id})
+})
+
+app.get('/api/collections', csrfProtection, async (req, res, next) => {
+  withPages(req, res, next, {isPublic: true})
 })
 
 app.post('/api/collections', csrfProtection, (req, res, next) => {
