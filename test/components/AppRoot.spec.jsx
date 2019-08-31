@@ -49,6 +49,15 @@ describe('<AppRoot />', () => {
   it('should reflect runtime logout', async () => {
     let mock$ = spy()
     let mockW = spy()
+
+    mockW.gapi = {
+      auth2: {
+        getAuthInstance: stub()
+      }
+    }
+    mockW.gapi.auth2.getAuthInstance.returns({
+      signOut: function() { return new Promise((resolve, reject) => { resolve() }) }
+    })
     mock$.ajax = spy()
     let wrapper = mount(
       <Router initialEntries={['/']}>
@@ -57,7 +66,7 @@ describe('<AppRoot />', () => {
     )
     expect(wrapper.find('.sign-in-container .name').text()).to.equal('Mike Rivers')
 
-    wrapper.find('.sign-in-container .btn.logout').simulate('click')
+    await wrapper.find('.sign-in-container .btn.logout').simulate('click')
     expect(mock$.ajax.calledWithMatch({url: '/api/signout'})).to.be.true
 
     // fake server completion
