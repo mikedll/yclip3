@@ -19,6 +19,32 @@ describe('<AppRoot />', () => {
     name: "",
     clips: []
   }
+
+  it('should display no name when logged out', async () => {
+    let mock$ = spy()
+    let mockW = spy()
+    mock$.ajax = spy()
+    let wrapper = mount(
+      <Router initialEntries={['/']}>
+        <AppRoot user={null} jQuery={mock$} globalWindow={mockW}/>
+      </Router>
+    )
+
+    expect(wrapper.find('.sign-in-container .name').text()).to.equal('')
+  })
+  
+  it('should display username when logged in', async () => {
+    let mock$ = spy()
+    let mockW = spy()
+    mock$.ajax = spy()
+    let wrapper = mount(
+      <Router initialEntries={['/']}>
+        <AppRoot user={{name: "Mike Rivers"}} jQuery={mock$} globalWindow={mockW}/>
+      </Router>
+    )
+
+    expect(wrapper.find('.sign-in-container .name').text()).to.equal('Mike Rivers')
+  })
   
   it('should render /collections without error', async () => {
     let mock$ = spy()

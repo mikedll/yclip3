@@ -4,12 +4,13 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import AppRoot from 'components/AppRoot.jsx'
 
+// This container helps with testing the AppRoot.
 class AppRootContainer extends Component {
 
   render() {
     return (
       <Router>
-        <AppRoot jQuery={this.props.jQuery} globalWindow={this.props.globalWindow}/>
+        <AppRoot user={this.props.user} jQuery={this.props.jQuery} globalWindow={this.props.globalWindow}/>
       </Router>
     )
   }

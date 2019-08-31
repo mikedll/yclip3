@@ -21,7 +21,7 @@ class AppRoot extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      user: null,
+      user: this.props.user,
       error: null
     }
     
@@ -73,8 +73,8 @@ class AppRoot extends Component {
               </Route>
             </ul>
 
-            <div>
-              {this.state.user ? this.state.user.name : ""}
+            <div className="sign-in-container">
+              <span className="name">{this.state.user ? this.state.user.name : ""}</span>
               <div className="g-signin2" data-onsuccess="gOnSignIn" data-theme="dark"></div>
             </div>
             

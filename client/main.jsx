@@ -37,5 +37,5 @@ addEventListener('DOMContentLoaded', () => {
   const firstScriptTag = document.getElementsByTagName('script')[0]
   firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)    
   
-  ReactDOM.render(<AppRootContainer jQuery={jQuery} globalWindow={window}/>, document.querySelector('.player-container'))
+  ReactDOM.render(<AppRootContainer user={window.gUser} jQuery={jQuery} globalWindow={window}/>, document.querySelector('.player-container'))
 })

@@ -40,8 +40,18 @@ if(config.env === "test") {
 
 const csrfProtection = csrf(csrfOpts)
 
-app.get(/^\/((?!api).)*$/, csrfProtection, (req, res, next) => {
-  res.render('index', { csrfToken: req.csrfToken(), googleClientId: config.googleClientId })
+app.get(/^\/((?!api).)*$/, csrfProtection, async (req, res, next) => {
+  let user = null;
+  
+  if(req.session['userId']) {
+    user = await User.findById(req.session['userId'])
+  }
+  
+  res.render('index', {
+    csrfToken: req.csrfToken(),
+    googleClientId: config.googleClientId,
+    user: user ? user : null
+  })
 })
 
 const dataDir = path.join(__dirname, 'data')
