@@ -50,7 +50,7 @@ app.get(/^\/((?!api).)*$/, csrfProtection, async (req, res, next) => {
   res.render('index', {
     csrfToken: req.csrfToken(),
     googleClientId: config.googleClientId,
-    user: user ? user : null
+    user: user ? JSON.stringify(user) : "null"
   })
 })
 
@@ -99,7 +99,7 @@ app.post('/api/signin', async(req, res, next) => {
 
 app.get('/api/signout', async(req, res, next) => {
   req.session = null
-  res.status(200).end()
+  res.status(200).json(null)
 })
 
 app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
