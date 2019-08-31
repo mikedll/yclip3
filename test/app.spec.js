@@ -259,4 +259,25 @@ describe('App', () => {
     expect(foundClips[0].vid).to.equal("dQw4w9WgXcQ")
   })
 
+  it('should permit logout', () => {
+    let appSession = session(app)
+    
+    return appSession.post('/api/testsignin').send({userId: user1._id})
+      .then(_ => {
+        return appSession.get('/api/me/collections')
+      })
+      .then(response => {
+        expect(response.status).to.equal(200)
+        return appSession.get('/api/signout')
+      })
+      .then(response => {
+        expect(response.status).to.equal(200)
+        return appSession.post('/api/me/collections')
+      })
+      .then(response => {
+        expect(response.status).to.equal(403)
+      })
+  })
+  
+  
 })

@@ -97,6 +97,11 @@ app.post('/api/signin', async(req, res, next) => {
   }
 })
 
+app.get('/api/signout', async(req, res, next) => {
+  req.session = null
+  res.status(200).end()
+})
+
 app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
   try {
     if(!idRegex.test(req.params.id)) {
