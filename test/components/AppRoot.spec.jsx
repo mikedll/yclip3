@@ -46,7 +46,27 @@ describe('<AppRoot />', () => {
     expect(wrapper.find('.sign-in-container .name').text()).to.equal('Mike Rivers')
   })
 
-  it.only('should swap in user on interactive login', async () => {
+  it('should reflect runtime logout', async () => {
+    let mock$ = spy()
+    let mockW = spy()
+    mock$.ajax = spy()
+    let wrapper = mount(
+      <Router initialEntries={['/']}>
+        <AppRoot user={{name: 'Mike Rivers'}} jQuery={mock$} globalWindow={mockW}/>
+      </Router>
+    )
+    expect(wrapper.find('.sign-in-container .name').text()).to.equal('Mike Rivers')
+
+    wrapper.find('.sign-in-container .btn.logout').simulate('click')
+    expect(mock$.ajax.calledWithMatch({url: '/api/signout'})).to.be.true
+
+    // fake server completion
+    await mock$.ajax.getCall(0).args[0].success(null)
+    
+    expect(wrapper.find('.sign-in-container .name').text()).to.equal('')
+  })
+  
+  it('should swap in user on interactive login', async () => {
     let mock$ = spy()
     let mockW = spy()
     mock$.ajax = spy()
@@ -67,7 +87,7 @@ describe('<AppRoot />', () => {
     // fake return call from server
     await mock$.ajax.getCall(0).args[0].success({name: 'Mike Rivers', id: 'SomeID'})
 
-    expect(wrapper.find('.sign-in-container .name').text()).to.equal('Mike Rivers')    
+    expect(wrapper.find('.sign-in-container .name').text()).to.equal('Mike Rivers')
   })  
   
   it('should render /collections without error', async () => {

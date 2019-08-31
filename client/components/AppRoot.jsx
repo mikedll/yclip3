@@ -26,6 +26,7 @@ class AppRoot extends Component {
     }
     
     this.onGoogleSignIn = this.onGoogleSignIn.bind(this)
+    this.onLogout = this.onLogout.bind(this)
   }
 
   componentDidMount() {
@@ -42,6 +43,12 @@ class AppRoot extends Component {
     const idToken = googleUser.getAuthResponse().id_token
     new AjaxAssistant(this.props.jQuery).post('/api/signin', {token: idToken})
       .then(user => this.setState({user}))
+      .catch(error => this.setState({error}))
+  }
+
+  onLogout() {
+    new AjaxAssistant(this.props.jQuery).post('/api/signout')
+      .then(_ => this.setState({user: null}))
       .catch(error => this.setState({error}))
   }
   
@@ -77,6 +84,7 @@ class AppRoot extends Component {
             <div className="sign-in-container">
               <span className="name">{this.state.user ? this.state.user.name : ""}</span>
               <div className="g-signin2" data-onsuccess="gOnSignIn" data-theme="dark"></div>
+              {this.state.user ? (<div className="btn logout" onClick={this.onLogout}>Logout</div>) : ''}
             </div>
             
           </div>
