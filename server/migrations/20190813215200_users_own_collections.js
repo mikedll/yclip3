@@ -61,7 +61,7 @@ async function up() {
     
     let user = new User({
       vendor: 'Google',
-      vendorId: '',
+      vendorId: 'fakeForNow',
       email: holderUser,
       name:''
     })
@@ -72,7 +72,7 @@ async function up() {
     
     const clipCollections = await ClipCollection.find({})
     
-    const saves = clipCollections.each(clipCollection => {
+    const saves = clipCollections.map(clipCollection => {
       clipCollection.userId = user._id
       clipCollection.isPublic = true
       return clipCollection.save()
