@@ -39,6 +39,8 @@ describe('<AppRoot />', () => {
     wrapper.update()
     
     expect(wrapper.find('.navbar-nav li a')).to.have.lengthOf(3) // Home, Browse, New Collection
+    expect(wrapper.find('.navbar-nav li a').first().text()).to.equal('Home')
+    expect(wrapper.find('.navbar-nav li a').at(1).text()).to.equal('Browse')
     expect(wrapper.find('.collection-brief')).to.have.lengthOf(2)
   })
   

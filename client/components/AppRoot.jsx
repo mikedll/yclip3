@@ -63,8 +63,8 @@ class AppRoot extends Component {
           </button>
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav mr-auto">
-              <MenuLink label="Home" to='/'>Home</MenuLink>
-              <MenuLink label="Browse" to='/collections'>Browse</MenuLink>
+              <MenuLink label="Home" to='/'/>
+              <MenuLink label="Browse" to='/collections'/>
               <Route path="*" render={routeProps => {
                 return (
                   <NewCollectionLink $={this.props.jQuery} {...routeProps} />
