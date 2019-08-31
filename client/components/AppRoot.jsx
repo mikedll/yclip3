@@ -29,12 +29,13 @@ class AppRoot extends Component {
   }
 
   componentDidMount() {
-    if(window.gOnGoogleSignInUser) {
-      this.onGoogleSigninUser(window.gOnGoogleSigninUser)
-      window.gOnGoogleSigninUser = null
+    if(this.props.globalWindow.gOnGoogleSignInUser) {
+      this.onGoogleSignin(this.props.globalWindow.gOnGoogleSigninUser)
+      this.props.globalWindow.gOnGoogleSigninUser = null
     }
     else
-      window.onGoogleSignInHook = (googleUser) => this.onGoogleSignIn(googleUser)
+      // I know this is supposed to be a no-no, modifying a prop (and further, one shared with child components).
+      this.props.globalWindow.onGoogleSignInHook = (googleUser) => this.onGoogleSignIn(googleUser)
   }
   
   onGoogleSignIn(googleUser) {

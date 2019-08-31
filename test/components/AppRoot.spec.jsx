@@ -4,7 +4,7 @@ import React from 'react';
 import { MemoryRouter as Router } from 'react-router-dom'
 import { configure, shallow, mount } from 'enzyme'
 import jQuery from 'jQuery'
-import { spy } from 'sinon'
+import { spy, stub } from 'sinon'
 
 import AppRoot from 'components/AppRoot.jsx'
 
@@ -45,6 +45,30 @@ describe('<AppRoot />', () => {
 
     expect(wrapper.find('.sign-in-container .name').text()).to.equal('Mike Rivers')
   })
+
+  it.only('should swap in user on interactive login', async () => {
+    let mock$ = spy()
+    let mockW = spy()
+    mock$.ajax = spy()
+    let wrapper = mount(
+      <Router initialEntries={['/']}>
+        <AppRoot user={null} jQuery={mock$} globalWindow={mockW}/>
+      </Router>
+    )
+
+    let googleUserStub = {
+      getAuthResponse: stub()
+    }
+    googleUserStub.getAuthResponse.returns({id_token: 'unused_token'})
+
+    mockW.onGoogleSignInHook(googleUserStub)
+    expect(mock$.ajax.calledWithMatch({url: '/api/signin', method: 'POST', data: {token: 'unused_token'}})).to.be.true
+
+    // fake return call from server
+    await mock$.ajax.getCall(0).args[0].success({name: 'Mike Rivers', id: 'SomeID'})
+
+    expect(wrapper.find('.sign-in-container .name').text()).to.equal('Mike Rivers')    
+  })  
   
   it('should render /collections without error', async () => {
     let mock$ = spy()
