@@ -29,7 +29,7 @@ export default class CollectionEditor extends Component {
   }
 
   fetchCollection() {
-    new AjaxAssistant(this.props.$).get('/api/collections/' + this.props.match.params.id)
+    new AjaxAssistant(this.props.$).get('/api/me/collections/' + this.props.match.params.id)
       .then(collection => {
         this.setState({collection})
       })
@@ -57,7 +57,7 @@ export default class CollectionEditor extends Component {
       idToPos[this.props.$(el).data('ref-id')] = i
     })
 
-    new AjaxAssistant(this.props.$).put('/api/collections/' + this.state.collection._id + '/order', idToPos)
+    new AjaxAssistant(this.props.$).put('/api/me/collections/' + this.state.collection._id + '/order', idToPos)
       .then((collection) => {
         this.setState({collection})
       })
@@ -111,7 +111,7 @@ export default class CollectionEditor extends Component {
     e.preventDefault()
 
     this.setState({error: ""})
-    new AjaxAssistant(this.props.$).put(`/api/collections/${this.props.match.params.id}`, {
+    new AjaxAssistant(this.props.$).put(`/api/me/collections/${this.props.match.params.id}`, {
         name: this.state.collection.name
       })
       .then(data => {
@@ -129,7 +129,7 @@ export default class CollectionEditor extends Component {
     e.preventDefault()
 
     this.setState({error: ""})
-    new AjaxAssistant(this.props.$).post(`/api/collections/${this.props.match.params.id}/clips`, {
+    new AjaxAssistant(this.props.$).post(`/api/me/collections/${this.props.match.params.id}/clips`, {
         vid: this.state.vid,
         start: this.state.start,
         end: this.state.end
@@ -170,7 +170,7 @@ export default class CollectionEditor extends Component {
   }
 
   onDelete(e, id) {
-    new AjaxAssistant(this.props.$).delete('/api/collections/' + this.state.collection._id + '/clips/' + id)
+    new AjaxAssistant(this.props.$).delete('/api/me/collections/' + this.state.collection._id + '/clips/' + id)
       .then(_ => {
         const index = underscore.findIndex(this.state.collection.clips, (c) => c._id == id)
         this.setState(prevState => update(prevState, {collection: {clips: {$splice: [[index, 1]]}}}))

@@ -109,7 +109,7 @@ app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
       return
     }
 
-    const clipCollection = await ClipCollection.findById(req.params.id)
+    const clipCollection = await ClipCollection.findOne({isPublic: true, id: req.params.id})
     if(!clipCollection) {
       res.status(404).end()
     } else {
@@ -121,14 +121,34 @@ app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
   }
 })
 
-app.put('/api/collections/:collection_id', csrfProtection, async (req, res, next) => {
+async function requireUser(req, res) {
+  let user = null;
+  
+  if(!req.session['userId']) {
+    res.status(403).end()
+    return null
+  }
+
+  user = await User.findById(req.session['userId'])
+  if(!user) {
+    res.status(403).end()
+    return null
+  }
+
+  return user
+}
+
+app.put('/api/me/collections/:collection_id', csrfProtection, async (req, res, next) => {
+  let user = await requireUser(req, res)
+  if(!user) return
+
   try {
     if(!idRegex.test(req.params.collection_id)) {
       res.status(404).end()
       return
     }
 
-    const clipCollection = await ClipCollection.findById(req.params.collection_id)
+    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.collection_id})
     if(!clipCollection) {
       res.status(404).end()
     } else {
@@ -142,14 +162,17 @@ app.put('/api/collections/:collection_id', csrfProtection, async (req, res, next
   }
 })
 
-app.put('/api/collections/:collection_id/order', csrfProtection, async (req, res, next) => {
+app.put('/api/me/collections/:collection_id/order', csrfProtection, async (req, res, next) => {
+  let user = await requireUser(req, res)
+  if(!user) return
+  
   try {
     if(!idRegex.test(req.params.collection_id)) {
       res.status(404).end()
       return
     }
 
-    const clipCollection = await ClipCollection.findById(req.params.collection_id)
+    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.collection_id})
     if(!clipCollection) {
       res.status(404).end()
     } else {
@@ -171,14 +194,17 @@ app.put('/api/collections/:collection_id/order', csrfProtection, async (req, res
   }
 })
 
-app.delete('/api/collections/:id', csrfProtection, async (req, res, next) => {
+app.delete('/api/me/collections/:id', csrfProtection, async (req, res, next) => {
+  let user = await requireUser(req, res)
+  if(!user) return
+
   try {
     if(!/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
       res.status(404).end()
       return
     }
 
-    const clipCollection = await ClipCollection.findById(req.params.id)
+    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.id})
     if(!clipCollection) {
       res.status(404).end()
     } else {
@@ -190,19 +216,22 @@ app.delete('/api/collections/:id', csrfProtection, async (req, res, next) => {
   }
 })
 
-app.post('/api/collections/:collection_id/clips', csrfProtection, async (req, res, next) => {
+app.post('/api/me/collections/:collection_id/clips', csrfProtection, async (req, res, next) => {
+  let user = await requireUser(req, res)
+  if(!user) return
+
   try {
     if(!/^[0-9a-fA-F]{24}$/.test(req.params.collection_id)) {
       res.status(404).end()
       return
     }
 
-    const clipCollection = await ClipCollection.findById(req.params.collection_id)
+    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.collection_id})
     if(!clipCollection) {
       res.status(404).end()
     } else {
       let newClip = new Clip()
-      newClip.clipCollection = req.params.collection_id
+      newClip.clipCollection = clipCollection._id
       newClip.vid = req.body.vid
       newClip.parseStartEnd(req.body.start, req.body.end)
       await newClip.save()
@@ -214,14 +243,18 @@ app.post('/api/collections/:collection_id/clips', csrfProtection, async (req, re
   }
 })
 
-app.delete('/api/collections/:collection_id/clips/:id', csrfProtection, async (req, res, next) => {
+app.delete('/api/me/collections/:collection_id/clips/:id', csrfProtection, async (req, res, next) => {
+  let user = await requireUser(req, res)
+  if(!user) return
+
   try {
     if(!idRegex.test(req.params.collection_id) || !idRegex.test(req.params.id)) {
       res.status(404).end()
       return
     }
 
-    const clip = await Clip.findOne({_id: req.params.id, clipCollection: req.params.collection_id})
+    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.collection_id})
+    const clip = await Clip.findOne({_id: req.params.id, clipCollection: clipCollection._id})
     if(!clip) {
       res.status(404).end()
     } else {
@@ -261,23 +294,6 @@ async function withPages(req, res, next, mongoQuery) {
   } catch (err) {
     next(err)
   }
-}
-
-async function requireUser(req, res) {
-  let user = null;
-  
-  if(!req.session['userId']) {
-    res.status(403).end()
-    return null
-  }
-
-  user = await User.findById(req.session['userId'])
-  if(!user) {
-    res.status(403).end()
-    return null
-  }
-
-  return user
 }
 
 app.get('/api/me/collections', csrfProtection, async(req, res, next) => {

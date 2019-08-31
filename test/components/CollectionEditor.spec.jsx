@@ -33,7 +33,7 @@ describe('<CollectionEditor />', function() {
     mock$.ajax = spy()
     const matchProps = { params: { id: 1 } }
     let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
-    expect(mock$.ajax.calledWithMatch({url: '/api/collections/' + 1})).to.be.true
+    expect(mock$.ajax.calledWithMatch({url: '/api/me/collections/' + 1})).to.be.true
   })
 
   it('should list existing clips', async () => {
@@ -61,7 +61,7 @@ describe('<CollectionEditor />', function() {
     wrapper.find('form').simulate('submit')
 
     expect(mock$.ajax.calledWithMatch({
-      url: '/api/collections/' + 1 + '/clips',
+      url: '/api/me/collections/' + 1 + '/clips',
       data: {
       vid: 'dfjlksdjf',
       start: '3:00',
@@ -111,7 +111,7 @@ describe('<CollectionEditor />', function() {
     wrapper.find('.name-editor form').simulate('submit')
 
     expect(mock$.ajax.calledWithMatch({
-      url: '/api/collections/' + 1,
+      url: '/api/me/collections/' + 1,
       method: 'PUT',
       data: {
         name: 'nice poems'
@@ -138,7 +138,7 @@ describe('<CollectionEditor />', function() {
     wrapper.find('.clip-container .btn-delete').first().simulate('click')
 
     expect(mock$.ajax.calledWithMatch({
-      url: '/api/collections/' + clipCollection1._id + '/clips/' + clip1._id,
+      url: '/api/me/collections/' + clipCollection1._id + '/clips/' + clip1._id,
       method: 'DELETE',
     })).to.be.true
 
