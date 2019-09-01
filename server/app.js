@@ -138,23 +138,47 @@ async function requireUser(req, res) {
   return user
 }
 
-app.put('/api/me/collections/:collection_id', csrfProtection, async (req, res, next) => {
+app.get('/api/me/collections/:id', csrfProtection, async (req, res, next) => {
   let user = await requireUser(req, res)
   if(!user) return
-
+  
   try {
-    if(!idRegex.test(req.params.collection_id)) {
+    if(!idRegex.test(req.params.id)) {
       res.status(404).end()
       return
     }
 
-    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.collection_id})
+    console.log("app user id", user._id)
+    console.log("app collection id", req.params.id)
+    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.id})
+    if(!clipCollection) {
+      res.status(404).end()
+    } else {
+      const clips = await Clip.find().forCollection(clipCollection._id)
+      res.json({ ...clipCollection.inspect(), ...{clips: clips} })
+    }
+  } catch(err) {
+    next(err)
+  }
+})
+
+app.put('/api/me/collections/:id', csrfProtection, async (req, res, next) => {
+  let user = await requireUser(req, res)
+  if(!user) return
+
+  try {
+    if(!idRegex.test(req.params.id)) {
+      res.status(404).end()
+      return
+    }
+
+    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.id})
     if(!clipCollection) {
       res.status(404).end()
     } else {
       clipCollection.name = req.body.name
       await clipCollection.save()
-      const clips = await Clip.find().forCollection(req.params.collection_id)
+      const clips = await Clip.find().forCollection(req.params.id)
       res.status(200).json({...clipCollection.inspect(), ...{clips: clips}})
     }
   } catch(err) {

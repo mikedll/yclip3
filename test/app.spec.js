@@ -176,9 +176,9 @@ describe('App', () => {
       })    
   })
 
-  it('should return a collection', () => {
+  it.only('should return a public collection', () => {
     let savedClips = []
-    const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
+    const collection = new ClipCollection({userId: user1._id, isPublic: true, name: "nice songs"})
     return collection.save()
       .then(collection => {
         [clip1, clip2].forEach(async (clip) => {
@@ -197,9 +197,40 @@ describe('App', () => {
         expect(response.body.clips.length).to.equal(2)
         expect(response.body.clips[0]._id).to.equal(savedClips[0]._id.toString())
       })
-    
   })
 
+  it('should return an owned collection', () => {
+    let wrappedApp = session(app)
+
+    let savedClips = []
+    const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
+    return collection.save()
+      .then(collection => {
+        [clip1, clip2].forEach(async (clip) => {
+          const newClip = Clip(clip)
+          newClip.clipCollection = collection._id
+          await newClip.save()
+          console.log("saved a clip.")
+          savedClips.push(newClip)
+        })
+
+
+        console.log("user created", user1._id)
+        console.log("collection created", collection._id)
+        return wrappedApp.post('/api/testsignin').send({userId: user1._id})
+      })
+      .then(_ => {
+        return wrappedApp.get('/api/me/collections/' + collection._id)
+      })
+      .then(response => {
+        expect(response.status).to.equal(200)
+        
+        expect(response.body._id).to.equal(collection._id.toString())
+        expect(response.body.clips.length).to.equal(2)
+        expect(response.body.clips[0]._id).to.equal(savedClips[0]._id.toString())
+      })
+  })
+  
   it('should create a new collection', () => {
     let wrappedApp = session(app)
     
