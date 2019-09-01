@@ -109,7 +109,7 @@ app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
       return
     }
 
-    const clipCollection = await ClipCollection.findOne({isPublic: true, id: req.params.id})
+    const clipCollection = await ClipCollection.findOne({isPublic: true, _id: req.params.id})
     if(!clipCollection) {
       res.status(404).end()
     } else {
@@ -148,9 +148,7 @@ app.get('/api/me/collections/:id', csrfProtection, async (req, res, next) => {
       return
     }
 
-    console.log("app user id", user._id)
-    console.log("app collection id", req.params.id)
-    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.id})
+    const clipCollection = await ClipCollection.findOne({userId: user._id, _id: req.params.id})
     if(!clipCollection) {
       res.status(404).end()
     } else {
@@ -172,7 +170,7 @@ app.put('/api/me/collections/:id', csrfProtection, async (req, res, next) => {
       return
     }
 
-    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.id})
+    const clipCollection = await ClipCollection.findOne({userId: user._id, _id: req.params.id})
     if(!clipCollection) {
       res.status(404).end()
     } else {
@@ -196,7 +194,7 @@ app.put('/api/me/collections/:collection_id/order', csrfProtection, async (req, 
       return
     }
 
-    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.collection_id})
+    const clipCollection = await ClipCollection.findOne({userId: user._id, _id: req.params.collection_id})
     if(!clipCollection) {
       res.status(404).end()
     } else {
@@ -250,7 +248,7 @@ app.post('/api/me/collections/:collection_id/clips', csrfProtection, async (req,
       return
     }
 
-    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.collection_id})
+    const clipCollection = await ClipCollection.findOne({userId: user._id, _id: req.params.collection_id})
     if(!clipCollection) {
       res.status(404).end()
     } else {
@@ -277,7 +275,7 @@ app.delete('/api/me/collections/:collection_id/clips/:id', csrfProtection, async
       return
     }
 
-    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.collection_id})
+    const clipCollection = await ClipCollection.findOne({userId: user._id, _id: req.params.collection_id})
     const clip = await Clip.findOne({_id: req.params.id, clipCollection: clipCollection._id})
     if(!clip) {
       res.status(404).end()

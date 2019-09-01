@@ -120,22 +120,31 @@ describe('App', () => {
     const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
     await collection.save()
 
-    const response = await session(app).put('/api/collections/' + collection._id).send({name: "nice poems"})
+    const wrappedApp = session(app)
+    await wrappedApp.post('/api/testsignin').send({userId: user1._id})
+      
+    const response = await wrappedApp.put('/api/me/collections/' + collection._id).send({name: "nice poems"})
     expect(response.status).to.equal(200)
     const collectionFound = await ClipCollection.findOne({_id: collection._id})
     expect(collectionFound.name).to.equal('nice poems')
   })
   
   it('should save a new clip in a collection', function() {
+    let wrappedApp = session(app)
+    
     const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
-    return collection.save()
+    return wrappedApp.post('/api/testsignin').send({userId: user1._id})
+      .then(_ => {
+        return collection.save()
+      })
       .then(collection => {
         const clip1b = {
           vid: clip1.vid,
           start: "34",
           end: "37"
         }
-        return session(app).post('/api/collections/' + collection._id + '/clips').send(clip1b)
+
+        return wrappedApp.post('/api/me/collections/' + collection._id + '/clips').send(clip1b)
       })
       .then((response) => {
         expect(response.status).to.equal(201)
@@ -148,6 +157,7 @@ describe('App', () => {
   })
 
   it('should save many clips as needed', function() {
+    let wrappedApp = session(app)
     const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
     const clip1b = {
       vid: clip1.vid,
@@ -159,12 +169,16 @@ describe('App', () => {
       start: "43",
       end: "49"
     }
-    return collection.save()
+    return wrappedApp.post('/api/testsignin').send({userId: user1._id})
+      .then(_ => {
+        return collection.save()
+      })
       .then(collection => {
-        return session(app).post('/api/collections/' + collection._id + '/clips').send(clip1b)
+        return wrappedApp.post('/api/me/collections/' + collection._id + '/clips').send(clip1b)
       })
       .then((response) => {
-        return session(app).post('/api/collections/' + collection._id + '/clips').send(clip2b)
+        expect(response.status).to.equal(201)
+        return wrappedApp.post('/api/me/collections/' + collection._id + '/clips').send(clip2b)
       })
       .then((response) => {
         return Clip.find({clipCollection: collection._id}).sort('createdAt')
@@ -176,7 +190,7 @@ describe('App', () => {
       })    
   })
 
-  it.only('should return a public collection', () => {
+  it('should return a public collection', () => {
     let savedClips = []
     const collection = new ClipCollection({userId: user1._id, isPublic: true, name: "nice songs"})
     return collection.save()
@@ -210,13 +224,9 @@ describe('App', () => {
           const newClip = Clip(clip)
           newClip.clipCollection = collection._id
           await newClip.save()
-          console.log("saved a clip.")
           savedClips.push(newClip)
         })
 
-
-        console.log("user created", user1._id)
-        console.log("collection created", collection._id)
         return wrappedApp.post('/api/testsignin').send({userId: user1._id})
       })
       .then(_ => {
@@ -263,8 +273,11 @@ describe('App', () => {
       [savedClips[0]._id]: 1,
       [savedClips[1]._id]: 0
     }
+
+    const wrappedApp = session(app)
+    await wrappedApp.post('/api/testsignin').send({userId: user1._id})
     
-    const response = await session(app).put('/api/collections/' + collection._id + '/order').send(ordering)
+    const response = await wrappedApp.put('/api/me/collections/' + collection._id + '/order').send(ordering)
     expect(response.status).to.equal(200)
 
     const foundClips = await Clip.find({clipCollection: collection._id}).sort('position')
@@ -282,7 +295,10 @@ describe('App', () => {
       return await newClip.save()
     }))
         
-    const response = await session(app).delete('/api/collections/' + collection._id + '/clips/' + savedClips[0]._id)
+    const wrappedApp = session(app)
+    await wrappedApp.post('/api/testsignin').send({userId: user1._id})
+    
+    const response = await wrappedApp.delete('/api/me/collections/' + collection._id + '/clips/' + savedClips[0]._id)
     expect(response.status).to.equal(200)
 
     const foundClips = await Clip.find({clipCollection: collection._id})
