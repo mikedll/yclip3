@@ -35,7 +35,7 @@ class CollectionsBrowser extends Component {
       
       this.setState({busy: true, stats: {}, collections: null})
       const nextQuery = {page: qPage}
-      new AjaxAssistant(this.props.$).get('/api/collections?' + serializeObj(nextQuery))
+      new AjaxAssistant(this.props.$).get((this.props.browsePrivate ? '/api/me/collections' : '/api/collections') + '?' + serializeObj(nextQuery))
         .then(data => {
           this.setState({busy: false, stats: underscore.pick(data, 'page', 'pages', 'total'), collections: data.results})
         })
@@ -52,7 +52,7 @@ class CollectionsBrowser extends Component {
     const refId = this.props.$(e.target).data('ref-id')
     if(this.props.globalWindow.confirm("Are you sure you want to delete this?")) {
       this.setState({busy: true})
-      new AjaxAssistant(this.props.$).delete('/api/collections/' + refId)
+      new AjaxAssistant(this.props.$).delete('/api/me/collections/' + refId)
         .then(_ => {
           this.setState(prevState => {
             const index = underscore.findIndex(prevState.collections, el => el._id === refId)
@@ -72,17 +72,29 @@ class CollectionsBrowser extends Component {
   componentDidMount() {
     this.retrieveIfNecessary()
   }
-  
-  render() {
 
+  render() {
     const thumbnails = !this.state.collections ? "" : this.state.collections.map((c) => {
+      let editLinks = null
+      if(this.props.user && this.props.user._id === c.userId) {
+        editLinks = (
+          <span className={'edit-collection-container'}>
+            <Link to={`/api/me/collections/${c._id}/edit`}>Edit</Link>
+            |
+            <a href="#" className="btn-delete" data-ref-id={c._id} onClick={this.onDelete}>Delete</a>
+          </span>
+        )
+      }
+
       return (
         <div key={c._id} className="collection-brief">
           {c._id} - {c.name}
           <br/>
           Clips: {c.clips.length}
           <br/>
-          <Link to={`/collections/${c._id}`}>View</Link> | <Link to={`/collections/${c._id}/edit`}>Edit</Link> | <a href="#" className="btn-delete" data-ref-id={c._id} onClick={this.onDelete}>Delete</a>
+          <Link to={`/collections/${c._id}`}>View</Link>
+          {editLinks ? ' | ' : ''}
+          {editLinks}
         </div>
       )
     })
