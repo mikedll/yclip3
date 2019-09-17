@@ -21,7 +21,7 @@ class CollectionsBrowser extends Component {
     this.onDelete = this.onDelete.bind(this)
   }
 
-  retrieveIfNecessary() {
+  retrieveIfNecessary(prevProps) {
     const query = getUrlQueryAsObj()
     let qPage = 1
     try {
@@ -30,7 +30,10 @@ class CollectionsBrowser extends Component {
       qPage = 1
     }
 
-    if(!this.state.stats.page || this.state.stats.page !== qPage) {
+    const fetchRequired = (prevProps && prevProps.browsePrivate !== this.props.browsePrivate)
+      || (!this.state.stats.page || this.state.stats.page !== qPage)
+
+    if(fetchRequired) {
       if(this.state.busy) return
       
       this.setState({busy: true, stats: {}, collections: null})
@@ -65,8 +68,8 @@ class CollectionsBrowser extends Component {
     }
   }
   
-  componentWillReceiveProps() {
-    this.retrieveIfNecessary()
+  componentDidUpdate(prevProps) {
+    this.retrieveIfNecessary(prevProps)
   }
   
   componentDidMount() {
@@ -79,9 +82,7 @@ class CollectionsBrowser extends Component {
       if(this.props.user && this.props.user._id === c.userId) {
         editLinks = (
           <span className={'edit-collection-container'}>
-            <Link to={`/api/me/collections/${c._id}/edit`}>Edit</Link>
-            |
-            <a href="#" className="btn-delete" data-ref-id={c._id} onClick={this.onDelete}>Delete</a>
+            <Link to={`/me/collections/${c._id}/edit`}>Edit</Link> | <a href="#" className="btn-delete" data-ref-id={c._id} onClick={this.onDelete}>Delete</a>
           </span>
         )
       }
