@@ -86,6 +86,7 @@ app.post('/api/signin', async(req, res, next) => {
         user.vendor = 'Google'
         user.vendorId = payload['sub']
         user.name = payload['name']
+        await user.save()
       }
     }
 
