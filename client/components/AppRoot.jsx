@@ -31,12 +31,20 @@ class AppRoot extends Component {
 
   componentDidMount() {
     if(this.props.globalWindow.gOnGoogleSignInUser) {
-      this.onGoogleSignin(this.props.globalWindow.gOnGoogleSigninUser)
+      // This component's code was later than google's code.
+      let googleUser = this.props.globalWindow.gOnGoogleSigninUser
       this.props.globalWindow.gOnGoogleSigninUser = null
+      this.onGoogleSignin(googleUser)
     }
-    else
-      // I know this is supposed to be a no-no, modifying a prop (and further, one shared with child components).
+    else {
+      // This component's code loaded faster than google's signin recognition code. Or, user signed in interactively,
+      // after not being signed in.
+      
+      // Also, I know this is supposed to be a no-no, modifying a prop (and further, one shared with child components).
+      // But it's the global window.
+      
       this.props.globalWindow.onGoogleSignInHook = (googleUser) => this.onGoogleSignIn(googleUser)
+    }
   }
   
   onGoogleSignIn(googleUser) {
@@ -66,6 +74,18 @@ class AppRoot extends Component {
       )}/>
     );
 
+    const userLoginArea = this.state.user ? (
+      <div className="sign-in-container">
+        // Have to have this hidden element here, or logout doesn't work.
+        <div className="g-signin2 d-none" data-onsuccess="gOnSignIn" data-theme="dark"></div>
+        <span className="name mr-2">{this.state.user ? this.state.user.name : ""}</span>
+        <div className="btn btn-info logout" onClick={this.onLogout}>Logout</div>
+      </div>
+    ) : (
+      <div className="sign-in-container">
+        <div className="g-signin2" data-onsuccess="gOnSignIn" data-theme="dark"></div>
+      </div>
+    )
     return (      
       <div>
 
@@ -76,8 +96,8 @@ class AppRoot extends Component {
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav mr-auto">
               <MenuLink label="Home" to='/'/>
-              <MenuLink label="My Compilations" to='/me/collections'/>
-              <MenuLink label="Browse Compilations" to='/collections'/>
+              <MenuLink label="Yours" to='/me/collections'/>
+              <MenuLink label="Public" to='/collections'/>
               <Route path="*" render={routeProps => {
                 return (
                   <NewCollectionLink $={this.props.jQuery} {...routeProps} />
@@ -86,12 +106,7 @@ class AppRoot extends Component {
               </Route>
             </ul>
 
-            <div className="sign-in-container">
-              <span className="name">{this.state.user ? this.state.user.name : ""}</span>
-              <div className="g-signin2" data-onsuccess="gOnSignIn" data-theme="dark"></div>
-              {this.state.user ? (<div className="btn logout" onClick={this.onLogout}>Logout</div>) : ''}
-            </div>
-            
+            {userLoginArea}
           </div>
         </nav>
 

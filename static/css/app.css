@@ -8,6 +8,26 @@ body {
   background: #1a0315;
 }
 
+.main-cont {
+  padding-top: 1em;
+}
+
+.header,
+.header a {
+  color: #c8ec0d;
+}
+
+.sign-in-container .name {
+  vertical-align: middle;
+}
+
+.footer { 
+  margin-top: 1rem;
+  text-align: right; 
+}
+
+/***** page by page ********************/
+
 .primary-pane {
   padding-top: 1rem;    
   padding-bottom: 1rem;    
@@ -23,20 +43,6 @@ body {
 .panel-relaxed {
   background: #535353;
   color: #fff;
-}
-
-.main-cont {
-  padding-top: 1em;
-}
-
-.header,
-.header a {
-  color: #c8ec0d;
-}
-
-.footer { 
-  margin-top: 1rem;
-  text-align: right; 
 }
 
 .player-container {

@@ -17,6 +17,8 @@ export default class AjaxAssistant {
     if(text === "") {
       if(xhr.status === 404) {
         text = "A resource could not be found."
+      } else if(xhr.status === 403) {
+        text = "That resource is forbidden to you"
       }
     }
     

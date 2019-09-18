@@ -31,19 +31,21 @@ class CollectionsBrowser extends Component {
     }
 
     const fetchRequired = (prevProps && prevProps.browsePrivate !== this.props.browsePrivate)
-      || (!this.state.stats.page || this.state.stats.page !== qPage)
+          || (!this.state.stats.page || this.state.stats.page !== qPage)
 
-    if(fetchRequired) {
+    const fetchOk = !(this.props.browsePrivate && this.state.error === 'That resource is forbidden to you')
+
+    if(fetchRequired && fetchOk) {
       if(this.state.busy) return
       
-      this.setState({busy: true, stats: {}, collections: null})
-      const nextQuery = {page: qPage}
+      this.setState({busy: true, error: "", stats: {}, collections: null})
+    const nextQuery = {page: qPage}
       new AjaxAssistant(this.props.$).get((this.props.browsePrivate ? '/api/me/collections' : '/api/collections') + '?' + serializeObj(nextQuery))
         .then(data => {
           this.setState({busy: false, stats: underscore.pick(data, 'page', 'pages', 'total'), collections: data.results})
         })
         .catch(error => {
-          this.setState({busy: false, error})
+          this.setState({busy: false, error: error})
         })
     }
   }
@@ -103,7 +105,7 @@ class CollectionsBrowser extends Component {
     const pagination = !this.state.stats.page ? "" : (
       <Paginator path="/collections" {...this.state.stats}/>
     )
-    
+
     return (
       <div>
         {this.state.error !== "" ? <div className="alert alert-danger">

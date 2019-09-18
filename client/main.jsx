@@ -25,13 +25,15 @@ window.gOnGoogleSignInUser = null
 window.onGoogleSignInHook = null
 window.gOnSignIn = function(googleUser) {
   if(!window.onGoogleSignInHook)
+    // hook to be defined and called later. prepare user for it.
     window.onGoogleSignInUser = googleUser
   else
+    // hook is installed. call it.
     window.onGoogleSignInHook(googleUser)
 }
 
 addEventListener('DOMContentLoaded', () => {
-
+  // Load youtube player.
   let tag = document.createElement('script')
   tag.src = 'https://www.youtube.com/iframe_api'
   const firstScriptTag = document.getElementsByTagName('script')[0]
