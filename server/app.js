@@ -226,7 +226,7 @@ app.delete('/api/me/collections/:id', csrfProtection, async (req, res, next) => 
       return
     }
 
-    const clipCollection = await ClipCollection.findOne({userId: user._id, id: req.params.id})
+    const clipCollection = await ClipCollection.findOne({userId: user._id, _id: req.params.id})
     if(!clipCollection) {
       res.status(404).end()
     } else {
