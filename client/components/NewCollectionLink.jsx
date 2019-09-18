@@ -15,6 +15,16 @@ export default class NewCollectionLink extends Component {
       this.setState({newCollectionMade: null})
     }
   }
+
+  newCollectionUrl() {
+    return `/me/collections/${this.state.newCollectionMade}/edit`
+  }
+  
+  componentDidUpdate() {
+    if(this.state.newCollectionMade && this.props.location.pathname.startsWith(this.newCollectionUrl())) {
+      this.setState({newCollectionMade: null})
+    }
+  }
   
   onMakeNewCollection(e) {
     e.preventDefault()
@@ -31,9 +41,10 @@ export default class NewCollectionLink extends Component {
   
   
   render() {
-    const redirects = !this.state.newCollectionMade ? "" : (
-      <Redirect push to={`/collections/${this.state.newCollectionMade}/edit`}/>
-    )
+    const redirects = this.state.newCollectionMade ? (
+      <Redirect push to={this.newCollectionUrl()}/>
+    ) : null
+
 
     return (
       <li className='nav-item'>
