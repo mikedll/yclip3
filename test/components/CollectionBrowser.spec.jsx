@@ -7,7 +7,7 @@ import { MemoryRouter } from 'react-router-dom'
 
 import CollectionsBrowser from 'components/CollectionsBrowser.jsx'
 
-describe.only('<CollectionsBrowser/>', function() {
+describe('<CollectionsBrowser/>', function() {
 
   let clip1 = {
   }, clip2 = {
