@@ -74,9 +74,9 @@ class AppRoot extends Component {
       )}/>
     );
 
+    // Have to have hidden signin button even when logged in, or logout doesn't work.
     const userLoginArea = this.state.user ? (
       <div className="sign-in-container">
-        // Have to have this hidden element here, or logout doesn't work.
         <div className="g-signin2 d-none" data-onsuccess="gOnSignIn" data-theme="dark"></div>
         <span className="name mr-2">{this.state.user ? this.state.user.name : ""}</span>
         <div className="btn btn-info logout" onClick={this.onLogout}>Logout</div>
