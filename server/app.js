@@ -103,16 +103,46 @@ app.get('/api/signout', async(req, res, next) => {
   res.status(200).json(null)
 })
 
+async function lookForUser(req, res) {
+  let user = null;
+  
+  if(!req.session['userId']) {
+    return null
+  }
+
+  try {
+    user = await User.findById(req.session['userId'])
+  } catch(error) {
+    console.error("Unable to do user search, error occurred: ", error)
+    return null
+  }
+  
+  if(!user) {
+    return null
+  }
+
+  return user
+}
+
 app.get('/api/collections/:id', csrfProtection, async (req, res, next) => {
+  const user = await lookForUser(req, res)
+
   try {
     if(!idRegex.test(req.params.id)) {
       res.status(404).end()
       return
     }
 
-    const clipCollection = await ClipCollection.findOne({isPublic: true, _id: req.params.id})
+    let clipCollection = await ClipCollection.findOne({isPublic: true, _id: req.params.id})
     if(!clipCollection) {
-      res.status(404).end()
+      if(user) {
+        clipCollection = await ClipCollection.findOne({userId: user._id, _id: req.params.id})
+      }
+
+      if(!clipCollection) {
+        res.status(404).end()
+        return
+      }
     } else {
       const clips = await Clip.find().forCollection(clipCollection._id)
       res.json({ ...clipCollection.inspect(), ...{clips: clips} })
