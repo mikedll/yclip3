@@ -57,9 +57,7 @@ class AppRoot extends Component {
   onLogout() {
     var auth2 = this.props.globalWindow.gapi.auth2.getAuthInstance();
     auth2.signOut()
-      .then(_ => {
-        return new AjaxAssistant(this.props.jQuery).get('/api/signout')
-      })
+      .then(_ => new AjaxAssistant(this.props.jQuery).get('/api/signout'))
       .then(_ => this.setState({user: null}))
       .catch(error => this.setState({error}))
   }

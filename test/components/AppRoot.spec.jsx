@@ -57,9 +57,27 @@ describe('<AppRoot />', () => {
         getAuthInstance: stub()
       }
     }
-    mockW.gapi.auth2.getAuthInstance.returns({
-      signOut: function() { return new Promise((resolve, reject) => { resolve() }) }
-    })
+
+    let promiseQueue = []
+    let promiseChainSimulator = {
+      then: function(callback) {
+        promiseQueue.push(callback)
+        return this
+      },
+      catch(onErrorCallback) {
+        // presume not called.
+        onErrorCallback()
+      }
+    }
+    
+    let authInst = {
+      signOut: function() {
+        return promiseChainSimulator
+      }
+    }
+
+    mockW.gapi.auth2.getAuthInstance.returns(authInst)
+    
     mock$.ajax = spy()
     let wrapper = mount(
       <Router initialEntries={['/']}>
@@ -68,12 +86,15 @@ describe('<AppRoot />', () => {
     )
     expect(wrapper.find('.sign-in-container .name').text()).to.equal('Mike Rivers')
 
-    await wrapper.find('.sign-in-container .btn.logout').simulate('click')
+    wrapper.find('.sign-in-container .btn.logout').simulate('click')
+    promiseQueue[0]() // sets up ajax assistant and calls .get on it
     expect(mock$.ajax.calledWithMatch({url: '/api/signout'})).to.be.true
 
     // fake server completion
-    await mock$.ajax.getCall(0).args[0].success(null)
+    mock$.ajax.getCall(0).args[0].success(null)
+    promiseQueue[1]() // calls setting user to null
 
+    wrapper.update() // without this, there is a conflict in enzyme on what the resulting html is
     expect(wrapper.find('.sign-in-container .name')).to.have.lengthOf(0)
   })
   
@@ -98,6 +119,7 @@ describe('<AppRoot />', () => {
     // fake return call from server
     await mock$.ajax.getCall(0).args[0].success({name: 'Mike Rivers', id: 'SomeID'})
 
+    wrapper.update() // enzyme in conflict without this
     expect(wrapper.find('.sign-in-container .name').text()).to.equal('Mike Rivers')
   })  
   
