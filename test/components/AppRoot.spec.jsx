@@ -13,10 +13,12 @@ describe('<AppRoot />', () => {
   let col1 = {
     _id: 'asdf1',
     name: "",
+    isPublic: true,
     clips: []
   }, col2 = {
     _id: "adsf2",
     name: "",
+    isPublic: true,
     clips: []
   }
 
@@ -30,7 +32,7 @@ describe('<AppRoot />', () => {
       </Router>
     )
 
-    expect(wrapper.find('.sign-in-container .name').text()).to.equal('')
+    expect(wrapper.find('.sign-in-container .name')).to.have.lengthOf(0)
   })
   
   it('should display username when logged in', async () => {
@@ -71,8 +73,8 @@ describe('<AppRoot />', () => {
 
     // fake server completion
     await mock$.ajax.getCall(0).args[0].success(null)
-    
-    expect(wrapper.find('.sign-in-container .name').text()).to.equal('')
+
+    expect(wrapper.find('.sign-in-container .name')).to.have.lengthOf(0)
   })
   
   it('should swap in user on interactive login', async () => {
@@ -117,9 +119,9 @@ describe('<AppRoot />', () => {
     })
     wrapper.update()
     
-    expect(wrapper.find('.navbar-nav li a')).to.have.lengthOf(3) // Home, Browse, New Collection
+    expect(wrapper.find('.navbar-nav li a')).to.have.lengthOf(4) // Home, Browse, New Collection
     expect(wrapper.find('.navbar-nav li a').first().text()).to.equal('Home')
-    expect(wrapper.find('.navbar-nav li a').at(1).text()).to.equal('Browse')
+    expect(wrapper.find('.navbar-nav li a').at(2).text()).to.equal('Public')
     expect(wrapper.find('.collection-brief')).to.have.lengthOf(2)
   })
   
