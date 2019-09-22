@@ -21,7 +21,7 @@ export default class CollectionEditor extends Component {
 
     this.tbodyEl = null
     this.onNewClipSubmit = this.onNewClipSubmit.bind(this)
-    this.onChange = this.onChange.bind(this)
+    this.onCollectionChange = this.onCollectionChange.bind(this)
     this.onNameSubmit = this.onNameSubmit.bind(this)
     this.onNameClick = this.onNameClick.bind(this)
     this.onNameEditCancel = this.onNameEditCancel.bind(this)
@@ -36,13 +36,6 @@ export default class CollectionEditor extends Component {
       .catch(error => {
         this.setState({error})
       })    
-  }
-  
-  componentWillReceiveProps(nextProps) {
-    if(this.state.collection && this.state.collection._id !== this.props.match.params.id) {
-      this.setState({error: "", vid: "", start: "", duration: ""})
-      this.fetchCollection()
-    }
   }
   
   componentDidMount() {
@@ -66,14 +59,27 @@ export default class CollectionEditor extends Component {
       })
   }
   
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
+    // sometimes we mount the component despite not having its data yet. so we can't do this
+    // in componentDidMount.
     const $this = this
-    if(this.tbodyEl) {
+    if(this.tbodyEl && !this.props.$(this.tbodyEl).data('uiSortable')) {
       this.props.$(this.tbodyEl).sortable({
         stop: function(e, ui) {
           $this.sortChanged(e, ui)
         }
       })
+    }
+
+    if(this.state.collection && this.state.collection._id !== this.props.match.params.id) {
+      // wrong collection loaded
+      this.setState({error: "", vid: "", start: "", duration: ""})
+      this.fetchCollection()
+    } else if (prevState.collection && prevState.collection.isPublic !== this.state.collection.isPublic) {
+      // isPublic toggled
+      new AjaxAssistant(this.props.$).put('/api/me/collections/' + this.state.collection._id, underscore.pick(this.state.collection, 'isPublic'))
+        .then(collection => this.setState({collection}))
+        .catch(error => this.setState({error}))
     }
   }
   
@@ -82,15 +88,21 @@ export default class CollectionEditor extends Component {
       this.props.$(this.tbodyEl).sortable('destroy')
     }
   }
- 
-  onChange(e) {
+
+  onCollectionChange(e) {
     const target = e.target
     const name = target.name
     const value = target.value
 
-    if(name === 'collection[name]') {
+    if(['collection[name]', 'collection[isPublic]'].indexOf(name) !== -1) {
+      let left = name.indexOf('['), right = name.indexOf(']'),
+          attrName = name.slice(left + 1, right)
+
+      let setableValue = value
+      if(attrName === 'isPublic') setableValue = target.checked
+
       this.setState((prevState) => {
-        return update(prevState, {'collection': {'name': {$set: value}}})
+        return update(prevState, {'collection': {[attrName]: {$set: setableValue}}})
       })
     } else {
       this.setState({[name]: value})
@@ -197,18 +209,33 @@ export default class CollectionEditor extends Component {
       ) : (
         <div className="name-editor">
           <form onSubmit={this.onNameSubmit}>
-            <input type="text" name="collection[name]" value={this.state.collection.name} onChange={this.onChange} placeholder="Collection Name" className="form-control"/>
+            <input type="text" name="collection[name]" value={this.state.collection.name} onChange={this.onCollectionChange} placeholder="Collection Name" className="form-control"/>
             <button type="submit" className="btn btn-primary">Save</button>
             <button className="btn btn-danger" onClick={this.onNameEditCancel}>Cancel</button>
           </form>
         </div>
       )
 
+      let isPublicSection = null
+      if(this.state.collection) {
+        let checked = {checked: false}
+        if(this.state.collection.isPublic === true) {
+          checked = {checked: true}
+        }
+
+        isPublicSection = (
+          <div className="collection-modification">
+            <input type="checkbox" id={'is-public-' + this.state.collection._id}
+                   name="collection[isPublic]" value="isPublic" {...checked} onChange={this.onCollectionChange}/>
+            <label htmlFor={'is-public-' + this.state.collection._id}>Public</label>
+          </div>
+        )        
+      }
       
       body = (
         <div>
           {nameSection}
-
+          {isPublicSection}
           <table className="table clips-table">
             <thead>
               <tr>
@@ -245,13 +272,13 @@ export default class CollectionEditor extends Component {
         <form onSubmit={this.onNewClipSubmit}>
           <div className="form-row">
             <div className="form-group col-md-4">
-              <input type="text" name="vid" value={this.state.vid} onChange={this.onChange} placeholder="Video ID" className="form-control"/>
+              <input type="text" name="vid" value={this.state.vid} onChange={this.onCollectionChange} placeholder="Video ID" className="form-control"/>
             </div>
             <div className="form-group col-md-3">
-              <input type="text" name="start" value={this.state.start} onChange={this.onChange} placeholder="Start (HH:MM:SS)" className="form-control"/>
+              <input type="text" name="start" value={this.state.start} onChange={this.onCollectionChange} placeholder="Start (HH:MM:SS)" className="form-control"/>
             </div>
             <div className="form-group col-md-3">
-              <input type="text" name="end" value={this.state.end} onChange={this.onChange} placeholder="End (HH:MM:SS)" className="form-control"/>
+              <input type="text" name="end" value={this.state.end} onChange={this.onCollectionChange} placeholder="End (HH:MM:SS)" className="form-control"/>
             </div>
 
             <div className="col-auto">

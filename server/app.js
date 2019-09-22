@@ -5,6 +5,7 @@ const express = require('express')
 const cookieParser = require('cookie-parser')
 const cons = require('consolidate')
 const csrf = require('csurf')
+const underscore = require('underscore')
 const ClipCollection = require('./models/clipCollection.js')
 const Clip = require('./models/clip.js')
 const User = require('./models/user.js')
@@ -205,7 +206,9 @@ app.put('/api/me/collections/:id', csrfProtection, async (req, res, next) => {
     if(!clipCollection) {
       res.status(404).end()
     } else {
-      clipCollection.name = req.body.name
+      ['name', 'isPublic'].forEach((attr) => {
+        if(underscore.has(req.body, attr)) clipCollection[attr] = req.body[attr]
+      })
       await clipCollection.save()
       const clips = await Clip.find().forCollection(req.params.id)
       res.status(200).json({...clipCollection.inspect(), ...{clips: clips}})
