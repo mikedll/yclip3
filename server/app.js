@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const os = require('os')
 
 const express = require('express')
 const cookieParser = require('cookie-parser')
@@ -12,11 +13,14 @@ const User = require('./models/user.js')
 const config = require('./config.js')
 const { OAuth2Client } = require('google-auth-library')
 const cookieSession = require('cookie-session')
+const busboy = require('connect-busboy')
 
 const app = express()
 app.engine('mustache', cons.mustache)
 app.set('view engine', 'mustache')
 app.set('views', path.join(__dirname, '../views'))
+
+const storageDir = path.join(__dirname, '../storage')
 
 app.use(express.static(path.join(__dirname, '../static')))
 
@@ -33,6 +37,12 @@ app.use(cookieSession({
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(busboy({
+  immediate: false,
+  limits: {
+    fileSize: 5 * 1024 * 1024
+  }
+}));
 
 const csrfOpts = {cookie: true}
 if(config.env === "test") {
@@ -54,8 +64,6 @@ app.get(/^\/((?!api).)*$/, csrfProtection, async (req, res, next) => {
     user: user ? JSON.stringify(user) : "null"
   })
 })
-
-const dataDir = path.join(__dirname, 'data')
 
 const idRegex = /^[0-9a-fA-F]{24}$/
 
@@ -248,6 +256,44 @@ app.put('/api/me/collections/:collection_id/order', csrfProtection, async (req, 
   } catch(err) {
     next(err)
   }
+})
+
+app.post('/api/me/collections/:collection_id/thumbnail', async(req, res, next) => {
+  let user = await requireUser(req, res)
+  if(!user) return
+
+  if(!/^[0-9a-fA-F]{24}$/.test(req.params.collection_id)) {
+    res.status(404).end()
+    return
+  }
+
+  let clipCollection
+  try {
+    clipCollection = await ClipCollection.findOne({userId: user._id, _id: req.params.collection_id})
+    if(!clipCollection) {
+      res.status(404).end()
+    }    
+  } catch(e) {
+    next(e)
+    return
+  }
+  
+  if(req.is('multipart/form-data')) {
+    req.busboy.on('field', (key, value) => {
+      console.log("Found field: ", key, " -> ", value)
+    })
+    req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+      var saveTo = path.join(storageDir, clipCollection._id + '.png')
+      console.log("saving file to ", saveTo)
+      file.pipe(fs.createWriteStream(saveTo))
+    })
+    req.busboy.on('finish', () => {
+      res.status(200).end()
+    })
+    req.pipe(req.busboy)
+  } else {
+    res.status(422).end()
+  }  
 })
 
 app.delete('/api/me/collections/:id', csrfProtection, async (req, res, next) => {

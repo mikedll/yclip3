@@ -1,4 +1,7 @@
 
+storage/*
+!storage/.keep
+
 node_modules/*
 
 tmp/*

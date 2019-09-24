@@ -231,11 +231,22 @@ export default class CollectionEditor extends Component {
           </div>
         )        
       }
+
+      const thumbnailSection = (
+        <div>
+          <form method="POST" action="/api/me/collections/5cc279b0d5a9411f718ead6f/thumbnail" enctype="multipart/form-data">
+            <input type="file" name="filefield"/>
+            <br/>
+            <input type="submit"/>            
+          </form>                  
+        </div>
+      )
       
       body = (
         <div>
           {nameSection}
           {isPublicSection}
+          {thumbnailSection}
           <table className="table clips-table">
             <thead>
               <tr>
