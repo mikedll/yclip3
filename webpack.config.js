@@ -10,6 +10,9 @@ module.exports = {
   },
   module: {
     rules: [
+      { test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      },
       { test: /\.js(x)?$/,
         use: [{ loader: 'babel-loader', options: { cacheDirectory: 'tmp/babel-loader-cache' } }],
         exclude: '/node_modules/'

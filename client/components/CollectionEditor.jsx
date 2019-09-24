@@ -2,6 +2,8 @@ import update from 'immutability-helper';
 import React, { Component } from 'react'
 import underscore from 'underscore'
 import AjaxAssistant from 'AjaxAssistant.jsx'
+import { FilePond } from 'react-filepond'
+import "filepond/dist/filepond.min.css";
 
 export default class CollectionEditor extends Component {
 
@@ -12,7 +14,8 @@ export default class CollectionEditor extends Component {
       start: "",
       end: "",
       error: "",
-      editingName: false
+      editingName: false,
+      thumbnails: []
     }
 
     if(this.props.collection) {
@@ -191,6 +194,10 @@ export default class CollectionEditor extends Component {
         this.setState(error)
       })
   }
+
+  handlePondInit() {
+    console.log("FilePond initialized")
+  }
   
   render() {
     const error = this.state.error !== "" ? (
@@ -232,15 +239,20 @@ export default class CollectionEditor extends Component {
         )        
       }
 
-      const thumbnailSection = (
+      const thumbnailSection = this.state.collection ? (
         <div>
-          <form method="POST" action="/api/me/collections/5cc279b0d5a9411f718ead6f/thumbnail" enctype="multipart/form-data">
-            <input type="file" name="filefield"/>
-            <br/>
-            <input type="submit"/>            
-          </form>                  
+          <FilePond className='thumbnail-pond' labelIdle='Thumbnail'                    
+            files={this.state.thumbnails}
+            allowMultiple={false}
+            maxFiles={1}
+            server={`/api/me/collections/${this.state.collection._id}/thumbnail`}
+            oninit={this.handlePondInit}
+            onupdatefiles={fileItems => {
+              this.setState({thumbnails: fileItems.map(fileItem => fileItem.file)})
+            }}
+            />
         </div>
-      )
+      ) : null
       
       body = (
         <div>
