@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import React from 'react';
 import { shallow, mount } from 'enzyme'
 import jQuery from 'jQuery'
-import { spy, stub } from 'sinon'
+import { spy, stub, fake } from 'sinon'
 
 import CollectionEditor from 'components/CollectionEditor.jsx'
 
@@ -22,6 +22,7 @@ describe('<CollectionEditor />', function() {
   }, clipCollection1 = {
     _id: "asdf0",
     name: "Some collection",
+    isPublic: false,
     clips: [clip1, clip2]
   }
 
@@ -29,17 +30,24 @@ describe('<CollectionEditor />', function() {
   })
   
   it('should fetch collection on load', () => {
-    let mock$ = stub().returns({sortable: spy()})
+    let mock$ = stub().returns({
+      sortable: spy(),
+      data: stub().returns(true)
+    })
     mock$.ajax = spy()
-    const matchProps = { params: { id: 1 } }
+    const matchProps = { params: { id: clipCollection1._id } }
     let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
-    expect(mock$.ajax.calledWithMatch({url: '/api/me/collections/' + 1})).to.be.true
+    expect(mock$.ajax.calledWithMatch({url: '/api/me/collections/' + clipCollection1._id})).to.be.true
   })
 
   it('should list existing clips', async () => {
-    let mock$ = stub().returns({sortable: spy()})
+    let mock$ = stub().returns({
+      sortable: spy(),
+      data: stub().returns(true)
+    })
     mock$.ajax = spy()
-    const matchProps = { params: { id: 1 } }
+
+    const matchProps = { params: { id: 'asdf0' } }
     let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
     expect(mock$.ajax.calledOnce).to.be.true
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
@@ -49,9 +57,12 @@ describe('<CollectionEditor />', function() {
   })
   
   it("should record a new clip", async () => {
-    let mock$ = stub().returns({sortable: spy()})
+    let mock$ = stub().returns({
+      sortable: spy(),
+      data: stub().returns(true)
+    })
     mock$.ajax = spy()
-    const matchProps = { params: { id: 1 } }
+    const matchProps = { params: { id: 'asdf0' } }
     let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     
@@ -61,7 +72,7 @@ describe('<CollectionEditor />', function() {
     wrapper.find('form').simulate('submit')
 
     expect(mock$.ajax.calledWithMatch({
-      url: '/api/me/collections/' + 1 + '/clips',
+      url: '/api/me/collections/asdf0/clips',
       data: {
       vid: 'dfjlksdjf',
       start: '3:00',
@@ -69,7 +80,9 @@ describe('<CollectionEditor />', function() {
       }})).to.be.true
 
     const clipCollection2 = {
+      _id: 'asdf0',
       name: "Some collection",
+      isPublic: false,
       clips: [clip1, clip2, {_id: 'adsf3', vid: 'dfjlksdjf', start: 180, duration: 35}]
     }
     await mock$.ajax.getCall(1).args[0].success(clipCollection2)
@@ -79,9 +92,12 @@ describe('<CollectionEditor />', function() {
   })
 
   it('should render start and end times', async() => {
-    let mock$ = stub().returns({sortable: spy()})
+    let mock$ = stub().returns({
+      sortable: spy(),
+      data: stub().returns(true)
+    })
     mock$.ajax = spy()
-    const matchProps = { params: { id: 1 } }
+    const matchProps = { params: { id: 'asdf0' } }
     let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
     
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
@@ -97,9 +113,12 @@ describe('<CollectionEditor />', function() {
   })
 
   it('should permit name editing', async () => {
-    let mock$ = stub().returns({sortable: spy()})
+    let mock$ = stub().returns({
+      sortable: spy(),
+      data: stub().returns(true)
+    })
     mock$.ajax = spy()
-    const matchProps = { params: { id: 1 } }
+    const matchProps = { params: { id: 'asdf0' } }
     let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
     
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
@@ -111,7 +130,7 @@ describe('<CollectionEditor />', function() {
     wrapper.find('.name-editor form').simulate('submit')
 
     expect(mock$.ajax.calledWithMatch({
-      url: '/api/me/collections/' + 1,
+      url: '/api/me/collections/asdf0',
       method: 'PUT',
       data: {
         name: 'nice poems'
@@ -126,7 +145,10 @@ describe('<CollectionEditor />', function() {
   })
 
   it('should permit clip deletion', async () => {
-    let mock$ = stub().returns({sortable: spy()})
+    let mock$ = stub().returns({
+      sortable: spy(),
+      data: stub().returns(true)
+    })
     mock$.ajax = spy()
     const matchProps = { params: { id: clipCollection1._id } }
     let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
@@ -148,5 +170,60 @@ describe('<CollectionEditor />', function() {
     expect(wrapper.find('.clip-container')).to.have.lengthOf(1)
     expect(wrapper.find('.clip-container').key()).to.equal(clip2._id)
   })
-  
+
+  it('should support toggling Public', async () => {
+    let mock$ = stub().returns({
+      sortable: spy(),
+      data: stub().returns(true)
+    })
+    mock$.ajax = fake()
+    const matchProps = { params: { id: clipCollection1._id } }
+    let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
+    
+    await mock$.ajax.getCall(0).args[0].success(clipCollection1)
+    wrapper.update()
+
+    expect(wrapper.find('.collection-modification .is-public-toggle')).to.have.lengthOf(1)
+
+    expect(wrapper.find('.collection-modification .is-public-toggle').props().checked).to.be.false
+    wrapper.find('.collection-modification .is-public-toggle').simulate('change', {
+      target: {
+        name: 'collection[isPublic]',
+        checked: true
+      }
+    })
+
+    expect(mock$.ajax.calledWithMatch({
+      method: 'PUT',
+      data: {isPublic: true},
+      url: '/api/me/collections/' + clipCollection1._id
+    })).to.be.true
+
+    clipCollection1.isPublic = true
+    
+    await mock$.ajax.getCall(1).args[0].success(clipCollection1)
+    wrapper.update()
+
+    expect(wrapper.find('.collection-modification .is-public-toggle').props().checked).to.be.true
+
+    wrapper.find('.collection-modification .is-public-toggle').simulate('change', {
+      target: {
+        name: 'collection[isPublic]',
+        checked: false
+      }
+    })
+
+    expect(mock$.ajax.calledWithMatch({
+      method: 'PUT',
+      data: {isPublic: false},
+      url: '/api/me/collections/' + clipCollection1._id
+    })).to.be.true
+
+    clipCollection1.isPublic = false
+    
+    await mock$.ajax.getCall(2).args[0].success(clipCollection1)
+    wrapper.update()
+
+    expect(wrapper.find('.collection-modification .is-public-toggle').props().checked).to.be.false
+  })
 })

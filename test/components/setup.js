@@ -1,3 +1,4 @@
+require('ignore-styles')
 
 require('jsdom-global')()
 

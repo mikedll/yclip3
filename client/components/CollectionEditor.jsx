@@ -232,7 +232,7 @@ export default class CollectionEditor extends Component {
 
         isPublicSection = (
           <div className="collection-modification">
-            <input type="checkbox" id={'is-public-' + this.state.collection._id}
+            <input className='is-public-toggle' type="checkbox" id={'is-public-' + this.state.collection._id}
                    name="collection[isPublic]" value="isPublic" {...checked} onChange={this.onCollectionChange}/>
             <label htmlFor={'is-public-' + this.state.collection._id}>Public</label>
           </div>
