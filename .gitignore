@@ -1,10 +1,11 @@
 
-storage/*
-!storage/.keep
+static/storage/*
+!static/storage/.gitkeep
 
 node_modules/*
 
 tmp/*
+!tmp/uploads/.gitkeep
 
 test/components.js
 

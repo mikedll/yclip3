@@ -10,17 +10,18 @@ const underscore = require('underscore')
 const ClipCollection = require('./models/clipCollection.js')
 const Clip = require('./models/clip.js')
 const User = require('./models/user.js')
+const Thumbnail = require('./models/thumbnail.js')
 const config = require('./config.js')
 const { OAuth2Client } = require('google-auth-library')
 const cookieSession = require('cookie-session')
-const busboy = require('connect-busboy')
+const fileupload = require('express-fileupload')
 
 const app = express()
 app.engine('mustache', cons.mustache)
 app.set('view engine', 'mustache')
 app.set('views', path.join(__dirname, '../views'))
 
-const storageDir = path.join(__dirname, '../storage')
+const storageDir = path.join(__dirname, '../static/storage')
 
 app.use(express.static(path.join(__dirname, '../static')))
 
@@ -37,8 +38,9 @@ app.use(cookieSession({
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(busboy({
-  immediate: false,
+app.use(fileupload({
+  useTempFiles: true,
+  tempFileDir: path.join(__dirname, '../tmp/uploads'),
   limits: {
     fileSize: 5 * 1024 * 1024
   }
@@ -272,28 +274,34 @@ app.post('/api/me/collections/:collection_id/thumbnail', async(req, res, next) =
     clipCollection = await ClipCollection.findOne({userId: user._id, _id: req.params.collection_id})
     if(!clipCollection) {
       res.status(404).end()
+      return
     }    
   } catch(e) {
     next(e)
     return
   }
-  
-  if(req.is('multipart/form-data')) {
-    req.busboy.on('field', (key, value) => {
-      console.log("Found field: ", key, " -> ", value)
-    })
-    req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-      var saveTo = path.join(storageDir, clipCollection._id + '.png')
-      console.log("saving file to ", saveTo)
-      file.pipe(fs.createWriteStream(saveTo))
-    })
-    req.busboy.on('finish', () => {
-      res.status(200).end()
-    })
-    req.pipe(req.busboy)
-  } else {
+
+  if(!req.files || !req.files.filepond) {
     res.status(422).end()
-  }  
+    return
+  }
+
+  let name = clipCollection._id + '.png'
+  var saveTo = path.join(storageDir, name)
+
+  try {
+    await req.files.filepond.mv(saveTo)
+  } catch(e) {
+    next(e)
+    return
+  }
+
+  let thumbnail = new Thumbnail({clipCollectionId: clipCollection._id, name: name})
+  await thumbnail.save()
+  
+  res
+    .status(200)
+    .json({...thumbnail.toJSON(), ...{path: thumbnail.path()}})
 })
 
 app.delete('/api/me/collections/:id', csrfProtection, async (req, res, next) => {

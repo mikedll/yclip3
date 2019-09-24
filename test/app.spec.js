@@ -8,6 +8,7 @@ const mongoose = require('mongoose')
 const User = require(path.join(srcDir, 'models/user.js'))
 const ClipCollection = require(path.join(srcDir, 'models/clipCollection.js'))
 const Clip = require(path.join(srcDir, 'models/clip.js'))
+const Thumbnail = require(path.join(srcDir, 'models/thumbnail.js'))
 const config = require(path.join(srcDir, 'config.js'))
 const underscore = require('underscore')
 
@@ -31,8 +32,8 @@ describe('App', () => {
     vid:"dQw4w9WgXcQ",
     start: 43,
     duration: 6
-  }
-  
+  }, dogPicture = path.join(__dirname, './support/stockdog.jpg')
+
   before(() => {
     return mongoose.connect(config.mongo.uri, config.mongo.connectionOpts)
   })
@@ -306,6 +307,25 @@ describe('App', () => {
     expect(foundClips[0].vid).to.equal("dQw4w9WgXcQ")
   })
 
+  it.only('should permit thumbnail upload', async () => {
+    const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
+    await collection.save()
+
+    const wrappedApp = session(app)
+    await wrappedApp.post('/api/testsignin').send({userId: user1._id})
+    
+    const response = await wrappedApp.post('/api/me/collections/' + collection._id + '/thumbnail')
+          .attach('filepond', dogPicture)
+
+    expect(response.status).to.equal(200)
+    expect(response.body.name).to.match(/[A-Za-z0-9]+.png/)
+
+    let thumbnail = await Thumbnail.findById(response.body._id)
+    expect(thumbnail).to.not.be.null
+    
+    expect(response.body.path).to.equal('/storage/' + thumbnail.name)
+  })
+  
   it('should permit logout', () => {
     let appSession = session(app)
     
