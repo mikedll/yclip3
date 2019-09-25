@@ -2,7 +2,7 @@
 const mongoose = require('mongoose')
 
 const ThumbnailSchema = new mongoose.Schema({
-  clipCollectionId: {
+  clipCollection: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'ClipCollection',
     required: true
@@ -12,6 +12,10 @@ const ThumbnailSchema = new mongoose.Schema({
     required: false
   }
 })
+
+ThumbnailSchema.query.forCollection = function(id) {
+  return this.find({clipCollection: id})
+}
 
 ThumbnailSchema.methods.path = function() {
   return '/storage/' + this.name

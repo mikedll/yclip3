@@ -40,6 +40,9 @@ describe('App', () => {
 
   beforeEach(() => {
     return ClipCollection.deleteMany({})
+      .then(_ => Clip.deleteMany({}))
+      .then(_ => Thumbnail.deleteMany({}))
+      .then(_ => User.deleteMany({}))
       .then(_ => {
         user1 = new User(user1attrs)
         return user1.save()
@@ -197,9 +200,9 @@ describe('App', () => {
     return collection.save()
       .then(collection => {
         [clip1, clip2].forEach(async (clip) => {
-          const newClip = Clip(clip)
+          let newClip = Clip(clip)
           newClip.clipCollection = collection._id
-          await newClip.save()
+          newClip = await newClip.save()
           savedClips.push(newClip)
         })
 
@@ -207,10 +210,11 @@ describe('App', () => {
       })
       .then(response => {
         expect(response.status).to.equal(200)
-        
+
         expect(response.body._id).to.equal(collection._id.toString())
         expect(response.body.clips.length).to.equal(2)
-        expect(response.body.clips[0]._id).to.equal(savedClips[0]._id.toString())
+
+        expect(response.body.clips.map(c => c._id)).to.have.members(savedClips.map(sc => sc._id.toString()))
       })
   })
 
@@ -222,9 +226,9 @@ describe('App', () => {
     return collection.save()
       .then(collection => {
         [clip1, clip2].forEach(async (clip) => {
-          const newClip = Clip(clip)
+          let newClip = Clip(clip)
           newClip.clipCollection = collection._id
-          await newClip.save()
+          newClip = await newClip.save()
           savedClips.push(newClip)
         })
 
@@ -238,7 +242,7 @@ describe('App', () => {
         
         expect(response.body._id).to.equal(collection._id.toString())
         expect(response.body.clips.length).to.equal(2)
-        expect(response.body.clips[0]._id).to.equal(savedClips[0]._id.toString())
+        expect(response.body.clips.map(c => c._id)).to.have.members(savedClips.map(sc => sc._id.toString()))
       })
   })
   
@@ -307,7 +311,7 @@ describe('App', () => {
     expect(foundClips[0].vid).to.equal("dQw4w9WgXcQ")
   })
 
-  it.only('should permit thumbnail upload', async () => {
+  it('should permit thumbnail upload', async () => {
     const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
     await collection.save()
 
@@ -318,12 +322,27 @@ describe('App', () => {
           .attach('filepond', dogPicture)
 
     expect(response.status).to.equal(200)
-    expect(response.body.name).to.match(/[A-Za-z0-9]+.png/)
 
-    let thumbnail = await Thumbnail.findById(response.body._id)
-    expect(thumbnail).to.not.be.null
+    // body is returning as an empty object {}, 9/24/19
+    expect(response.res.text).to.match(/[A-Za-z0-9]+/)
+
+    let thumbnail = await Thumbnail.findOne({name: response.res.text})
+    expect(thumbnail).to.not.be.null    
+  })
+
+  it('should include thumbnail when returning a collection from api', async () => {
+    const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
+    await collection.save()
+
+    const thumbnail = new Thumbnail({clipCollection: collection._id, name: 'asdf0'})
+    await thumbnail.save()
+
+    const wrappedApp = session(app)
+    await wrappedApp.post('/api/testsignin').send({userId: user1._id})
     
-    expect(response.body.path).to.equal('/storage/' + thumbnail.name)
+    const response = await wrappedApp.get('/api/me/collections/' + collection._id)
+
+    expect(response.body.thumbnail._id).to.equal(thumbnail._id.toString())
   })
   
   it('should permit logout', () => {

@@ -195,7 +195,8 @@ app.get('/api/me/collections/:id', csrfProtection, async (req, res, next) => {
       res.status(404).end()
     } else {
       const clips = await Clip.find().forCollection(clipCollection._id)
-      res.json({ ...clipCollection.inspect(), ...{clips: clips} })
+      const thumbnail = await Thumbnail.findOne({clipCollection: clipCollection._id})
+      res.json({ ...clipCollection.toJSON(), ...{clips: clips}, ...{thumbnail: thumbnail} })
     }
   } catch(err) {
     next(err)
@@ -286,7 +287,7 @@ app.post('/api/me/collections/:collection_id/thumbnail', async(req, res, next) =
     return
   }
 
-  let name = clipCollection._id + '.png'
+  let name = clipCollection._id.toString()
   var saveTo = path.join(storageDir, name)
 
   try {
@@ -296,7 +297,7 @@ app.post('/api/me/collections/:collection_id/thumbnail', async(req, res, next) =
     return
   }
 
-  let thumbnail = new Thumbnail({clipCollectionId: clipCollection._id, name: name})
+  let thumbnail = new Thumbnail({clipCollection: clipCollection._id, name: name})
   await thumbnail.save()
 
   res

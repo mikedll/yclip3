@@ -15,7 +15,8 @@ export default class CollectionEditor extends Component {
       end: "",
       error: "",
       editingName: false,
-      thumbnail: null
+      thumbnail: null,
+      thumbnailPrompt: false
     }
 
     if(this.props.collection) {
@@ -23,12 +24,14 @@ export default class CollectionEditor extends Component {
     }
 
     this.tbodyEl = null
+
     this.onNewClipSubmit = this.onNewClipSubmit.bind(this)
     this.onCollectionChange = this.onCollectionChange.bind(this)
     this.onNameSubmit = this.onNameSubmit.bind(this)
     this.onNameClick = this.onNameClick.bind(this)
     this.onNameEditCancel = this.onNameEditCancel.bind(this)
     this.onDelete = this.onDelete.bind(this)
+    this.onReplaceThumbnail = this.onReplaceThumbnail(this)
   }
 
   fetchCollection() {
@@ -196,7 +199,11 @@ export default class CollectionEditor extends Component {
   }
 
   thumbnailUrl() {
-    return this.state.thumbnail ? ('/storage/' + this.state.thumbnail) : ''
+    return this.state.thumbnail ? ('/storage/' + this.state.thumbnail = '.png') : ''
+  }
+
+  onReplaceThumbnail() {
+    this.setState(prevState => {thumbnailPrompt: !prevState.thumbnailPrompt})
   }
   
   render() {
@@ -239,21 +246,33 @@ export default class CollectionEditor extends Component {
         )        
       }
 
-      const thumbnailSection = this.state.collection ? (this.thumbnailUrl() !== '' ? (
-        <div className='thumbnail-wrapper'>
-          <img src={this.thumbnailUrl()}/>
-        </div>) : (
-        <div className='thumbnail-pond'>
-          <FilePond labelIdle='Upload'
-            files={this.state.thumbnails}
-            allowMultiple={false}
-            maxFiles={1}
-            server={`/api/me/collections/${this.state.collection._id}/thumbnail`}
-            onprocessfile={(error, file) => {
-              this.setState({thumbnail: file.serverId})
-            }}
-            />
-        </div>)) : null
+      let thumbnailSection = null
+      if(this.state.collection) {
+        if(this.thumbnailUrl() === '' || this.state.thumbnailPrompt) {
+          thumbnailSection = (
+            <div className='thumbnail-wrapper'>
+              <img src={this.thumbnailUrl()}/>
+              <a href='#' onClick={this.onReplaceThumbnail}>Replace Thumbnail</a>
+            </div>            
+          )
+        } else {
+          thumbnailSection = (
+            <div className='thumbnail-pond'>
+              <FilePond labelIdle='Upload'
+                        files={this.state.thumbnails}
+                        allowMultiple={false}
+                        maxFiles={1}
+                        server={`/api/me/collections/${this.state.collection._id}/thumbnail`}
+                        onprocessfile={(error, file) => {
+                          this.setState({thumbnail: file.serverId})
+                }}
+                />
+              <a href='#' onClick={this.onReplaceThumbnail}>Cancel</a>
+            </div>
+          )
+        }
+      }
+
       
       body = (
         <div>
