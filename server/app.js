@@ -287,18 +287,16 @@ app.post('/api/me/collections/:collection_id/thumbnail', async(req, res, next) =
     return
   }
 
-  let name = clipCollection._id.toString()
-  var saveTo = path.join(storageDir, name)
-
+  let thumbnail = new Thumbnail({clipCollection: clipCollection._id, name: clipCollection._id.toString()})
+  await thumbnail.save()
+  
+  let saveTo = thumbnail.path()
   try {
     await req.files.filepond.mv(saveTo)
   } catch(e) {
     next(e)
     return
   }
-
-  let thumbnail = new Thumbnail({clipCollection: clipCollection._id, name: name})
-  await thumbnail.save()
 
   res
     .status(200)

@@ -5,7 +5,7 @@ static/storage/*
 node_modules/*
 
 tmp/*
-!tmp/uploads/.gitkeep
+!tmp/storage/.gitkeep
 
 test/components.js
 

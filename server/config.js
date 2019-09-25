@@ -1,4 +1,5 @@
 
+const path = require('path')
 const Joi = require('joi')
 
 const envVarsSchema = Joi.object({
@@ -38,6 +39,7 @@ const config = {
   googleClientId: envVars.GOOGLE_SIGNIN_CLIENT_ID,
   env: envVars.NODE_ENV,
   port: envVars.PORT,
+  localStorageLocation: (envVars.NODE_ENV !== 'test' ? path.join(__dirname, '../static/storage') : path.join(__dirname, '../tmp/storage')),
   mongo: {
     uri: envVars.MONGODB_URI || `mongodb://${envVars.MONGO_HOST}:${envVars.MONGO_PORT}/${envVars.MONGO_DATABASE}`,
     connectionOpts: { useNewUrlParser: true }
