@@ -31,7 +31,7 @@ export default class CollectionEditor extends Component {
     this.onNameClick = this.onNameClick.bind(this)
     this.onNameEditCancel = this.onNameEditCancel.bind(this)
     this.onDelete = this.onDelete.bind(this)
-    this.onReplaceThumbnail = this.onReplaceThumbnail(this)
+    this.onReplaceThumbnail = this.onReplaceThumbnail.bind(this)
   }
 
   fetchCollection() {
@@ -199,11 +199,13 @@ export default class CollectionEditor extends Component {
   }
 
   thumbnailUrl() {
-    return this.state.thumbnail ? ('/storage/' + this.state.thumbnail = '.png') : ''
+    return this.state.thumbnail ? ('/storage/' + this.state.thumbnail + '.png') : ''
   }
 
   onReplaceThumbnail() {
-    this.setState(prevState => {thumbnailPrompt: !prevState.thumbnailPrompt})
+    this.setState(prevState => {
+      return { thumbnailPrompt: !prevState.thumbnailPrompt }
+    })
   }
   
   render() {
@@ -249,13 +251,7 @@ export default class CollectionEditor extends Component {
       let thumbnailSection = null
       if(this.state.collection) {
         if(this.thumbnailUrl() === '' || this.state.thumbnailPrompt) {
-          thumbnailSection = (
-            <div className='thumbnail-wrapper'>
-              <img src={this.thumbnailUrl()}/>
-              <a href='#' onClick={this.onReplaceThumbnail}>Replace Thumbnail</a>
-            </div>            
-          )
-        } else {
+          let cancelBtn = this.thumbnailUrl() === '' ? null : (<a href='#' onClick={this.onReplaceThumbnail}>Cancel</a>)
           thumbnailSection = (
             <div className='thumbnail-pond'>
               <FilePond labelIdle='Upload'
@@ -267,8 +263,16 @@ export default class CollectionEditor extends Component {
                           this.setState({thumbnail: file.serverId})
                 }}
                 />
-              <a href='#' onClick={this.onReplaceThumbnail}>Cancel</a>
+              {cancelBtn}
             </div>
+          )
+        } else {
+          let imgRendered = this.thumbnailUrl() !== '' ? (<img src={this.thumbnailUrl()}/>) : null
+          thumbnailSection = (
+            <div className='thumbnail-wrapper'>
+              {imgRendered}
+              <a href='#' onClick={this.onReplaceThumbnail}>Upload Thumbnail</a>
+            </div>            
           )
         }
       }
