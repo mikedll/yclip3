@@ -298,10 +298,11 @@ app.post('/api/me/collections/:collection_id/thumbnail', async(req, res, next) =
 
   let thumbnail = new Thumbnail({clipCollectionId: clipCollection._id, name: name})
   await thumbnail.save()
-  
+
   res
     .status(200)
-    .json({...thumbnail.toJSON(), ...{path: thumbnail.path()}})
+    .send(thumbnail.name)
+    .end()
 })
 
 app.delete('/api/me/collections/:id', csrfProtection, async (req, res, next) => {

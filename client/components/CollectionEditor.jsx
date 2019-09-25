@@ -15,7 +15,7 @@ export default class CollectionEditor extends Component {
       end: "",
       error: "",
       editingName: false,
-      thumbnails: []
+      thumbnail: null
     }
 
     if(this.props.collection) {
@@ -195,8 +195,8 @@ export default class CollectionEditor extends Component {
       })
   }
 
-  handlePondInit() {
-    console.log("FilePond initialized")
+  thumbnailUrl() {
+    return this.state.thumbnail ? ('/storage/' + this.state.thumbnail) : ''
   }
   
   render() {
@@ -239,20 +239,21 @@ export default class CollectionEditor extends Component {
         )        
       }
 
-      const thumbnailSection = this.state.collection ? (
-        <div>
-          <FilePond className='thumbnail-pond' labelIdle='Thumbnail'                    
+      const thumbnailSection = this.state.collection ? (this.thumbnailUrl() !== '' ? (
+        <div className='thumbnail-wrapper'>
+          <img src={this.thumbnailUrl()}/>
+        </div>) : (
+        <div className='thumbnail-pond'>
+          <FilePond labelIdle='Upload'
             files={this.state.thumbnails}
             allowMultiple={false}
             maxFiles={1}
             server={`/api/me/collections/${this.state.collection._id}/thumbnail`}
-            oninit={this.handlePondInit}
-            onupdatefiles={fileItems => {
-              this.setState({thumbnails: fileItems.map(fileItem => fileItem.file)})
+            onprocessfile={(error, file) => {
+              this.setState({thumbnail: file.serverId})
             }}
             />
-        </div>
-      ) : null
+        </div>)) : null
       
       body = (
         <div>
