@@ -220,9 +220,9 @@ export default class CollectionEditor extends Component {
 
       let nameSection
       nameSection = !this.state.editingName ? (
-        <form className="form-inline name-modification">
+        <form className="form-inline name-modification" onClick={this.onNameClick}>
           <label htmlFor="collection-name-input form-check-label mr-2">Collection:&nbsp;</label>
-          <span onClick={this.onNameClick}>{this.state.collection.name}</span>
+          <span>{this.state.collection.name}</span>
         </form>
       ) : (
         <form className="form-inline name-modification" onSubmit={this.onNameSubmit}>
