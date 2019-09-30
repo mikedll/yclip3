@@ -69,7 +69,7 @@ describe('<CollectionEditor />', function() {
     wrapper.find('form input[name="vid"]').simulate('change', {target: { name: 'vid', value: 'dfjlksdjf' }})
     wrapper.find('form input[name="start"]').simulate('change', {target: { name: 'start', value: '3:00' }})
     wrapper.find('form input[name="end"]').simulate('change', {target: { name: 'end', value: '3:35' }})
-    wrapper.find('form').simulate('submit')
+    wrapper.find('form.new-clip').simulate('submit')
 
     expect(mock$.ajax.calledWithMatch({
       url: '/api/me/collections/asdf0/clips',
@@ -124,10 +124,10 @@ describe('<CollectionEditor />', function() {
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     wrapper.update()
 
-    wrapper.find('.name-container').simulate('click')
-    expect(wrapper.find('.name-editor')).to.have.lengthOf(1)
-    wrapper.find('.name-editor').find('input').simulate('change', {target: {name: 'collection[name]', value: 'nice poems'}})
-    wrapper.find('.name-editor form').simulate('submit')
+    wrapper.find('.name-modification').simulate('click')
+    expect(wrapper.find('.name-modification')).to.have.lengthOf(1)
+    wrapper.find('.name-modification').find('input').simulate('change', {target: {name: 'collection[name]', value: 'nice poems'}})
+    wrapper.find('form.name-modification').simulate('submit')
 
     expect(mock$.ajax.calledWithMatch({
       url: '/api/me/collections/asdf0',

@@ -325,7 +325,7 @@ export default class CollectionEditor extends Component {
 
         {body}
         
-        <form onSubmit={this.onNewClipSubmit}>
+        <form className="new-clip" onSubmit={this.onNewClipSubmit}>
           <div className="form-row">
             <div className="form-group col-md-4">
               <input type="text" name="vid" value={this.state.vid} onChange={this.onCollectionChange} placeholder="Video ID" className="form-control"/>
