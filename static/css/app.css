@@ -84,12 +84,35 @@ tr.active {
   height: 250px;
 }
 
+/************************* CollectionEditor *************/
+
+.name-modification {
+  margin-block-end: 0;
+}
+
+.collection-modification {
+  text-align: left;
+}
+
+.editor-top-wrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
 .thumbnail-pond, .thumbnail-wrapper {
-  float: right;
-  width: 300px;
+  width: 275px;
+  height: 100px;
+}
+
+.thumbnail-pond {
+  border: dashed 2px;
+}
+
+.thumbnail-pond .filepond--drop-label {
+  color: #fff;
 }
 
 .thumbnail-wrapper img {
-  width: 300px;
+  width: 275px;
   height: 150px;
 }

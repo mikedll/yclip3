@@ -218,19 +218,20 @@ export default class CollectionEditor extends Component {
     var body = null
     if(this.state.collection) {
 
-      const nameSection = !this.state.editingName ? (
-        <div className="name-container" onClick={this.onNameClick}>
-          Collection: <strong>{this.state.collection.name}</strong>
-        </div>
+      let nameSection
+      nameSection = !this.state.editingName ? (
+        <form className="form-inline name-modification">
+          <label htmlFor="collection-name-input form-check-label mr-2">Collection:&nbsp;</label>
+          <span onClick={this.onNameClick}>{this.state.collection.name}</span>
+        </form>
       ) : (
-        <div className="name-editor">
-          <form onSubmit={this.onNameSubmit}>
-            <input type="text" name="collection[name]" value={this.state.collection.name} onChange={this.onCollectionChange} placeholder="Collection Name" className="form-control"/>
-            <button type="submit" className="btn btn-primary">Save</button>
-            <button className="btn btn-danger" onClick={this.onNameEditCancel}>Cancel</button>
-          </form>
-        </div>
-      )
+        <form className="form-inline name-modification" onSubmit={this.onNameSubmit}>
+          <label htmlFor="collection-name-input form-check-label">Collection: </label>
+          <input type="text" name="collection[name]" value={this.state.collection.name} onChange={this.onCollectionChange} placeholder="Collection Name" className="form-control" id="collection-name-input"/>
+          <button type="submit" className="btn btn-primary">Save</button>
+          <button className="btn btn-danger" onClick={this.onNameEditCancel}>Cancel</button>
+        </form>
+      )        
 
       let isPublicSection = null
       if(this.state.collection) {
@@ -240,10 +241,11 @@ export default class CollectionEditor extends Component {
         }
 
         isPublicSection = (
-          <div className="collection-modification">
-            <input className='is-public-toggle' type="checkbox" id={'is-public-' + this.state.collection._id}
+          <div className="collection-modification form-check">
+            <input className='is-public-toggle form-check-input' type="checkbox"
+                   id={'is-public-' + this.state.collection._id}
                    name="collection[isPublic]" value="isPublic" {...checked} onChange={this.onCollectionChange}/>
-            <label htmlFor={'is-public-' + this.state.collection._id}>Public</label>
+            <label className="form-check-label" htmlFor={'is-public-' + this.state.collection._id}>Public</label>
           </div>
         )        
       }
@@ -280,9 +282,16 @@ export default class CollectionEditor extends Component {
       
       body = (
         <div>
-          {nameSection}
-          {isPublicSection}
-          {thumbnailSection}
+          <div className="editor-top-wrapper">
+            <div>
+              {nameSection}
+              {isPublicSection}
+            </div>
+            <div>
+              {thumbnailSection}
+            </div>
+          </div>
+          
           <table className="table clips-table">
             <thead>
               <tr>
