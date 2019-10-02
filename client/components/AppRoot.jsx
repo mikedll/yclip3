@@ -49,7 +49,7 @@ class AppRoot extends Component {
   
   onGoogleSignIn(googleUser) {
     const idToken = googleUser.getAuthResponse().id_token
-    new AjaxAssistant(this.props.jQuery).post('/api/signin', {token: idToken})
+    new AjaxAssistant(this.props.jQuery).post('/api/sessions/signin', {token: idToken})
       .then(user => this.setState({user}))
       .catch(error => this.setState({error}))
   }
@@ -57,7 +57,7 @@ class AppRoot extends Component {
   onLogout() {
     var auth2 = this.props.globalWindow.gapi.auth2.getAuthInstance();
     auth2.signOut()
-      .then(_ => new AjaxAssistant(this.props.jQuery).get('/api/signout'))
+      .then(_ => new AjaxAssistant(this.props.jQuery).get('/api/sessions/signout'))
       .then(_ => this.setState({user: null}))
       .catch(error => this.setState({error}))
   }

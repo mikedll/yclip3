@@ -12,7 +12,7 @@ const Thumbnail = require(path.join(srcDir, 'models/thumbnail.js'))
 const config = require(path.join(srcDir, 'config.js'))
 const underscore = require('underscore')
 
-app.post('/api/testsignin', (req, res, next) => {
+app.post('/api/sessions/testsignin', (req, res, next) => {
   req.session['userId'] = req.body.userId
   res.status(200).end()
 })
@@ -75,7 +75,7 @@ describe('App', () => {
     })
     return Promise.all(saves)
       .then(collections => {
-        return wrappedApp.post('/api/testsignin').send({userId: user1._id})
+        return wrappedApp.post('/api/sessions/testsignin').send({userId: user1._id})
       })
       .then(response => {
         return wrappedApp.get('/api/me/collections?page=2')
@@ -125,7 +125,7 @@ describe('App', () => {
     await collection.save()
 
     const wrappedApp = session(app)
-    await wrappedApp.post('/api/testsignin').send({userId: user1._id})
+    await wrappedApp.post('/api/sessions/testsignin').send({userId: user1._id})
       
     const response = await wrappedApp.put('/api/me/collections/' + collection._id).send({name: "nice poems"})
     expect(response.status).to.equal(200)
@@ -137,7 +137,7 @@ describe('App', () => {
     let wrappedApp = session(app)
     
     const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
-    return wrappedApp.post('/api/testsignin').send({userId: user1._id})
+    return wrappedApp.post('/api/sessions/testsignin').send({userId: user1._id})
       .then(_ => {
         return collection.save()
       })
@@ -173,7 +173,7 @@ describe('App', () => {
       start: "43",
       end: "49"
     }
-    return wrappedApp.post('/api/testsignin').send({userId: user1._id})
+    return wrappedApp.post('/api/sessions/testsignin').send({userId: user1._id})
       .then(_ => {
         return collection.save()
       })
@@ -232,7 +232,7 @@ describe('App', () => {
           savedClips.push(newClip)
         })
 
-        return wrappedApp.post('/api/testsignin').send({userId: user1._id})
+        return wrappedApp.post('/api/sessions/testsignin').send({userId: user1._id})
       })
       .then(_ => {
         return wrappedApp.get('/api/me/collections/' + collection._id)
@@ -249,7 +249,7 @@ describe('App', () => {
   it('should create a new collection', () => {
     let wrappedApp = session(app)
     
-    return wrappedApp.post('/api/testsignin').send({userId: user1._id})
+    return wrappedApp.post('/api/sessions/testsignin').send({userId: user1._id})
       .then(_ => {
         return wrappedApp.post('/api/me/collections')
       })
@@ -280,7 +280,7 @@ describe('App', () => {
     }
 
     const wrappedApp = session(app)
-    await wrappedApp.post('/api/testsignin').send({userId: user1._id})
+    await wrappedApp.post('/api/sessions/testsignin').send({userId: user1._id})
     
     const response = await wrappedApp.put('/api/me/collections/' + collection._id + '/order').send(ordering)
     expect(response.status).to.equal(200)
@@ -301,7 +301,7 @@ describe('App', () => {
     }))
         
     const wrappedApp = session(app)
-    await wrappedApp.post('/api/testsignin').send({userId: user1._id})
+    await wrappedApp.post('/api/sessions/testsignin').send({userId: user1._id})
     
     const response = await wrappedApp.delete('/api/me/collections/' + collection._id + '/clips/' + savedClips[0]._id)
     expect(response.status).to.equal(200)
@@ -316,7 +316,7 @@ describe('App', () => {
     await collection.save()
 
     const wrappedApp = session(app)
-    await wrappedApp.post('/api/testsignin').send({userId: user1._id})
+    await wrappedApp.post('/api/sessions/testsignin').send({userId: user1._id})
     
     const response = await wrappedApp.post('/api/me/collections/' + collection._id + '/thumbnail')
           .attach('filepond', dogPicture)
@@ -338,7 +338,7 @@ describe('App', () => {
     await thumbnail.save()
 
     const wrappedApp = session(app)
-    await wrappedApp.post('/api/testsignin').send({userId: user1._id})
+    await wrappedApp.post('/api/sessions/testsignin').send({userId: user1._id})
     
     const response = await wrappedApp.get('/api/me/collections/' + collection._id)
 
@@ -348,13 +348,13 @@ describe('App', () => {
   it('should permit logout', () => {
     let appSession = session(app)
     
-    return appSession.post('/api/testsignin').send({userId: user1._id})
+    return appSession.post('/api/sessions/testsignin').send({userId: user1._id})
       .then(_ => {
         return appSession.get('/api/me/collections')
       })
       .then(response => {
         expect(response.status).to.equal(200)
-        return appSession.get('/api/signout')
+        return appSession.get('/api/sessions/signout')
       })
       .then(response => {
         expect(response.status).to.equal(200)

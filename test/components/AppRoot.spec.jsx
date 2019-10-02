@@ -88,7 +88,7 @@ describe('<AppRoot />', () => {
 
     wrapper.find('.sign-in-container .btn.logout').simulate('click')
     promiseQueue[0]() // sets up ajax assistant and calls .get on it
-    expect(mock$.ajax.calledWithMatch({url: '/api/signout'})).to.be.true
+    expect(mock$.ajax.calledWithMatch({url: '/api/sessions/signout'})).to.be.true
 
     // fake server completion
     mock$.ajax.getCall(0).args[0].success(null)
@@ -114,7 +114,7 @@ describe('<AppRoot />', () => {
     googleUserStub.getAuthResponse.returns({id_token: 'unused_token'})
 
     mockW.onGoogleSignInHook(googleUserStub)
-    expect(mock$.ajax.calledWithMatch({url: '/api/signin', method: 'POST', data: {token: 'unused_token'}})).to.be.true
+    expect(mock$.ajax.calledWithMatch({url: '/api/sessions/signin', method: 'POST', data: {token: 'unused_token'}})).to.be.true
 
     // fake return call from server
     await mock$.ajax.getCall(0).args[0].success({name: 'Mike Rivers', id: 'SomeID'})
