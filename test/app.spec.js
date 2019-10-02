@@ -35,6 +35,7 @@ describe('App', () => {
   }, dogPicture = path.join(__dirname, './support/stockdog.jpg')
 
   before(() => {
+    config.s3.bucket = config.s3.testBucket // Choosing here to do this.
     return mongoose.connect(config.mongo.uri, config.mongo.connectionOpts)
   })
 

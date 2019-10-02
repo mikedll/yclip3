@@ -21,7 +21,8 @@ const envVarsSchema = Joi.object({
   COOKIE_SECRET: Joi.string().required(),
   AWS_ACCESS_KEY_ID: Joi.string(),
   AWS_SECRET_ACCESS_KEY: Joi.string(),
-  AWS_S3_BUCKET: Joi.string()
+  AWS_S3_BUCKET: Joi.string(),
+  TEST_AWS_S3_BUCKET: Joi.string()
 }).unknown().required().when(
   Joi.object({
     NODE_ENV: Joi.exist().equal('test')
@@ -50,7 +51,8 @@ const config = {
   s3: {
     key: envVars.AWS_ACCESS_KEY_ID,
     secret: envVars.AWS_SECRET_ACCESS_KEY,
-    bucket: envVars.AWS_S3_BUCKET
+    bucket: envVars.AWS_S3_BUCKET,
+    testBucket: envVars.AWS_S3_BUCKET
   }
 }
 
