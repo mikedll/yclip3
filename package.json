@@ -13,6 +13,7 @@
     "ctest": "NODE_ENV=test mochapack --require test/components/setup.js --webpack-config ./webpack.config-test.js test/components/*.spec.jsx"
   },
   "dependencies": {
+    "aws-sdk": "^2.540.0",
     "body-parser": "^1.19.0",
     "consolidate": "^0.15.1",
     "cookie-parser": "^1.4.4",

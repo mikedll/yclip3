@@ -20,7 +20,11 @@ ThumbnailSchema.query.forCollection = function(id) {
 }
 
 ThumbnailSchema.methods.path = function() {
-  return path.join(config.localStorageLocation, this.name + '.png')
+  return path.join(config.localStorageLocation, this.relativePath())
+}
+
+ThumbnailSchema.methods.relativePath = function() {
+  return this.name + '.png'
 }
 
 ThumbnailSchema.methods.destroyStoredFile = function() {

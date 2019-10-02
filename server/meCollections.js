@@ -2,13 +2,16 @@
 const express = require('express')
 const app = express.Router()
 
+const underscore = require('underscore')
+const fs = require('fs')
+const AWS = require('aws-sdk')
+
 const ClipCollection = require('./models/clipCollection.js')
 const Clip = require('./models/clip.js')
 const User = require('./models/user.js')
 const Thumbnail = require('./models/thumbnail.js')
-
-const underscore = require('underscore')
 const csrfProtection = require('./csrfProtection.js')
+const config = require('./config.js')
 
 const appUtils = require('./appUtils')
 
@@ -138,15 +141,55 @@ app.post('/:id/thumbnail', async(req, res, next) => {
 
   let thumbnail = new Thumbnail({clipCollection: clipCollection._id, name: clipCollection._id.toString()})
   await thumbnail.save()
-  
-  let saveTo = thumbnail.path()
-  try {
-    await req.files.filepond.mv(saveTo)
-  } catch(e) {
-    next(e)
-    return
+
+  let caughtError
+  if(config.s3.bucket) {
+    AWS.config.update({accessKeyId: config.s3.key, secretAccessKey: config.s3.secret})
+
+    let readDataPromise = new Promise((resolve, reject) => {
+      fs.readFile(req.files.filepond.tempFilePath, (err, data) => {
+        if(err) reject(err)
+        else resolve(data)
+      })
+    })
+
+    let dataTemp
+    try {
+      dataTemp = await readDataPromise
+    } catch(e) {
+      caughtError = e
+      next('error reading temp file: ' + e)        
+    }
+
+    let s3lib = new AWS.S3()
+    let uploadPromise = new Promise((resolve, reject) => {
+      s3lib.putObject({
+        ACL: 'public-read',
+        Bucket: config.s3.bucket,
+        Key: thumbnail.relativePath(),
+        'ContentType': 'image/png',
+        'ContentLength': dataTemp.byteLength,
+        Body: dataTemp
+      }, (err, data) => {
+        if(err) {
+          reject(err)
+        } else {
+          resolve(data)
+        }
+      })
+    })
+    try {
+      const data = await uploadPromise
+    } catch(e) {
+      caughtError = e
+      next(e)
+    }
+  } else {
+    let saveTo = thumbnail.path()
+    req.files.filepond.mv(saveTo)
   }
 
+  if(caughtError) return
   res
     .status(200)
     .send(thumbnail.name)
