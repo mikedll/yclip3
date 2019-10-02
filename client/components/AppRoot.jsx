@@ -115,7 +115,9 @@ class AppRoot extends Component {
           <PropsRoute path="/collections" exact component={CollectionsBrowser} $={this.props.jQuery}
             globalWindow={this.props.globalWindow} user={this.state.user}/>
           <PropsRoute path="/collections/:id" exact component={CollectionViewer} $={this.props.jQuery} />
-          <PropsRoute path="/me/collections/:id/edit" exact component={CollectionEditor} $={this.props.jQuery}/>
+          <PropsRoute path="/me/collections/:id/edit" exact
+            globalWindow={this.props.globalWindow}
+            component={CollectionEditor} $={this.props.jQuery}/>
         </Switch>
       </div>
     )

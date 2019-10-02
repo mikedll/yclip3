@@ -54,6 +54,7 @@ app.get(/^\/((?!api).)*$/, csrfProtection, async (req, res, next) => {
   }
   
   res.render('index', {
+    imageBucket: config.s3.bucket + '.s3.amazonaws.com',
     csrfToken: req.csrfToken(),
     googleClientId: config.googleClientId,
     user: user ? JSON.stringify(user) : "null"

@@ -3,6 +3,8 @@ const path = require('path')
 const fs = require('fs')
 
 const AWS = require('aws-sdk')
+const gm = require('gm')
+const imageMagick = gm.subClass({imageMagick: true})
 
 const mongoose = require('mongoose')
 const config = require('../config.js')
@@ -32,13 +34,29 @@ ThumbnailSchema.methods.relativePath = function() {
 }
 
 ThumbnailSchema.methods.moveToStorage = async function(remoteS3, filepond) {
-  let caughtError = null
+
+  const processedPath = filepond.tempFilePath + '-processed.png'
+  let processPromise = new Promise((resolve, reject) => {
+    imageMagick(filepond.tempFilePath)
+      .resize(275, 150)
+      .write(processedPath, (err) => {
+        if(err) reject(err)
+        else resolve()
+      })
+  })
+
+  try {
+    await processPromise
+  } catch(e) {
+    return e
+  }
   
+  let caughtError = null
   if(remoteS3) {
     AWS.config.update({accessKeyId: config.s3.key, secretAccessKey: config.s3.secret})
 
     let readDataPromise = new Promise((resolve, reject) => {
-      fs.readFile(filepond.tempFilePath, (err, data) => {
+      fs.readFile(processedPath, (err, data) => {
         if(err) reject(err)
         else resolve(data)
       })
@@ -74,8 +92,20 @@ ThumbnailSchema.methods.moveToStorage = async function(remoteS3, filepond) {
       caughtError = e
     }
   } else {
-    let saveTo = this.diskPath()
-    filepond.mv(saveTo)
+    let renamePromise = new Promise((resolve, reject) => {
+      fs.rename(processedPath, this.diskPath(), (err) => {
+        if(err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
+    try {
+      await renamePromise
+    } catch(err) {
+      caughtError = err
+    }
   }
 
   return caughtError

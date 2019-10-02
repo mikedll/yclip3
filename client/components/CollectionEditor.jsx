@@ -37,7 +37,9 @@ export default class CollectionEditor extends Component {
   fetchCollection() {
     new AjaxAssistant(this.props.$).get('/api/me/collections/' + this.props.match.params.id)
       .then(collection => {
-        this.setState({collection})
+        let newState = {collection}
+        newState.thumbnail = collection.thumbnail ? collection.thumbnail.name : null
+        this.setState(newState)
       })
       .catch(error => {
         this.setState({error})
@@ -199,7 +201,12 @@ export default class CollectionEditor extends Component {
   }
 
   thumbnailUrl() {
-    return this.state.thumbnail ? ('/storage/' + this.state.thumbnail + '.png') : ''
+    if(!this.state.thumbnail) return ''
+
+    if(this.props.globalWindow.imageBucket)
+      return ('http://' + this.props.globalWindow.imageBucket + '/' + this.state.thumbnail + '.png')
+    else      
+      return ('/storage/' + this.state.thumbnail + '.png')
   }
 
   onReplaceThumbnail() {
@@ -273,6 +280,7 @@ export default class CollectionEditor extends Component {
           thumbnailSection = (
             <div className='thumbnail-wrapper'>
               {imgRendered}
+              <br/>
               <a href='#' onClick={this.onReplaceThumbnail}>Upload Thumbnail</a>
             </div>            
           )
