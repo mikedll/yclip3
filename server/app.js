@@ -46,7 +46,7 @@ app.use(fileupload({
 const csrfProtection = require(path.join(__dirname, './csrfProtection.js'))
 const mongoIdRegex = /^[0-9a-fA-F]{24}$/
 
-app.get(/^\/((?!api).)*$/, async (req, res, next) => {
+app.get(/^\/((?!api).)*$/, csrfProtection, async (req, res, next) => {
   let user = null;
   
   if(req.session['userId']) {
