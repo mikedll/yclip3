@@ -327,7 +327,10 @@ describe('App', () => {
     expect(response.res.text).to.match(/[A-Za-z0-9]+/)
 
     let thumbnail = await Thumbnail.findOne({name: response.res.text})
-    expect(thumbnail).to.not.be.null    
+    expect(thumbnail).to.not.be.null
+
+    let err = await thumbnail.destroyStoredFile(config.s3.bucket !== undefined)
+    expect(err).to.be.null
   })
 
   it('should include thumbnail when returning a collection from api', async () => {

@@ -31,10 +31,10 @@ ThumbnailSchema.methods.relativePath = function() {
   return this.name + '.png'
 }
 
-ThumbnailSchema.methods.moveToStorage = async function(filepond) {
+ThumbnailSchema.methods.moveToStorage = async function(remoteS3, filepond) {
   let caughtError = null
   
-  if(config.s3.bucket) {
+  if(remoteS3) {
     AWS.config.update({accessKeyId: config.s3.key, secretAccessKey: config.s3.secret})
 
     let readDataPromise = new Promise((resolve, reject) => {
@@ -80,16 +80,50 @@ ThumbnailSchema.methods.moveToStorage = async function(filepond) {
 
   return caughtError
 }
-ThumbnailSchema.methods.destroyStoredFile = function() {
-  return new Promise((resolve, reject) => {
-    fs.unlink(this.path(), (err) => {
-      if(err) {
-        reject(err)
-      } else {
-        resolve()
-      }
-    })    
-  })  
+ThumbnailSchema.methods.destroyStoredFile = async function(remoteS3) {
+  let caughtError = null
+  
+  if(remoteS3) {
+    AWS.config.update({accessKeyId: config.s3.key, secretAccessKey: config.s3.secret})
+
+    let s3lib = new AWS.S3()
+    let deletePromise = new Promise((resolve, reject) => {
+      s3lib.deleteObject({
+        Bucket: config.s3.bucket,
+        Key: this.relativePath(),
+      }, (err, data) => {
+        if(err) {
+          reject(err)
+        } else {
+          resolve(data)
+        }
+      })
+    })
+    try {
+      const response = await deletePromise
+    } catch(e) {
+      caughtError = e
+    }
+    
+  } else {
+    let deletePromise = new Promise((resolve, reject) => {
+      fs.unlink(this.diskPath(), (err) => {
+        if(err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })    
+    })
+
+    try {
+      await deletePromise
+    } catch(e) {
+      caughtError = e
+    }
+  }
+
+  return caughtError
 }
 
 const Thumbnail = mongoose.model('Thumbnail', ThumbnailSchema)

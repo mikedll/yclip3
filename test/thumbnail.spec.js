@@ -24,7 +24,7 @@ describe('Thumbnail', function() {
 
   after(() => { return mongoose.disconnect() } )
 
-  it('should destroy stored file on destroyStoredFile', (done) => {
+  it('should destroy local disk file on destroyStoredFile', (done) => {
     let user, clipCollection, thumbnail
 
     user = new User(user1attrs)
@@ -38,12 +38,12 @@ describe('Thumbnail', function() {
         return thumbnail.save()
       })
       .then(_ => {
-        const targetFile = thumbnail.path()
+        const targetFile = thumbnail.diskPath()
 
         fs.copyFile(path.join(__dirname, 'support/stockdog.jpg'), targetFile, (err) => {
           if(err) { console.error('failed to copy support file') }
 
-          thumbnail.destroyStoredFile()
+          thumbnail.destroyStoredFile(false)
             .then(_ => {
               fs.access(targetFile, fs.constants.F_OK, (err) => {
                 expect(err.code).to.equal('ENOENT')
