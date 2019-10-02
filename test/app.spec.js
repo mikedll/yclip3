@@ -329,6 +329,7 @@ describe('App', () => {
     let thumbnail = await Thumbnail.findOne({name: response.res.text})
     expect(thumbnail).to.not.be.null
 
+    // cleanup of storage.
     let err = await thumbnail.destroyStoredFile(config.s3.bucket !== undefined)
     expect(err).to.be.null
   })

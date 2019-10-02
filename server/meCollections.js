@@ -149,15 +149,15 @@ app.post('/:id/thumbnail', async(req, res, next) => {
   if(thumbnail) {
     try {
       await thumbnail.destroyStoredFile(config.s3.bucket !== undefined)
+      await Thumbnail.deleteOne({_id: thumbnail._id})
     } catch(e) {
       next(e)
       return
     }
-  } else {
-    thumbnail = new Thumbnail({clipCollection: clipCollection._id, name: clipCollection._id.toString()})
-    await thumbnail.save()
   }
-
+  
+  thumbnail = new Thumbnail({clipCollection: clipCollection._id, name: clipCollection._id.toString()})
+  await thumbnail.save()
   let err = await thumbnail.moveToStorage(config.s3.bucket !== undefined, req.files.filepond)
   if(err) {
     next(err)
