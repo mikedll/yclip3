@@ -34,7 +34,7 @@ class NewCollectionLink extends Component {
 }
 
 const mapStateToProps = state => ({
-  newConnectionId: state.newCollectionId ? state.newCollectionId : null
+  newCollectionId: state.newCollectionId ? state.newCollectionId : null
 })
 
 const mapDispatchToProps = dispatch => ({

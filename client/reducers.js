@@ -59,7 +59,6 @@ function requestingNewCollection(state = false, action) {
 function newCollectionId(state = null, action) {
   switch(action.type) {
   case RECEIVE_NEW_COLLECTION:
-    console.log('new collection received: ', action.collection)
     return action.collection._id
   case START_EDITING_COLLECTION:
     return (action.id === state) ? null : state
