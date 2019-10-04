@@ -6,7 +6,7 @@ import { configure, shallow, mount } from 'enzyme'
 import jQuery from 'jQuery'
 import { spy, stub } from 'sinon'
 
-import AppRoot from 'components/AppRoot.jsx'
+import AppRoot from 'AppRoot.jsx'
 
 describe('<AppRoot />', () => {
 

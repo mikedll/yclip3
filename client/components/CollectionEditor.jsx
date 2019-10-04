@@ -1,14 +1,12 @@
 import update from 'immutability-helper';
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
+
 import underscore from 'underscore'
 import AjaxAssistant from 'AjaxAssistant.jsx'
 import { FilePond } from 'react-filepond'
 import "filepond/dist/filepond.min.css";
 
-import { startEditingCollection } from '../actions.js'
-
-class CollectionEditor extends Component {
+export default class CollectionEditor extends Component {
 
   constructor(props) {
     super(props)
@@ -65,7 +63,7 @@ class CollectionEditor extends Component {
   }
 
   componentDidMount() {
-    this.props.dispatch(startEditingCollection(this.props.match.params.id))
+    this.props.startingEdit(this.props.match.params.id)
     
     if(!this.props.collection) {
       this.fetchCollection()
@@ -74,7 +72,7 @@ class CollectionEditor extends Component {
   
   componentDidUpdate(prevProps, prevState) {
     if(prevProps.match.params.id !== this.props.match.params.id) {
-      this.props.dispatch(startEditingCollection(this.props.match.params.id))
+      this.props.startingEdit(this.props.match.params.id)      
     }
 
     // sometimes we mount the component despite not having its data yet. so we can't do this
@@ -364,8 +362,3 @@ class CollectionEditor extends Component {
     )    
   }
 }
-
-const mapStateToProps = {
-}
-
-export default connect()(CollectionEditor)

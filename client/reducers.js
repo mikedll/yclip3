@@ -10,6 +10,7 @@ import {
 /*
 
 state = {
+  loggedInUser: null || {_id: 'adsf1', name: 'mike rivers'},
   clips: [{
     id: 'asdfclip1',
     clipId: 'asdfasf2',
@@ -25,8 +26,7 @@ state = {
   }],
   collectionBeingEdited: 'asdf',
   collectionBeingViewed: 'asdf',
-  requestingNewCollection: false,
-  newCollectionId: null || 'adsf3'
+    newCollectionId: null || 'adsf3'
 }
 
 */
