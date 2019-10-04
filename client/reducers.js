@@ -12,14 +12,16 @@ import {
 state = {
   clips: [{
     id: 'asdfclip1',
+    clipId: 'asdfasf2',
     start: something
     end: something else
     vid: blahvid
   }],
   collections: [{
+    userId: 'asdf1',
     id: 'asdf',
     name: 'My collection',
-    clips: ['asfdclip1']
+    isPublic: true
   }],
   collectionBeingEdited: 'asdf',
   collectionBeingViewed: 'asdf',
