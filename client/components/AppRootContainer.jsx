@@ -1,14 +1,15 @@
 
 import React, { Component} from 'react'
 import { BrowserRouter as Router } from 'react-router-dom';
-import { createStore } from 'redux'
+import { createStore, applyMiddleware } from 'redux'
 import { Provider } from 'react-redux'
+import thunkMiddleware from 'redux-thunk'
 
 import AppRoot from 'components/AppRoot.jsx'
 
 import { rootReducer } from '../reducers.js'
 
-const store = createStore( rootReducer )
+const store = createStore( rootReducer, applyMiddleware(thunkMiddleware))
 
 // This container helps with testing the AppRoot.
 class AppRootContainer extends Component {

@@ -1,11 +1,14 @@
 import update from 'immutability-helper';
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import underscore from 'underscore'
 import AjaxAssistant from 'AjaxAssistant.jsx'
 import { FilePond } from 'react-filepond'
 import "filepond/dist/filepond.min.css";
 
-export default class CollectionEditor extends Component {
+import { startEditingCollection } from '../actions.js'
+
+class CollectionEditor extends Component {
 
   constructor(props) {
     super(props)
@@ -46,12 +49,6 @@ export default class CollectionEditor extends Component {
       })    
   }
   
-  componentDidMount() {
-    if(!this.props.collection) {
-      this.fetchCollection()
-    }
-  }
-
   sortChanged(e, ui) {
     let idToPos = {}
     this.props.$(this.tbodyEl).find('tr').each((i, el) => {
@@ -66,8 +63,21 @@ export default class CollectionEditor extends Component {
         this.setState({error})
       })
   }
+
+  componentDidMount() {
+    this.props.dispatch(startEditingCollection(Number(this.props.match.params.id)))
+    
+    if(!this.props.collection) {
+      this.fetchCollection()
+    }
+  }
   
   componentDidUpdate(prevProps, prevState) {
+    if(prevProps.match.params.id !== this.props.match.params.id) {
+      // stop infinite redirect loop in NewCollectionLink's redirect
+      this.props.dispatch(startEditingCollection(Number(this.props.match.params.id)))
+    }
+
     // sometimes we mount the component despite not having its data yet. so we can't do this
     // in componentDidMount.
     const $this = this
@@ -356,3 +366,7 @@ export default class CollectionEditor extends Component {
   }
 }
 
+const mapStateToProps = {
+}
+
+export default connect()(CollectionEditor)

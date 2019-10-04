@@ -4,8 +4,8 @@ import { Link, Route, Switch } from 'react-router-dom';
 
 import AjaxAssistant from 'AjaxAssistant.jsx'
 import CollectionViewer from 'components/CollectionViewer.jsx'
-import CollectionEditor from 'components/CollectionEditor.jsx'
-import NewCollectionLink from 'components/NewCollectionLink.jsx'
+import CollectionEditor from 'containers/CollectionEditor.jsx'
+import NewCollectionLink from 'containers/NewCollectionLink.jsx'
 import CollectionsBrowser from 'components/CollectionsBrowser.jsx'
 
 const renderMergedProps = (component, ...rest) => {
