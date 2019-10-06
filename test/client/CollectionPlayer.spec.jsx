@@ -5,9 +5,9 @@ import { expect } from 'chai'
 import { mount } from 'enzyme'
 import { MemoryRouter } from 'react-router-dom'
 
-import CollectionViewer from 'components/CollectionViewer.jsx'
+import CollectionPlayer from 'components/CollectionPlayer.jsx'
 
-describe('<CollectionViewer/>', function() {
+describe('<CollectionPlayer/>', function() {
   let clip1 = {
     _id: "asdf1",
     vid:"Iwuy4hHO3YQ",
@@ -29,7 +29,7 @@ describe('<CollectionViewer/>', function() {
     mock$.ajax = spy()
     const mockMatch = { params: { id: clipCollection1._id } }
     const wrapper = mount(
-      <CollectionViewer $={mock$} match={mockMatch}/>
+      <CollectionPlayer $={mock$} match={mockMatch}/>
     )
 
     expect(mock$.ajax.calledWithMatch({url: '/api/collections/' + clipCollection1._id})).to.be.true

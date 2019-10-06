@@ -4,7 +4,10 @@ import { combineReducers } from 'redux'
 import {
   REQUEST_NEW_COLLECTION,
   RECEIVE_NEW_COLLECTION,
-  START_EDITING_COLLECTION
+  START_EDITING_COLLECTION,
+  REQUEST_COLLECTION_PLAY,
+  RECEIVED_COLLECTION_FOR_PLAY,
+  GOTO_NEXT_CLIP
 } from './actions.js'
 
 /*
@@ -12,21 +15,39 @@ import {
 state = {
   loggedInUser: null || {_id: 'adsf1', name: 'mike rivers'},
   clips: [{
-    id: 'asdfclip1',
-    clipId: 'asdfasf2',
-    start: something
-    end: something else
-    vid: blahvid
-  }],
+      id: 'asdfclip1',
+      clipCollection: 'asdf1',
+      start: something,
+      end: something else,
+      vid: blahvid,
+      position: 1
+    },
+    {
+      id: 'asdfclip2',
+      clipCollection: 'asdf1',
+      start: something,
+      end: something else,
+      vid: blahvid,
+      position: 2
+    }
+  ],
   collections: [{
     userId: 'asdf1',
     id: 'asdf',
     name: 'My collection',
-    isPublic: true
+    isPublic: true,
   }],
   collectionBeingEdited: 'asdf',
   collectionBeingViewed: 'asdf',
-    newCollectionId: null || 'adsf3'
+  newCollectionId: null || 'adsf3',
+  collectionPlayRequested: null | 'asdf1',
+  playing: null | {
+    playerLoaded: false,
+    collection: 'adsf1',
+    clipIndex: 2,
+    seeking: false,
+    clipCheck: ClipCheckState.pending || ClipCheckState.due
+  }
 }
 
 */
@@ -69,9 +90,33 @@ function newCollectionId(state = null, action) {
   }
 }
 
+
+function collectionPlayRequested(state = null, action) {
+  switch(action.type) {
+  case REQUEST_COLLECTION_PLAY:
+    return action.id
+  case RECEIVED_COLLECTION_FOR_PLAY:
+    return (action.collection._id === state) ? null : state
+  default:
+    return state
+  }
+}
+
+function playing(state = null, action) {
+  switch(action.type) {
+  case GOTO_NEXT_CLIP:
+    const next = {clipCheckNeeded: false}
+    return (state === null) ? next : {...state, ...next}
+  default:
+    return state
+  }
+}
+
 export const rootReducer = combineReducers({
   clips,
   collections,
   requestingNewCollection,
-  newCollectionId
+  newCollectionId,
+  collectionPlayRequested,
+  playing
 })

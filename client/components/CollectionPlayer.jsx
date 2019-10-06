@@ -1,9 +1,8 @@
 
 import React from 'react';
-import CollectionForm from './CollectionForm.jsx'
 import AjaxAssistant from 'AjaxAssistant.jsx'
 
-class CollectionViewer extends React.Component {
+class CollectionPlayer extends React.Component {
 
   constructor(props) {
     super(props)
@@ -17,8 +16,6 @@ class CollectionViewer extends React.Component {
       error: ""
     }
     
-    if(this.props.collection) this.state.collection = this.props.collection
-
     this.onPlay = this.onPlay.bind(this)    
     this.onPlayerReady = this.onPlayerReady.bind(this)
     this.onPlayerStateChange = this.onPlayerStateChange.bind(this)
@@ -333,8 +330,6 @@ class CollectionViewer extends React.Component {
     
     return (
       <div className="embedded-player-container">
-        <CollectionForm/>
-
         {errorMsg}
         
         <div id="embedded-player-5"></div>
@@ -352,4 +347,4 @@ class CollectionViewer extends React.Component {
   }
 }
 
-export default CollectionViewer
+export default CollectionPlayer
