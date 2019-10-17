@@ -80,6 +80,11 @@ export const ClipCheckState = {
   DUE: 'DUE'
 }
 
+export const NOT_SEEKING = 'NOT_SEEKING'
+export const notSeeking = () => ({
+  type: NOT_SEEKING
+})
+
 export const CLIP_CHECK_PENDING = 'CLIP_CHECK_PENDING'
 export const CLIP_CHECK_DUE = 'CLIP_CHECK_DUE' // pickup in componentDidUpdate
 export const SHUTDOWN_PLAYER = 'SHUTDOWN_PLAYER'
@@ -96,7 +101,7 @@ const markClipCheckPending = () => {
   }
 }
 
-const curClip = (playing) => {
+export const curClip = (playing) => {
   if(playing.clipIndex === null) return null;
 
   if(playing.clipIndex < playing.collection.clips.length) {

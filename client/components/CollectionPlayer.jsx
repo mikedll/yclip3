@@ -21,36 +21,6 @@ class CollectionPlayer extends React.Component {
     this.onPlayerStateChange = this.onPlayerStateChange.bind(this)
   }
 
-  curClip() {
-    if(this.state.clipIndex === null) return null;
-
-    if(this.state.clipIndex < this.state.collection.clips.length) {
-      const clip = this.state.collection.clips[this.state.clipIndex]
-      
-      return {
-        vid: clip.vid,
-        start: clip.start,
-        end: (clip.start + clip.duration)
-      }
-    }
-    return null
-  }
-
-  calcClipInc(prevState) {
-    if(!prevState.collection) {
-      return {error: "Internal error in player."}
-    }
-    
-    const next = {}
-    if(prevState.clipIndex >= prevState.collection.clips.length - 1) {
-      next.clipIndex = null
-    } else {
-      next.clipIndex = prevState.clipIndex + 1
-    }
-    console.log("set clipIndex=" + next.clipIndex + ", was " + prevState.clipIndex)
-    return next
-  }
-  
   onPlay(e) {
     e.preventDefault()
     if (!this.state.loaded) {
@@ -73,9 +43,9 @@ class CollectionPlayer extends React.Component {
     switch (e.data) {
     case YT.PlayerState.ENDED: {
       dout("player.state.ended")
-      if (this.state.clipIndex !== null && !this.state.seeking) {
+      if (this.props.curClip && !this.props.seeking) {
         // nextClip() will be a noop. This is an opportunity to jump clips.
-        this.setState((prevState) => (this.calcClipInc(prevState)))
+        this.props.onVideoEnd()
       } else {
         dout("clips finished cleanly.")
       }
@@ -112,10 +82,9 @@ class CollectionPlayer extends React.Component {
       dout("player.state.playing.")
       if(this.curClip()) {
         // todo: what if an interrupt is already scheduled?
-        this.setState({seeking: false})
-
-        this.nextClipOrScheduleCheck(this.player.getVideoData().video_id,
-                                     this.player.getCurrentTime())
+        this.props.enteredPlaying()
+        this.props.nextClipOrScheduleCheck(this.player.getVideoData().video_id,
+                                           this.player.getCurrentTime())
       }
       break
     }
@@ -200,8 +169,8 @@ class CollectionPlayer extends React.Component {
         return
       }
       
-      this.nextClipOrScheduleCheck(this.player.getVideoData().video_id,
-                                   this.player.getCurrentTime())
+      this.props.nextClipOrScheduleCheck(this.player.getVideoData().video_id,
+                                         this.player.getCurrentTime())
       return
     }
 

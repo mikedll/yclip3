@@ -10,6 +10,7 @@ import {
   GOTO_NEXT_CLIP,
   CLIP_CHECK_PENDING,
   CLIP_CHECK_DUE,
+  NOT_SEEKING,
   ClipCheckState
 } from './actions.js'
 
@@ -108,6 +109,10 @@ function collectionPlayRequested(state = null, action) {
 function playing(state = null, action) {
   let next
   switch(action.type) {
+  case NOT_SEEKING:
+    // assumes state !== null
+    next = { seeking: false }
+    return {...state, ...next}
   case CLIP_CHECK_PENDING:
     next = { clipCheck: ClipCheckState.PENDING }
     return (state === null) ? next : {...state, ...next }
