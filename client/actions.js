@@ -80,8 +80,9 @@ export const ClipCheckState = {
   DUE: 'DUE'
 }
 
-export const NEXT_CLIP_PENDING = 'NEXT_CLIP_PENDING'
+export const CLIP_CHECK_PENDING = 'CLIP_CHECK_PENDING'
 export const CLIP_CHECK_DUE = 'CLIP_CHECK_DUE' // pickup in componentDidUpdate
+export const SHUTDOWN_PLAYER = 'SHUTDOWN_PLAYER'
 
 function clipCheckDue() {
   return {
@@ -89,39 +90,69 @@ function clipCheckDue() {
   }
 }
 
-/*
- CollectionViewer:
- componentDidUpdate() {
-   if(this.props.clipCheck === ClipCheckState.due) {
-     this.props.tryNextClip(getPlayerCurrentTime())
-   }
- }
+const markClipCheckPending = () => {
+  return {
+    type: CLIP_CHECK_PENDING
+  }
+}
 
-  CollectionViewerBed:
-  dispatch => {
-    tryNextClip: (currentTime) => {
-      dispatch(calcNextClipOrReschedule(currentTime))
+const curClip = (playing) => {
+  if(playing.clipIndex === null) return null;
+
+  if(playing.clipIndex < playing.collection.clips.length) {
+    const clip = playing.collection.clips[playing.clipIndex]
+    
+    return {
+      vid: clip.vid,
+      start: clip.start,
+      end: (clip.start + clip.duration)
     }
   }
-*/
+  return null
+}
 
-export function calcNextClipOrReschedule(currentTime) {
+/*
+ * Keeps scheduling calls to itself once called until the current clip
+ * is done (pos within epsilon of ending).
+ */
+export function nextClipOrMonitor(vid, currentTime) {
   return (dispatch, getState) => {
-    
-    // check time is beyond current clip end,
-    // dispatch(gotoNextClip())
-    // return Promise.resolve() // why are we using promises here again...?
 
-    // else, schedule a timeout to try again at next closest time to end.
-    const timeUntilClipEnds = something
+    const state = getState()
+    const c = curClip(state.playing)
+
+    if(!c) {
+      dout("error: requested timeout without a clip in bounds.")
+      return Promise.resolve()
+    }
+
+    if (vid !== c.vid) {
+      // wrong video. this timeout probably should have been
+      // cleared.
+      dout("critical error: video_id mismatch in nextClip. clear this timeout?")
+      return Promise.resolve()
+    }
+    
+
+    // clip is over?
+    if (currentTime >= c.end) {
+      dispatch(gotoNextClip())
+      return Promise.resolve() // why are we using promises here again...?
+    }
+
+    // schedule a timeout to try again at next closest time to end.
+    const timeUntilClipEnds = (c.end - currentTime) * 1000
     const waitForClipPromise = new Promise((resolve, reject) => {
       dispatch(markClipCheckPending())
+      // todo: Have to start capturing the return values
+      // to prevent users from causing infinite
+      // timeouts by repetitively clicking the play clips button.
       setTimeout(() => resolve(), timeUntilClipEnds)
     })
     waitForClipPromise.then(() => {
       dispatch(clipCheckDue())
     })
-    
-    // if(getState().player && currentClipTime )
+
+    return waitForClipPromise
   }
 }

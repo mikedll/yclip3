@@ -51,53 +51,6 @@ class CollectionPlayer extends React.Component {
     return next
   }
   
-  /*
-   * Keeps calling itself once called until the current clip
-   * is done (pos is within epsilon of ending).
-   */
-  nextClipOrReschedule() {
-    if(!this.state.loaded) {
-      dout("error: trying to interrupt while not yet loaded.")
-      return
-    }
-
-    if(this.player.getPlayerState() !== YT.PlayerState.PLAYING) {
-      // Let player state change schedule an interrupt.
-      // Video might have started buffering.
-      // Could be something else.
-      return
-    }
-    
-    const c = this.curClip()
-    if(!c) {
-      dout("error: requested timeout without a clip in bounds.")
-      return
-    }
-
-    if (this.player.getVideoData().video_id !== c.vid) {
-      // wrong video. this timeout probably should have been
-      // cleared.
-      dout("critical error: video_id mismatch in nextClip. clear this timeout?")
-      return
-    }
-
-    const pos = this.player.getCurrentTime()
-    dout("nextClip: pos=" + (Math.round(pos * 100) / 100))
-    if (pos < c.end) {
-      // Time left, so schedule interrupt (make a timeout)
-      dout("setting time out for " + (Math.round((c.end - pos) * 100) / 100) + " c.end=" + c.end)
-      // Have to start capturing the return values
-      // to prevent users from causing infinite
-      // timeouts by repetitively clicking the play clips button.
-      setTimeout(() => {
-        this.nextClipOrReschedule()
-      }, (c.end - pos) * 1000)
-    } else {
-      dout("nextClip() succeeded on clip " + this.state.clipIndex)
-      this.setState((prevState) => (this.calcClipInc(prevState)))
-    }
-  }
-
   onPlay(e) {
     e.preventDefault()
     if (!this.state.loaded) {
@@ -160,7 +113,9 @@ class CollectionPlayer extends React.Component {
       if(this.curClip()) {
         // todo: what if an interrupt is already scheduled?
         this.setState({seeking: false})
-        this.nextClipOrReschedule()
+
+        this.nextClipOrScheduleCheck(this.player.getVideoData().video_id,
+                                     this.player.getCurrentTime())
       }
       break
     }
@@ -231,7 +186,25 @@ class CollectionPlayer extends React.Component {
       this.tryRetrieveAndMountPlayer()
       return
     }
-    
+
+    if(this.props.clipCheckIsDue) {
+      if(!this.state.loaded) {
+        dout("error: trying to interrupt while not yet loaded.")
+        return
+      }    
+
+      if(this.player.getPlayerState() !== YT.PlayerState.PLAYING) {
+        // Let player state change schedule an interrupt.
+        // Video might have started buffering.
+        // Could be something else.
+        return
+      }
+      
+      this.nextClipOrScheduleCheck(this.player.getVideoData().video_id,
+                                   this.player.getCurrentTime())
+      return
+    }
+
     const seekIfNew = function(prevState, curState) {
       if (prevState.clipIndex !== curState.clipIndex) {
         // clip change

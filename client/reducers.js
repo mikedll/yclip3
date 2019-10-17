@@ -7,7 +7,10 @@ import {
   START_EDITING_COLLECTION,
   REQUEST_COLLECTION_PLAY,
   RECEIVED_COLLECTION_FOR_PLAY,
-  GOTO_NEXT_CLIP
+  GOTO_NEXT_CLIP,
+  CLIP_CHECK_PENDING,
+  CLIP_CHECK_DUE,
+  ClipCheckState
 } from './actions.js'
 
 /*
@@ -43,7 +46,7 @@ state = {
   collectionPlayRequested: null | 'asdf1',
   playing: null | {
     playerLoaded: false,
-    collection: 'adsf1',
+    collection: 'adsf1',  // may hold clips
     clipIndex: 2,
     seeking: false,
     clipCheck: ClipCheckState.pending || ClipCheckState.due
@@ -103,10 +106,19 @@ function collectionPlayRequested(state = null, action) {
 }
 
 function playing(state = null, action) {
+  let next
   switch(action.type) {
+  case CLIP_CHECK_PENDING:
+    next = { clipCheck: ClipCheckState.PENDING }
+    return (state === null) ? next : {...state, ...next }
   case GOTO_NEXT_CLIP:
-    const next = {clipCheckNeeded: false}
-    return (state === null) ? next : {...state, ...next}
+    // assumes state !== null
+    if(state.clipIndex >= state.collection.clips.length - 1) {
+      next = {clipIndex: null}
+    } else {
+      next = {clipIndex: state.clipIndex + 1}
+    }
+    return {...state, ...next}
   default:
     return state
   }
