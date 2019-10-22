@@ -11,18 +11,17 @@ import {
   fetchingCollection,
   fetchCollectionToPlay,
   shutdownPlayer,
-  jumpToForPlay,
-  ytLoaded
+  jumpToForPlay
 } from '../actions.js'
 
 import underscore from 'underscore'
 
 import CollectionPlayer from '../components/CollectionPlayer.jsx'
 
-const mapStateToProps = state => {
+const mapStateToProps = (state, ownProps) => {
   const clipCheckIsDue = (state.playing.clipCheck === ClipCheckState.DUE)
   const propCurClip = curClip(state.playing)
-  return {...state.playing, clipCheckIsDue, curClip: propCurClip, fetching: state.collectionPlayRequested }
+  return {...state.playing, clipCheckIsDue, curClip: propCurClip, fetching: state.collectionPlayRequested, ...ownProps }
 }
 
 const mapDispatchToProps = (dispatch) => ({
@@ -46,9 +45,6 @@ const mapDispatchToProps = (dispatch) => ({
   },
   jumpTo: (index) => {
     dispatch(jumpToForPlay(index))
-  },
-  ytLoaded: () => {
-    dispatch(ytLoaded())
   }
 })
 

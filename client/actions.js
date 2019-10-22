@@ -69,16 +69,16 @@ export function fetchCollectionToPlay($, id) {
     
     if(getState().collectionPlayRequested) return Promise.resolve()
     dispatch(requestCollectionPlay(id))
-    new AjaxAssistant($).get('/api/collections' + id)
+    new AjaxAssistant($).get('/api/collections/' + id)
       .then(collection => { dispatch(receiveCollectionForPlay(collection)) },
             error => {
-              playingError(error)
+              dispatch(playingError(error))
               console.log("An error occurred while fetching a collecdtion")
             })
   }
 }
 
-const GOTO_NEXT_CLIP = 'PLAYER_GOTO_NEXT_CLIP'
+export const GOTO_NEXT_CLIP = 'GOTO_NEXT_CLIP'
 
 export function gotoNextClip() {
   return {

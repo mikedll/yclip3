@@ -8,9 +8,10 @@ class CollectionPlayer extends React.Component {
     super(props)
 
     this.state = {
-      player: null,      // did the YT player become defined and start loading?
       loaded: false,     // did the YT player become ready?
     }
+
+    this.player = null
     
     this.onPlay = this.onPlay.bind(this)    
     this.onPlayerReady = this.onPlayerReady.bind(this)
@@ -96,7 +97,7 @@ class CollectionPlayer extends React.Component {
         // No clips to play :(
         return;
       }
-      
+
       window.ytPlayer = this.player = new YT.Player('embedded-player-5', {
         height: '390',
         width: '640',
@@ -110,7 +111,7 @@ class CollectionPlayer extends React.Component {
     
     if(window.ytApiLoaded) {
       mountPlayer()
-    } else {
+    } else if (!window.ytApiLoadedHook) {
       window.ytApiLoadedHook = () => {
         mountPlayer()
       }
@@ -120,25 +121,21 @@ class CollectionPlayer extends React.Component {
 
   tryRetrieveAndMountPlayer() {
     if(!this.player) {
-      // Why not? Missing a collection? Or just missing the player?
-      if(!this.props.collection && !this.props.fetching) {
-        this.props.fetch(this.$, this.props.match.params.id)
-      } else if (this.props.collection){
-        this.scheduleMountPlayer()
-        return
-      } else {
-        // collection does not exist, but was retrieving. Future render will call this again
-        // via componentDidUpdate.
-        return
-      }
+      this.scheduleMountPlayer()
     }
   }
   
   componentDidMount() {
-    this.tryRetrieveAndMountPlayer()
   }
   
   componentDidUpdate(prevProps, prevState, snapshot) {
+    if(!this.props.collection && !this.props.fetching) {
+      this.props.fetch(this.props.$, this.props.match.params.id)
+      return
+    } else if(!this.props.collection && this.props.fetching) {
+      return
+    }
+
     if(!this.player) {
       this.tryRetrieveAndMountPlayer()
       return

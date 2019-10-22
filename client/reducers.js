@@ -111,8 +111,19 @@ function collectionPlayRequested(state = null, action) {
 }
 
 function playing(state = null, action) {
+  if(state === null) {
+    state = {
+      error: "",
+      collection: null,
+      clipIndex: null,
+      seeking: false,
+      clipCheck: null
+    }
+  }
   let next
   switch(action.type) {
+  case RECEIVED_COLLECTION_FOR_PLAY:
+    return {...state, ...{collection: action.collection, clipIndex: null, clipCheck: null, seeking: false, error: ""}}
   case JUMP_TO_CLIP_FOR_PLAY:
     return {...state, ...{clipIndex: action.index}}
   case SHUTDOWN_PLAYER:
@@ -122,12 +133,9 @@ function playing(state = null, action) {
   case SEEKING_TO_CLIP:
     return {...state, ...{seeking: true}}
   case NOT_SEEKING:
-    // assumes state !== null
-    next = { seeking: false }
-    return {...state, ...next}
+    return {...state, ...{ seeking: false }}
   case CLIP_CHECK_PENDING:
-    next = { clipCheck: ClipCheckState.PENDING }
-    return (state === null) ? next : {...state, ...next }
+    return {...state, ...{clipCheck: ClipCheckState.PENDING} }
   case GOTO_NEXT_CLIP:
     // assumes state !== null
     if(state.clipIndex >= state.collection.clips.length - 1) {
