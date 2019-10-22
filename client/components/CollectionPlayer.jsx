@@ -119,14 +119,19 @@ class CollectionPlayer extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if(!this.props.collection && !this.props.fetching) {
+  componentDidMount() {
+    if(!this.props.collection ||
+       (this.props.collection._id !== this.props.match.params.id)) {
       this.props.fetch(this.props.$, this.props.match.params.id)
       return
-    } else if(!this.props.collection && this.props.fetching) {
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if(this.props.fetching) {
       return
     }
-
+    
     if(!this.player) {
       this.scheduleMountPlayer()
       return

@@ -122,8 +122,10 @@ function playing(state = null, action) {
   }
   let next
   switch(action.type) {
+  case REQUEST_COLLECTION_PLAY:
+    return {...state, ...{collection: null, clipIndex: null, clipCheck: null, seeking: false, error: ""}}
   case RECEIVED_COLLECTION_FOR_PLAY:
-    return {...state, ...{collection: action.collection, clipIndex: null, clipCheck: null, seeking: false, error: ""}}
+    return {...state, ...{collection: action.collection}}
   case JUMP_TO_CLIP_FOR_PLAY:
     return {...state, ...{clipIndex: action.index}}
   case SHUTDOWN_PLAYER:
