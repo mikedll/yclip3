@@ -9,11 +9,7 @@ class CollectionPlayer extends React.Component {
 
     this.state = {
       player: null,      // did the YT player become defined and start loading?
-      loaded: false,     // did the YT player load?
-      clipIndex: null,
-      seeking: false,
-      retrieving: false, // are we fetching data from server?
-      error: ""
+      loaded: false,     // did the YT player become ready?
     }
     
     this.onPlay = this.onPlay.bind(this)    
@@ -28,11 +24,11 @@ class CollectionPlayer extends React.Component {
       return
     }
 
-    dout("onPlay.clipIndex=" + this.state.clipIndex)
-    if(this.state.clipIndex === null || this.state.clipIndex >= this.state.collection.clips.length) {
+    dout("onPlay.clipIndex=" + this.props.clipIndex)
+    if(this.props.clipIndex === null || this.props.clipIndex >= this.props.collection.clips.length) {
       dout("onPlay.calling setState")
-      this.setState({clipIndex: 0})
-    }    
+      this.props.jumpTo(0)
+    }
   }
 
   onPlayerReady(e) {
@@ -54,11 +50,11 @@ class CollectionPlayer extends React.Component {
     case YT.PlayerState.CUED: {
       dout("player.state.cued")
       // Handle nextClipJump to new video.
-      const c = this.curClip()
+      const c = this.props.curClip
       if(c) {
         if(this.player.getVideoData().video_id !== c.vid) {
           dout("very unexpected. cued video that isn't for current clip. shutting clips down.")
-          this.setState({clipIndex: null})
+          this.props.shutdown()
         } else {
           this.player.playVideo()
         }
@@ -80,7 +76,7 @@ class CollectionPlayer extends React.Component {
     }
     case YT.PlayerState.PLAYING: {
       dout("player.state.playing.")
-      if(this.curClip()) {
+      if(this.props.curClip) {
         // todo: what if an interrupt is already scheduled?
         this.props.enteredPlaying()
         this.props.nextClipOrScheduleCheck(this.player.getVideoData().video_id,
@@ -96,7 +92,7 @@ class CollectionPlayer extends React.Component {
 
   scheduleMountPlayer() {
     const mountPlayer = () => {
-      if(this.state.collection.clips.length === 0) {
+      if(this.props.collection.clips.length === 0) {
         // No clips to play :(
         return;
       }
@@ -104,7 +100,7 @@ class CollectionPlayer extends React.Component {
       window.ytPlayer = this.player = new YT.Player('embedded-player-5', {
         height: '390',
         width: '640',
-        videoId: this.state.collection.clips[0].vid,
+        videoId: this.props.collection.clips[0].vid,
         events: {
           'onReady': this.onPlayerReady,
           'onStateChange': this.onPlayerStateChange
@@ -119,23 +115,15 @@ class CollectionPlayer extends React.Component {
         mountPlayer()
       }
       window.ytApiLoadedHook = window.ytApiLoadedHook.bind(this)
-    }    
+    }
   }
 
   tryRetrieveAndMountPlayer() {
     if(!this.player) {
       // Why not? Missing a collection? Or just missing the player?
-      if(!this.state.collection && !this.state.retrieving) {
-        this.setState({error: "", retrieving: true})
-        new AjaxAssistant(this.props.$).get('/api/collections/' + this.props.match.params.id)
-          .then((data) => {
-            this.setState({collection: data})
-          })
-          .catch(error => {
-            this.setState({error})
-          })
-        return
-      } else if (this.state.collection){
+      if(!this.props.collection && !this.props.fetching) {
+        this.props.fetch(this.$, this.props.match.params.id)
+      } else if (this.props.collection){
         this.scheduleMountPlayer()
         return
       } else {
@@ -143,7 +131,7 @@ class CollectionPlayer extends React.Component {
         // via componentDidUpdate.
         return
       }
-    }    
+    }
   }
   
   componentDidMount() {
@@ -174,13 +162,13 @@ class CollectionPlayer extends React.Component {
       return
     }
 
-    const seekIfNew = function(prevState, curState) {
-      if (prevState.clipIndex !== curState.clipIndex) {
+    const seekIfNew = function(prevProps, curProps) {
+      if (prevProps.clipIndex !== curProps.clipIndex) {
         // clip change
-        const c = this.curClip()
+        const c = curProps.curClip
         if (this.player.getVideoData().video_id !== c.vid) {
           dout(`indexChange -> cueing(${c.vid})`)
-          this.setState({seeking: true})
+          this.props.seeking()
           this.player.cueVideoById({videoId:c.vid, startSeconds: c.start, endSeconds: c.end})
         } else {
           this.player.seekTo(c.start, true)
@@ -191,7 +179,7 @@ class CollectionPlayer extends React.Component {
     const s = this.player.getPlayerState()
     switch (s) {
     case YT.PlayerState.ENDED: {
-      if(prevState.clipIndex === prevState.collection.clips.length && this.state.clipIndex === null) {
+      if(prevProps.clipIndex === prevProps.collection.clips.length && this.props.clipIndex === null) {
         // Clips finished.
         dout("successful finish")
         break
@@ -205,11 +193,11 @@ class CollectionPlayer extends React.Component {
     }
     case YT.PlayerState.PLAYING: {
       dout("didUpdate.playing")
-      if(prevState.clipIndex !== null && this.state.clipIndex === null) {
+      if(prevProps.clipIndex !== null && this.props.clipIndex === null) {
         // Clips finished.
         this.player.pauseVideo()
       } else {
-        seekIfNew.call(this, prevState, this.state)
+        seekIfNew.call(this, prevProps, this.props)
       }
 
       break
@@ -222,19 +210,23 @@ class CollectionPlayer extends React.Component {
   }
 
   componentWillUnmount() {
+    if(!window.ytApiLoaded && window.ytApiLoadedHook) {
+      window.ytApiLoadedHook = function(){}
+    }
+    
     if(this.state.loaded) {
       this.player.destroy()
     }
   }
 
   canPlayClips() {
-    return (this.state.collection && this.state.loaded && this.state.collection.clips.length > 0)
+    return (this.props.collection && this.props.collection.clips.length > 0 && this.state.loaded)
   }
 
   render() {
     // dout("invoked render")
     let btnMsg
-    if(this.state.collection && this.state.collection.clips.length === 0) {
+    if(this.props.collection && this.props.collection.clips.length === 0) {
       btnMsg = "No Clips in Compilation"
     } else if (this.state.loaded) {
       btnMsg = "Roll Clips"
@@ -242,8 +234,8 @@ class CollectionPlayer extends React.Component {
       btnMsg = "Loading..."
     }
 
-    const rows = !this.state.collection ? null : this.state.collection.clips.map((c, i) => (
-      <tr key={i} className={"" + ((this.state.clipIndex !== null && this.state.clipIndex === i) ? 'active' : '')}>
+    const rows = !this.props.collection ? null : this.props.collection.clips.map((c, i) => (
+      <tr key={i} className={"" + ((this.props.clipIndex !== null && this.props.clipIndex === i) ? 'active' : '')}>
         <td>{c.vid}</td>
         <td>{c.start}s</td>
         <td>{c.duration}s</td>
@@ -264,9 +256,9 @@ class CollectionPlayer extends React.Component {
         </table>
     )
 
-    const errorMsg = (this.state.error === "") ? "" : (
+    const errorMsg = (this.props.error === "") ? "" : (
       <div className="alert alert-danger">
-        {this.state.error}
+        {this.props.error}
       </div>
     )
     

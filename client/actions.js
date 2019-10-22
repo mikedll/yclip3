@@ -45,6 +45,14 @@ export function requestCollectionPlay(id) {
 }
 
 export const RECEIVED_COLLECTION_FOR_PLAY = 'RECEIVED_COLLECTION_FOR_PLAY'
+export const PLAYING_ERROR = 'PLAYING_ERROR'
+
+function playingError(error) {
+  return {
+    type: PLAYING_ERROR,
+    error
+  }
+}
 
 function receiveCollectionForPlay(collection) {
   return {
@@ -61,9 +69,12 @@ export function fetchCollectionToPlay($, id) {
     
     if(getState().collectionPlayRequested) return Promise.resolve()
     dispatch(requestCollectionPlay(id))
-    new AjaxAssistant($).get('/api/collections')
+    new AjaxAssistant($).get('/api/collections' + id)
       .then(collection => { dispatch(receiveCollectionForPlay(collection)) },
-            error => console.log("An error occurred while fetching a collecdtion"))
+            error => {
+              playingError(error)
+              console.log("An error occurred while fetching a collecdtion")
+            })
   }
 }
 
@@ -88,6 +99,19 @@ export const notSeeking = () => ({
 export const CLIP_CHECK_PENDING = 'CLIP_CHECK_PENDING'
 export const CLIP_CHECK_DUE = 'CLIP_CHECK_DUE' // pickup in componentDidUpdate
 export const SHUTDOWN_PLAYER = 'SHUTDOWN_PLAYER'
+export const JUMP_TO_CLIP_FOR_PLAY = 'JUMP_TO_CLIP_FOR_PLAY'
+export const YT_LOADED = 'YT_LOADED'
+
+export const jumpToForPlay = (index) => {
+  return {
+    type: JUMP_TO_CLIP_FOR_PLAY,
+    index
+  }
+}
+
+export const shutdownPlayer = () => ({
+  type: SHUTDOWN_PLAYER
+})
 
 function clipCheckDue() {
   return {
@@ -159,5 +183,13 @@ export function nextClipOrMonitor(vid, currentTime) {
     })
 
     return waitForClipPromise
+  }
+}
+
+export const SEEKING_TO_CLIP = 'SEEKING_TO_CLIP'
+
+export const seekingToClip = () => {
+  return {
+    type: SEEKING_TO_CLIP
   }
 }

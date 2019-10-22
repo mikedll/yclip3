@@ -7,11 +7,15 @@ import {
   START_EDITING_COLLECTION,
   REQUEST_COLLECTION_PLAY,
   RECEIVED_COLLECTION_FOR_PLAY,
+  PLAYING_ERROR,
   GOTO_NEXT_CLIP,
   CLIP_CHECK_PENDING,
   CLIP_CHECK_DUE,
+  SHUTDOWN_PLAYER,
   NOT_SEEKING,
-  ClipCheckState
+  ClipCheckState,
+  SEEKING_TO_CLIP,
+  JUMP_TO_CLIP_FOR_PLAY
 } from './actions.js'
 
 /*
@@ -46,11 +50,11 @@ state = {
   newCollectionId: null || 'adsf3',
   collectionPlayRequested: null | 'asdf1',
   playing: null | {
-    playerLoaded: false,
+    error: "",
     collection: 'adsf1',  // may hold clips
-    clipIndex: 2,
+    clipIndex: 2 || null,
     seeking: false,
-    clipCheck: ClipCheckState.pending || ClipCheckState.due
+    clipCheck: null || ClipCheckState.pending || ClipCheckState.due
   }
 }
 
@@ -109,6 +113,14 @@ function collectionPlayRequested(state = null, action) {
 function playing(state = null, action) {
   let next
   switch(action.type) {
+  case JUMP_TO_CLIP_FOR_PLAY:
+    return {...state, ...{clipIndex: action.index}}
+  case SHUTDOWN_PLAYER:
+    return {...state, ...{clipIndex: null, clipCheckDue: null}}
+  case PLAYING_ERROR:
+    return {...state, ...{error: action.error}}
+  case SEEKING_TO_CLIP:
+    return {...state, ...{seeking: true}}
   case NOT_SEEKING:
     // assumes state !== null
     next = { seeking: false }
