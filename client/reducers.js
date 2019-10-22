@@ -134,16 +134,17 @@ function playing(state = null, action) {
     return {...state, ...{seeking: true}}
   case NOT_SEEKING:
     return {...state, ...{ seeking: false }}
+  case CLIP_CHECK_DUE:
+    return {...state, ...{clipCheck: ClipCheckState.DUE} }
   case CLIP_CHECK_PENDING:
     return {...state, ...{clipCheck: ClipCheckState.PENDING} }
   case GOTO_NEXT_CLIP:
-    // assumes state !== null
     if(state.clipIndex >= state.collection.clips.length - 1) {
       next = {clipIndex: null}
     } else {
       next = {clipIndex: state.clipIndex + 1}
     }
-    return {...state, ...next}
+    return {...state, ...{clipCheck: null}, ...next}
   default:
     return state
   }

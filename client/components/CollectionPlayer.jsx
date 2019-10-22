@@ -119,15 +119,6 @@ class CollectionPlayer extends React.Component {
     }
   }
 
-  tryRetrieveAndMountPlayer() {
-    if(!this.player) {
-      this.scheduleMountPlayer()
-    }
-  }
-  
-  componentDidMount() {
-  }
-  
   componentDidUpdate(prevProps, prevState, snapshot) {
     if(!this.props.collection && !this.props.fetching) {
       this.props.fetch(this.props.$, this.props.match.params.id)
@@ -137,7 +128,7 @@ class CollectionPlayer extends React.Component {
     }
 
     if(!this.player) {
-      this.tryRetrieveAndMountPlayer()
+      this.scheduleMountPlayer()
       return
     }
 
@@ -160,9 +151,9 @@ class CollectionPlayer extends React.Component {
     }
 
     const seekIfNew = function(prevProps, curProps) {
-      if (prevProps.clipIndex !== curProps.clipIndex) {
+      const c = curProps.curClip
+      if (c && prevProps.clipIndex !== curProps.clipIndex) {
         // clip change
-        const c = curProps.curClip
         if (this.player.getVideoData().video_id !== c.vid) {
           dout(`indexChange -> cueing(${c.vid})`)
           this.props.seeking()
@@ -185,7 +176,7 @@ class CollectionPlayer extends React.Component {
     case YT.PlayerState.CUED:
     case YT.PlayerState.UNSTARTED: {
       dout("didUpdate.(ended,cued,unstarted)")
-      seekIfNew.call(this, prevState, this.state)
+      seekIfNew.call(this, prevState, this.props)
       break
     }
     case YT.PlayerState.PLAYING: {
