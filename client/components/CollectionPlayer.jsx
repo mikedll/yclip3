@@ -119,9 +119,13 @@ class CollectionPlayer extends React.Component {
     }
   }
 
+  fetchCollectionRequired() {
+    return (!this.props.collection ||
+            (this.props.collection._id !== this.props.match.params.id))
+  }
+  
   componentDidMount() {
-    if(!this.props.collection ||
-       (this.props.collection._id !== this.props.match.params.id)) {
+    if(this.fetchCollectionRequired()) {
       this.props.fetch(this.props.$, this.props.match.params.id)
       return
     }
@@ -129,6 +133,11 @@ class CollectionPlayer extends React.Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if(this.props.fetching) {
+      return
+    }
+
+    if(this.fetchCollectionRequired()) {
+      this.fetchCollectionIfNecessary()
       return
     }
     
