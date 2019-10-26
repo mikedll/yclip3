@@ -45,8 +45,13 @@ state = {
     name: 'My collection',
     isPublic: true,
   }],
+  browsePagination: {
+    pages: 5,
+    currentPage: 2,
+    count: 40,
+    records: ['asdf1', 'asdf2']
+  },
   collectionBeingEdited: 'asdf',
-  collectionBeingViewed: 'asdf',
   newCollectionId: null || 'adsf3',
   collectionPlayRequested: null | 'asdf1',
   playing: null | {
@@ -67,10 +72,19 @@ function clips(state = [], action) {
   }
 }
 
+function browsePagination(state = {pages: 0, busy: false, currentPage: -1, count: 0, records: []}, action) {
+  switch (action.type) {
+  case RECEIVE_PAGE:
+    return {...state, ...action.stats}
+  default:
+    return state
+  }
+}
+
 function collections(state = [], action) {
   switch (action.type) {
   case RECEIVE_NEW_COLLECTION:
-    return [...state, action.collection]
+    return state // [...state, action.collection]
   default:
     return state
   }
@@ -155,8 +169,9 @@ function playing(state = null, action) {
 export const rootReducer = combineReducers({
   clips,
   collections,
+  browsePagination,
   requestingNewCollection,
   newCollectionId,
   collectionPlayRequested,
-  playing
+  playing  
 })

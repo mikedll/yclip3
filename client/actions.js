@@ -1,6 +1,44 @@
 
 import AjaxAssistant from './AjaxAssistant.jsx'
 
+export const REQUEST_PAGE = 'REQUEST_PAGE'
+export const RECEIVE_PAGE = 'RECEIVE_PAGE'
+export const REQUEST_PAGE_ERROR = 'REQUEST_PAGE_ERROR'
+
+export function requestPage() {
+  return {
+    type: REQUEST_PAGE
+  }
+}
+
+export function receivePage() {
+  return {
+    type: RECEIVE_PAGE
+  }
+}
+
+export function requestPageError(error) {
+  return {
+    type: REQUEST_PAGE,
+    error
+  }
+}
+
+export function fetchBrowsePage($, path, page) {
+  return (dispatch, getState) => {
+    const getState = getState()
+    dispatch(requestPage())
+    const query = ""
+    new AjaxAssistant($).get(path + '?' + query)
+      .then(stats => {
+        dispatch(receivePage(stats))
+      }, error => {
+        dispatch(requestPageError(error))
+      })
+  }
+}
+
+
 export const REQUEST_NEW_COLLECTION = 'REQUEST_NEW_COLLECTION'
 export const RECEIVE_NEW_COLLECTION = 'RECEIVE_NEW_COLLECTION'
 export const START_EDITING_COLLECTION = 'START_EDITING_COLLECTION'
