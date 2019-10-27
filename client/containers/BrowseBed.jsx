@@ -3,8 +3,8 @@ import { connect } from 'react-redux'
 import CollectionBrowser from 'components/CollectionBrowser.jsx'
 import { fetchBrowsePage } from 'actions.js'
 
-const mapStateToProps = state => {
-  return {...state.browsePagination}
+const mapStateToProps = (state, ownProps) => {
+  return {...state.browser, ...ownProps}
 }
 
 const mapDispatchToProps = dispatch => {

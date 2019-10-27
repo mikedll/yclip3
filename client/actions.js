@@ -1,5 +1,6 @@
 
 import AjaxAssistant from './AjaxAssistant.jsx'
+import { serializeObj } from 'UrlHelper.jsx'
 
 export const REQUEST_PAGE = 'REQUEST_PAGE'
 export const RECEIVE_PAGE = 'RECEIVE_PAGE'
@@ -11,15 +12,16 @@ export function requestPage() {
   }
 }
 
-export function receivePage() {
+export function receivePage(res) {
   return {
-    type: RECEIVE_PAGE
+    type: RECEIVE_PAGE,
+    res
   }
 }
 
 export function requestPageError(error) {
   return {
-    type: REQUEST_PAGE,
+    type: REQUEST_PAGE_ERROR,
     error
   }
 }
@@ -28,10 +30,9 @@ export function fetchBrowsePage($, path, page) {
   return (dispatch, getState) => {
     const getState = getState()
     dispatch(requestPage())
-    const query = ""
-    new AjaxAssistant($).get(path + '?' + query)
-      .then(stats => {
-        dispatch(receivePage(stats))
+    new AjaxAssistant($).get(path + '?' + serializeObj({page}))
+      .then(res => {
+        dispatch(receivePage(res))
       }, error => {
         dispatch(requestPageError(error))
       })

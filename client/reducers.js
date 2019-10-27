@@ -1,7 +1,11 @@
 
 import { combineReducers } from 'redux'
+import underscore from 'underscore'
 
 import {
+  REQUEST_PAGE,
+  RECEIVE_PAGE,
+  REQUEST_PAGE_ERROR,
   REQUEST_NEW_COLLECTION,
   RECEIVE_NEW_COLLECTION,
   START_EDITING_COLLECTION,
@@ -45,11 +49,13 @@ state = {
     name: 'My collection',
     isPublic: true,
   }],
-  browsePagination: {
+  browser: {
+    error: "",
+    busy: false,
     pages: 5,
     currentPage: 2,
     count: 40,
-    records: ['asdf1', 'asdf2']
+    collections: ['asdf1', 'asdf2']
   },
   collectionBeingEdited: 'asdf',
   newCollectionId: null || 'adsf3',
@@ -72,10 +78,16 @@ function clips(state = [], action) {
   }
 }
 
-function browsePagination(state = {pages: 0, busy: false, currentPage: -1, count: 0, records: []}, action) {
+function browser(state = {busy: false, error: "", pages: 0, page: -1, total: 0, collections: []}, action) {
   switch (action.type) {
+  case REQUEST_PAGE:
+    return {...state, ...{error: "", busy: true, collections: []}}
   case RECEIVE_PAGE:
-    return {...state, ...action.stats}
+    return {...state,
+            ...underscore.pick(action.res, 'page', 'pages', 'total'),
+            ...{busy: false, collections: action.res.results}}
+  case REQUEST_PAGE_ERROR:
+    return {...state, ...{busy: false, error: action.error}}
   default:
     return state
   }
@@ -169,7 +181,7 @@ function playing(state = null, action) {
 export const rootReducer = combineReducers({
   clips,
   collections,
-  browsePagination,
+  browser,
   requestingNewCollection,
   newCollectionId,
   collectionPlayRequested,
