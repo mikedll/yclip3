@@ -127,14 +127,14 @@ class CollectionPlayer extends React.Component {
   }
   
   componentDidMount() {
-    if(this.fetchCollectionRequired() && !this.props.fetching) {
+    if(this.fetchCollectionRequired() && !this.props.busy) {
       this.props.fetch(this.props.$, this.props.match.params.id)
       return
     }
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if(this.fetchCollectionRequired() && !this.props.fetching) {
+    if(this.fetchCollectionRequired() && !this.props.busy) {
       this.props.fetch(this.props.$, this.props.match.params.id)
       return
     }
@@ -285,13 +285,14 @@ class CollectionPlayer extends React.Component {
 }
 
 CollectionPlayer.propTypes = {
+  $: PropTypes.func.isRequired,
   error: PropTypes.string.isRequired,
   seeking: PropTypes.bool.isRequired,
   collection: PropTypes.object,
   clipIndex: PropTypes.number,
   clipCheck: PropTypes.string,
   curClip: PropTypes.object,
-  fetching: PropTypes.bool.isRequired,
+  busy: PropTypes.bool.isRequired,
   clipCheckIsDue: PropTypes.bool.isRequired,
   onVideoEnd: PropTypes.func.isRequired,
   enteredPlaying: PropTypes.func.isRequired,

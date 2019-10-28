@@ -134,29 +134,27 @@ function newCollectionId(state = null, action) {
   }
 }
 
-function playing(state = null, action) {
-  if(state === null) {
-    state = {
-      error: "",
-      collection: null,
-      clipIndex: null,
-      seeking: false,
-      clipCheck: null,
-      fetching: false
-    }
-  }
+function playing(state = {
+  error: "",
+  collection: null,
+  clipIndex: null,
+  seeking: false,
+  clipCheck: null,
+  busy: false
+}, action) {
+
   let next
   switch(action.type) {
   case REQUEST_COLLECTION_PLAY:
-    return {...state, ...{fetching: true, collection: null, clipIndex: null, clipCheck: null, seeking: false, error: ""}}
+    return {...state, ...{busy: true, collection: null, clipIndex: null, clipCheck: null, seeking: false, error: ""}}
   case RECEIVED_COLLECTION_FOR_PLAY:
-    return {...state, ...{fetching: false, collection: action.collection}}
+    return {...state, ...{busy: false, collection: action.collection}}
   case JUMP_TO_CLIP_FOR_PLAY:
     return {...state, ...{clipIndex: action.index}}
   case SHUTDOWN_PLAYER:
     return {...state, ...{clipIndex: null, clipCheckDue: null}}
   case PLAYING_ERROR:
-    return {...state, ...{fetching: false, error: action.error}}
+    return {...state, ...{busy: false, error: action.error}}
   case SEEKING_TO_CLIP:
     return {...state, ...{seeking: true}}
   case NOT_SEEKING:

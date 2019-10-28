@@ -21,7 +21,7 @@ import CollectionPlayer from '../components/CollectionPlayer.jsx'
 const mapStateToProps = (state, ownProps) => {
   const clipCheckIsDue = (state.playing.clipCheck === ClipCheckState.DUE)
   const propCurClip = curClip(state.playing)
-  return {...state.playing, clipCheckIsDue, curClip: propCurClip, fetching: state.collectionPlayRequested, ...ownProps }
+  return {...state.playing, clipCheckIsDue, curClip: propCurClip, ...ownProps }
 }
 
 const mapDispatchToProps = (dispatch) => ({
