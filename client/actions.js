@@ -28,7 +28,8 @@ export function requestPageError(error) {
 
 export function fetchBrowsePage($, path, page) {
   return (dispatch, getState) => {
-    const getState = getState()
+    const state = getState()
+    if(state.browser.busy) return
     dispatch(requestPage())
     new AjaxAssistant($).get(path + '?' + serializeObj({page}))
       .then(res => {

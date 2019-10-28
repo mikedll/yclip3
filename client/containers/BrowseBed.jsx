@@ -9,7 +9,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    fetchPage: ($, path, page) => dispatch(fetchBrowsePage($, path, page))
+    tryFetchPage: ($, path, page) => dispatch(fetchBrowsePage($, path, page))
   }
 }
 

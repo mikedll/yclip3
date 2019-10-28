@@ -1,6 +1,7 @@
 
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import { getUrlQueryAsObj } from 'UrlHelper.jsx'
 import update from 'immutability-helper';
 import underscore from 'underscore'
@@ -31,8 +32,7 @@ class CollectionsBrowser extends Component {
     const fetchOk = !(this.props.browsePrivate && this.props.error === 'That resource is forbidden to you')
 
     if(fetchRequired && fetchOk) {
-      if(this.props.busy) return
-      this.props.fetchPage(this.props.$, (this.props.browsePrivate ? '/api/me/collections' : '/api/collections'), qPage)
+      this.props.tryFetchPage(this.props.$, (this.props.browsePrivate ? '/api/me/collections' : '/api/collections'), qPage)
     }
   }
 
@@ -106,6 +106,18 @@ class CollectionsBrowser extends Component {
       </div>
     )
   }
+}
+
+CollectionsBrowser.propTypes = {
+  user: PropTypes.object,
+  browsePrivate: PropTypes.bool.isRequired,
+  page: PropTypes.number.isRequired,
+  pages: PropTypes.number.isRequired,
+  total: PropTypes.number.isRequired,
+  error: PropTypes.string.isRequired,
+  busy: PropTypes.bool.isRequired,
+  collections: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
+  tryFetchPage: PropTypes.func.isRequired
 }
 
 export default CollectionsBrowser
