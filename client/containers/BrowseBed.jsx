@@ -1,6 +1,6 @@
 
 import { connect } from 'react-redux'
-import CollectionBrowser from 'components/CollectionBrowser.jsx'
+import CollectionsBrowser from 'components/CollectionsBrowser.jsx'
 import { fetchBrowsePage, browseDelete } from 'actions.js'
 
 const mapStateToProps = (state, ownProps) => {
@@ -14,5 +14,5 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const BrowseBed = connect(mapStateToProps, mapDispatchToProps)(CollectionBrowser)
+const BrowseBed = connect(mapStateToProps, mapDispatchToProps)(CollectionsBrowser)
 export default BrowseBed

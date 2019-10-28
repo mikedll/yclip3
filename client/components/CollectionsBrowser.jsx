@@ -29,7 +29,7 @@ class CollectionsBrowser extends Component {
     const fetchOk = !(this.props.browsePrivate && this.props.error === 'That resource is forbidden to you')
 
     if(fetchRequired && fetchOk && !this.props.busy) {
-      this.props.tryFetchPage(this.props.$, (this.props.browsePrivate ? '/api/me/collections' : '/api/collections'), qPage)
+      this.props.fetchPage(this.props.$, (this.props.browsePrivate ? '/api/me/collections' : '/api/collections'), qPage)
     }
   }
 
@@ -95,6 +95,7 @@ class CollectionsBrowser extends Component {
 }
 
 CollectionsBrowser.propTypes = {
+  $: PropTypes.func.isRequired,
   globalWindow:  PropTypes.object,
   user: PropTypes.object,
   browsePrivate: PropTypes.bool.isRequired,
@@ -104,7 +105,7 @@ CollectionsBrowser.propTypes = {
   error: PropTypes.string.isRequired,
   busy: PropTypes.bool.isRequired,
   collections: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
-  tryFetchPage: PropTypes.func.isRequired,
+  fetchPage: PropTypes.func.isRequired,
   delete: PropTypes.func.isRequired
 }
 
