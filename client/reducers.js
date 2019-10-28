@@ -23,13 +23,17 @@ import {
   NOT_SEEKING,
   ClipCheckState,
   SEEKING_TO_CLIP,
-  JUMP_TO_CLIP_FOR_PLAY
+  JUMP_TO_CLIP_FOR_PLAY,
+  REQUEST_ADD_CLIP,
+  FINISH_ADD_CLIP,
+  ADD_CLIP_ERROR
 } from './actions.js'
 
 /*
 
 state = {
   loggedInUser: null || {_id: 'adsf1', name: 'mike rivers'},
+  newCollectionId: null || 'adsf3',
   clips: [{
       id: 'asdfclip1',
       clipCollection: 'asdf1',
@@ -53,6 +57,11 @@ state = {
     name: 'My collection',
     isPublic: true,
   }],
+  editor: {
+    collection: {_id: 'asdf1'},
+    busy: false,
+    error: ""
+  },
   browser: {
     error: "",
     busy: false,
@@ -61,8 +70,6 @@ state = {
     count: 40,
     collections: ['asdf1', 'asdf2']
   },
-  collectionBeingEdited: 'asdf',
-  newCollectionId: null || 'adsf3',
   playing: null | {
     error: "",
     collection: 'adsf1',  // may hold clips
@@ -76,6 +83,19 @@ state = {
 
 function clips(state = [], action) {
   switch(action.type) {
+  default:
+    return state
+  }
+}
+
+function editor(state = {busy: false, error: "", collection: null}, action) {
+  switch (action.type) {
+  case REQUEST_ADD_CLIP:
+    return {...state, ...{busy: true}}
+  case ADD_CLIP_ERROR:
+    return {...state, ...{busy: false, error: action.error}}
+  case FINISH_ADD_CLIP:
+    return {...state, ...{busy: false, error: "", collection: action.res}}
   default:
     return state
   }

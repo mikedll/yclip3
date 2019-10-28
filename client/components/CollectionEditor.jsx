@@ -156,19 +156,13 @@ export default class CollectionEditor extends Component {
     e.preventDefault()
 
     this.setState({error: ""})
-    new AjaxAssistant(this.props.$).post(`/api/me/collections/${this.props.match.params.id}/clips`, {
-        vid: this.state.vid,
-        start: this.state.start,
-        end: this.state.end
-      })
-      .then(data => {
-        this.setState(prevState => {
-          return { ...update(prevState, {collection: {$set: data}}), ...{ vid: "", start: "", end: "", error: ""} }
-        })
-      })
-      .catch(error => {
-        this.setState({error})
-      })
+    this.props.addClip(this.props.$, this.props.match.params.id, {
+      vid: this.state.vid,
+      start: this.state.start,
+      end: this.state.end
+    }).then(_ => {
+      this.setState({ vid: "", start: "", end: ""})
+    })
   }
 
   timerFormatted(time) {

@@ -267,3 +267,49 @@ export const seekingToClip = () => {
     type: SEEKING_TO_CLIP
   }
 }
+
+export const REQUEST_ADD_CLIP = 'REQUEST_ADD_CLIP'
+export const FINISH_ADD_CLIP = 'FINISH_ADD_CLIP'
+export const ADD_CLIP_ERROR = 'REQUEST_ADD_CLIP_ERROR'
+
+export const requestAddClip = () => {
+  return {
+    type: REQUEST_ADD_CLIP
+  }
+}
+
+export const finishAddClip = (res) => {
+  return {
+    type: FINISH_ADD_CLIP,
+    res
+  }
+}
+
+export const addClipError = (error) => {
+  return {
+    type: ADD_CLIP_ERROR,
+    error
+  }
+}
+
+export const addClip = ($, id, data) => {
+  return dispatch => {
+    dispatch(requestAddClip())
+
+    new AjaxAssistant($).post(`/api/me/collections/${id}/clips`, {
+        vid: data.vid,
+        start: data.start,
+        end: data.end
+      })
+      .then(res => {
+        dispatch(finishAddClip(res))
+        
+        this.setState(prevState => {
+        })
+      })
+      .catch(error => {
+        this.setState({error})
+      })
+    
+  }
+}
