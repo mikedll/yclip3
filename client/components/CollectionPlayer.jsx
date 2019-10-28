@@ -1,4 +1,5 @@
 
+import PropTypes from 'prop-types'
 import React from 'react';
 import AjaxAssistant from 'AjaxAssistant.jsx'
 
@@ -107,6 +108,7 @@ class CollectionPlayer extends React.Component {
           'onStateChange': this.onPlayerStateChange
         }
       })
+
     }
     
     if(window.ytApiLoaded) {
@@ -125,19 +127,15 @@ class CollectionPlayer extends React.Component {
   }
   
   componentDidMount() {
-    if(this.fetchCollectionRequired()) {
+    if(this.fetchCollectionRequired() && !this.props.fetching) {
       this.props.fetch(this.props.$, this.props.match.params.id)
       return
     }
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if(this.props.fetching) {
-      return
-    }
-
-    if(this.fetchCollectionRequired()) {
-      this.fetchCollectionIfNecessary()
+    if(this.fetchCollectionRequired() && !this.props.fetching) {
+      this.props.fetch(this.props.$, this.props.match.params.id)
       return
     }
     
@@ -177,7 +175,10 @@ class CollectionPlayer extends React.Component {
         }
       }
     }
-    
+
+    if(!this.state.loaded) {
+      return
+    }
     const s = this.player.getPlayerState()
     switch (s) {
     case YT.PlayerState.ENDED: {
@@ -281,6 +282,24 @@ class CollectionPlayer extends React.Component {
       </div>
     )
   }
+}
+
+CollectionPlayer.propTypes = {
+  error: PropTypes.string.isRequired,
+  seeking: PropTypes.bool.isRequired,
+  collection: PropTypes.object,
+  clipIndex: PropTypes.number,
+  clipCheck: PropTypes.string,
+  curClip: PropTypes.object,
+  fetching: PropTypes.bool.isRequired,
+  clipCheckIsDue: PropTypes.bool.isRequired,
+  onVideoEnd: PropTypes.func.isRequired,
+  enteredPlaying: PropTypes.func.isRequired,
+  nextClipOrScheduleCheck: PropTypes.func.isRequired,
+  seeking: PropTypes.func.isRequired,
+  fetch: PropTypes.func.isRequired,
+  shutdown: PropTypes.func.isRequired,
+  jumpTo: PropTypes.func.isRequired
 }
 
 export default CollectionPlayer
