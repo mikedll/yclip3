@@ -25,16 +25,26 @@ describe('<CollectionPlayer/>', function() {
   }
 
   it('should fetch clips and present them in table', async () => {
-    let mock$ = spy()
-    mock$.ajax = spy()
+    let fetch = spy()
     const mockMatch = { params: { id: clipCollection1._id } }
+    const mockProps = {
+      $: spy(),
+      error: "",
+      seeking: spy(),
+      busy: false,
+      clipCheckIsDue: false,
+      onVideoEnd: spy(),
+      enteredPlaying: spy(),
+      nextClipOrScheduleCheck: spy(),
+      shutdown: spy(),
+      jumpTo: spy()
+    }
     const wrapper = mount(
-      <CollectionPlayer $={mock$} match={mockMatch}/>
+      <CollectionPlayer fetch={fetch} match={mockMatch} {...mockProps}/>
     )
 
-    expect(mock$.ajax.calledWithMatch({url: '/api/collections/' + clipCollection1._id})).to.be.true
-    await mock$.ajax.getCall(0).args[0].success(clipCollection1)
-    wrapper.update()
+    expect(fetch.calledOnce).to.be.true
+    wrapper.setProps({collection: clipCollection1})
     expect(wrapper.find('tbody tr')).to.have.lengthOf(2)
   })
 })

@@ -38,7 +38,7 @@ class CollectionsBrowser extends Component {
     if(this.props.busy) return
     
     if(this.props.globalWindow.confirm("Are you sure you want to delete this?")) {
-      this.props.delete(this.props.$(e.target).data('ref-id'))
+      this.props.delete(this.props.$, this.props.$(e.target).data('ref-id'))
     }
   }
   

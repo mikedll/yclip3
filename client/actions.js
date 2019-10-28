@@ -45,7 +45,7 @@ export const REQUEST_DELETE_ERROR = 'REQUEST_DELETE_ERROR'
 
 export const requestDelete = () => {
   return {
-    type: RECEIVE_DELETE,
+    type: REQUEST_DELETE,
   }
 }
 
@@ -58,7 +58,7 @@ export const receiveDelete = (id) => {
 
 export const requestDeleteError = (error) => {
   return {
-    type: RECEIVE_DELETE,
+    type: REQUEST_DELETE_ERROR,
     error
   }
 }
