@@ -3,9 +3,6 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { getUrlQueryAsObj } from 'UrlHelper.jsx'
-import update from 'immutability-helper';
-import underscore from 'underscore'
-import AjaxAssistant from 'AjaxAssistant.jsx'
 import Paginator from 'components/Paginator.jsx'
 
 class CollectionsBrowser extends Component {
@@ -31,28 +28,17 @@ class CollectionsBrowser extends Component {
 
     const fetchOk = !(this.props.browsePrivate && this.props.error === 'That resource is forbidden to you')
 
-    if(fetchRequired && fetchOk) {
+    if(fetchRequired && fetchOk && !this.props.busy) {
       this.props.tryFetchPage(this.props.$, (this.props.browsePrivate ? '/api/me/collections' : '/api/collections'), qPage)
     }
   }
 
   onDelete(e) {
     e.preventDefault()
-    if(this.state.busy) return
+    if(this.props.busy) return
     
-    const refId = this.props.$(e.target).data('ref-id')
     if(this.props.globalWindow.confirm("Are you sure you want to delete this?")) {
-      this.setState({busy: true})
-      new AjaxAssistant(this.props.$).delete('/api/me/collections/' + refId)
-        .then(_ => {
-          this.setState(prevState => {
-            const index = underscore.findIndex(prevState.collections, el => el._id === refId)
-            return update(prevState, {'busy': {$set: false}, 'collections': {$splice: [[index, 1]]}})
-          })
-        })
-        .catch(error => {
-          this.setState({busy: false, error})
-        })
+      this.props.delete(this.props.$(e.target).data('ref-id'))
     }
   }
   
@@ -109,6 +95,7 @@ class CollectionsBrowser extends Component {
 }
 
 CollectionsBrowser.propTypes = {
+  globalWindow:  PropTypes.object,
   user: PropTypes.object,
   browsePrivate: PropTypes.bool.isRequired,
   page: PropTypes.number.isRequired,
@@ -117,7 +104,8 @@ CollectionsBrowser.propTypes = {
   error: PropTypes.string.isRequired,
   busy: PropTypes.bool.isRequired,
   collections: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
-  tryFetchPage: PropTypes.func.isRequired
+  tryFetchPage: PropTypes.func.isRequired,
+  delete: PropTypes.func.isRequired
 }
 
 export default CollectionsBrowser

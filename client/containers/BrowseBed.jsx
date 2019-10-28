@@ -1,7 +1,7 @@
 
 import { connect } from 'react-redux'
 import CollectionBrowser from 'components/CollectionBrowser.jsx'
-import { fetchBrowsePage } from 'actions.js'
+import { fetchBrowsePage, browseDelete } from 'actions.js'
 
 const mapStateToProps = (state, ownProps) => {
   return {...state.browser, ...ownProps}
@@ -9,7 +9,8 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    tryFetchPage: ($, path, page) => dispatch(fetchBrowsePage($, path, page))
+    fetchPage: ($, path, page) => dispatch(fetchBrowsePage($, path, page)),
+    delete: ($, id) => dispatch(browseDelete($, id))
   }
 }
 

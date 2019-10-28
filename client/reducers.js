@@ -1,11 +1,15 @@
 
 import { combineReducers } from 'redux'
+import update from 'immutability-helper';
 import underscore from 'underscore'
 
 import {
   REQUEST_PAGE,
   RECEIVE_PAGE,
   REQUEST_PAGE_ERROR,
+  REQUEST_DELETE,
+  RECEIVE_DELETE,
+  REQUEST_DELETE_ERROR,
   REQUEST_NEW_COLLECTION,
   RECEIVE_NEW_COLLECTION,
   START_EDITING_COLLECTION,
@@ -80,6 +84,13 @@ function clips(state = [], action) {
 
 function browser(state = {busy: false, error: "", pages: 0, page: -1, total: 0, collections: []}, action) {
   switch (action.type) {
+  case REQUEST_DELETE:
+    return {...state, ...{busy: true}}
+  case RECEIVE_DELETE:
+    const index = underscore.findIndex(state.collections, el => el._id === action.id)
+    return update(state, {'busy': {$set: false}, 'collections': {$splice: [[index, 1]]}})
+  case REQUEST_DELETE_ERROR:
+    return {...state, ...{busy: false, error: action.error}}
   case REQUEST_PAGE:
     return {...state, ...{error: "", busy: true, collections: []}}
   case RECEIVE_PAGE:

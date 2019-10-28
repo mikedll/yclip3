@@ -29,7 +29,6 @@ export function requestPageError(error) {
 export function fetchBrowsePage($, path, page) {
   return (dispatch, getState) => {
     const state = getState()
-    if(state.browser.busy) return
     dispatch(requestPage())
     new AjaxAssistant($).get(path + '?' + serializeObj({page}))
       .then(res => {
@@ -40,6 +39,41 @@ export function fetchBrowsePage($, path, page) {
   }
 }
 
+export const REQUEST_DELETE = 'REQUEST_DELETE'
+export const RECEIVE_DELETE = 'RECEIVE_DELETE'
+export const REQUEST_DELETE_ERROR = 'REQUEST_DELETE_ERROR'
+
+export const requestDelete = () => {
+  return {
+    type: RECEIVE_DELETE,
+  }
+}
+
+export const receiveDelete = (id) => {
+  return {
+    type: RECEIVE_DELETE,
+    id
+  }
+}
+
+export const requestDeleteError = (error) => {
+  return {
+    type: RECEIVE_DELETE,
+    error
+  }
+}
+
+export const browseDelete = ($, id) => {
+  return (dispatch) => {
+    dispatch(requestDelete())
+    new AjaxAssistant($).delete('/api/me/collections/' + id)
+      .then(_ => {
+        dispatch(receiveDelete(id))
+      }, error => {
+        dispatch(requestDeleteError(error))
+      })
+  }
+}
 
 export const REQUEST_NEW_COLLECTION = 'REQUEST_NEW_COLLECTION'
 export const RECEIVE_NEW_COLLECTION = 'RECEIVE_NEW_COLLECTION'
