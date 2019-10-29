@@ -1,5 +1,6 @@
 import update from 'immutability-helper';
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 
 import underscore from 'underscore'
 import AjaxAssistant from 'AjaxAssistant.jsx'
@@ -20,10 +21,6 @@ export default class CollectionEditor extends Component {
       thumbnailPrompt: false
     }
 
-    if(this.props.collection) {
-      this.state.collection = props.collection
-    }
-
     this.tbodyEl = null
 
     this.onNewClipSubmit = this.onNewClipSubmit.bind(this)
@@ -36,15 +33,7 @@ export default class CollectionEditor extends Component {
   }
 
   fetchCollection() {
-    new AjaxAssistant(this.props.$).get('/api/me/collections/' + this.props.match.params.id)
-      .then(collection => {
-        let newState = {collection}
-        newState.thumbnail = collection.thumbnail ? collection.thumbnail.name : null
-        this.setState(newState)
-      })
-      .catch(error => {
-        this.setState({error})
-      })    
+    this.props.fetch(this.props.$, this.props.match.params.id)
   }
   
   sortChanged(e, ui) {
@@ -62,40 +51,55 @@ export default class CollectionEditor extends Component {
       })
   }
 
+  needCollection() {
+    return !this.props.collection || this.props.collection._id !== this.props.match.params.id
+  }
+  
   componentDidMount() {
     this.props.startingEdit(this.props.match.params.id)
     
-    if(!this.props.collection) {
+    if(this.needCollection() && !this.props.busy) {
       this.fetchCollection()
     }
   }
-  
+
   componentDidUpdate(prevProps, prevState) {
     if(prevProps.match.params.id !== this.props.match.params.id) {
       this.props.startingEdit(this.props.match.params.id)      
     }
 
-    // sometimes we mount the component despite not having its data yet. so we can't do this
-    // in componentDidMount.
-    const $this = this
-    if(this.tbodyEl && !this.props.$(this.tbodyEl).data('uiSortable')) {
-      this.props.$(this.tbodyEl).sortable({
-        stop: function(e, ui) {
-          $this.sortChanged(e, ui)
-        }
-      })
+    if(this.needCollection()) {
+      if(!this.props.busy) {
+        // wrong collection loaded
+        this.setState({vid: "", start: "", duration: ""})
+        this.fetchCollection()
+      }
+
+      // if it was busy...then we're stuck with wrong collection until we 'unbusy'.
+      return
     }
 
-    if(this.state.collection && this.state.collection._id !== this.props.match.params.id) {
-      // wrong collection loaded
-      this.setState({error: "", vid: "", start: "", duration: ""})
-      this.fetchCollection()
-    } else if (prevState.collection && prevState.collection.isPublic !== this.state.collection.isPublic) {
-      // isPublic toggled
-      new AjaxAssistant(this.props.$).put('/api/me/collections/' + this.state.collection._id, underscore.pick(this.state.collection, 'isPublic'))
-        .then(collection => this.setState({collection}))
-        .catch(error => this.setState({error}))
-    }
+    if(!this.state.collection || this.state.collection._id !== this.props.collection._id)
+      this.setState({collection: this.props.collection})
+    else {
+      // assumes state.collection is defined, and state.collection._id === props.collection._id
+      
+      // sometimes we mount the component despite not having its data yet. so we can't do this
+      // in componentDidMount.
+      const _this = this
+      if(this.tbodyEl && !this.props.$(this.tbodyEl).data('uiSortable')) {
+        this.props.$(this.tbodyEl).sortable({
+          stop: function(e, ui) {
+            _this.sortChanged(e, ui)
+          }
+        })
+      }
+
+      if (this.state.collection.isPublic !== this.props.collection.isPublic) {
+        // isPublic toggled
+        this.update(this.props.$, this.props.collection._id, {isPublic: this.state.collection.isPublic})
+      }      
+    }    
   }
   
   componentWillUnmount() {
@@ -112,7 +116,7 @@ export default class CollectionEditor extends Component {
     if(['collection[name]', 'collection[isPublic]'].indexOf(name) !== -1) {
       let left = name.indexOf('['), right = name.indexOf(']'),
           attrName = name.slice(left + 1, right)
-
+  
       let setableValue = value
       if(attrName === 'isPublic') setableValue = target.checked
 
@@ -202,12 +206,13 @@ export default class CollectionEditor extends Component {
   }
 
   thumbnailUrl() {
-    if(!this.state.thumbnail) return ''
+    if(!this.props.collection.thumbnail) return ''
 
+    const name = this.props.collection.thumbnail.name
     if(this.props.globalWindow.imageBucket)
-      return ('http://' + this.props.globalWindow.imageBucket + '/' + this.state.thumbnail + '.png')
+      return ('http://' + this.props.globalWindow.imageBucket + '/' + name + '.png')
     else      
-      return ('/storage/' + this.state.thumbnail + '.png')
+      return ('/storage/' + name + '.png')
   }
 
   onReplaceThumbnail() {
@@ -355,4 +360,11 @@ export default class CollectionEditor extends Component {
       </div>
     )    
   }
+}
+
+CollectionEditor.propTypes = {
+  $: PropTypes.func.isRequired,
+  collection: PropTypes.object,
+  fetch: PropTypes.func.isRequired,
+  startingEdit: PropTypes.func.isRequired
 }

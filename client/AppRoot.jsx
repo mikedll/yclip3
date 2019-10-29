@@ -4,7 +4,7 @@ import { Link, Route, Switch } from 'react-router-dom';
 
 import AjaxAssistant from 'AjaxAssistant.jsx'
 import CollectionPlayerBed from 'containers/CollectionPlayerBed.jsx'
-import ReadyEditor from 'containers/ReadyEditor.jsx'
+import EditorBed from 'containers/EditorBed.jsx'
 import NewCollectionLink from 'containers/NewCollectionLink.jsx'
 import BrowseBed from 'containers/BrowseBed.jsx'
 
@@ -117,7 +117,7 @@ class AppRoot extends Component {
           <PropsRoute path="/collections/:id" exact component={CollectionPlayerBed} $={this.props.jQuery} />
           <PropsRoute path="/me/collections/:id/edit" exact
             globalWindow={this.props.globalWindow}
-            component={ReadyEditor} $={this.props.jQuery}/>
+            component={EditorBed} $={this.props.jQuery}/>
         </Switch>
       </div>
     )

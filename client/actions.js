@@ -141,7 +141,6 @@ export function fetchCollectionToPlay($, id) {
     // Could do a cache check here, to see if we already have the
     // collection.
     
-    if(getState().collectionPlayRequested) return Promise.resolve()
     dispatch(requestCollectionPlay(id))
     new AjaxAssistant($).get('/api/collections/' + id)
       .then(collection => { dispatch(receiveCollectionForPlay(collection)) },
@@ -151,6 +150,86 @@ export function fetchCollectionToPlay($, id) {
             })
   }
 }
+
+export const FETCH_COLLECTION = 'FETCH_COLLECTION'
+export const FINISH_FETCH_COLLECTION = 'FINISH_FETCH_COLLECTION'
+export const FETCH_COLLECTION_ERROR = 'FETCH_COLLECTION_ERROR'
+
+export function requestCollection() {
+  return {
+    type: FETCH_COLLECTION
+  }
+}
+
+export function finishFetchCollection(res) {
+  return {
+    type: FINISH_FETCH_COLLECTION,
+    res
+  }
+}
+
+export function fetchCollectionError(error) {
+  return {
+    type: FETCH_COLLECTION_ERROR,
+    error
+  }
+}
+
+export const fetchCollection = ($, id, requireOwned = false) => {
+  return dispatch => {
+    dispatch(requestCollection())
+    const path = requireOwned ? '/api/me/collections' : '/api/collections'
+    new AjaxAssistant($).get(path + '/' + id)
+      .then(res => { dispatch(finishFetchCollection(res)) },
+            error => dispatch(fetchCollectionError(error)))
+  }
+}
+
+export const REQUEST_UPDATE_COLLECTION = 'REQUEST_UPDATE_COLLECTION'
+export const FINISH_UPDATE_COLLECTION = 'FINISH_UPDATE_COLLECTION'
+export const UPDATE_COLLECTION_ERROR = 'UPDATE_COLLECTION_ERROR'
+
+export function requestUpdateCollection() {
+  return {
+    type: REQUEST_UPDATE_COLLECTION
+  }
+}
+
+export function finishUpdateCollection(res) {
+  return {
+    type: FINISH_UPDATE_COLLECTION,
+    res
+  }
+}
+
+export function updateCollectionError(error) {
+  return {
+    type: UPDATE_COLLECTION_ERROR,
+    error
+  }
+}
+
+export function updateCollection($, id, diffs) {
+  return dispatch => {
+    dispatch(requestUpdateCollection())
+    new AjaxAssistant($).put('/api/me/collections/' + id)
+      .then(res => dispatch(finishUpdateCollection(res)),
+            error => dispatch(updateCollectionError(error)))
+  }
+}
+
+/*
+
+The plan is to reuse the same fetchCollection for both the player and the editor.
+
+export const fetchCollectionForEdit = ($, id, requireOwned = true) => {
+  return dispatch => {
+    dispatch(fetchCollection($, id, true))
+      .then(_ => dispatch(editCollectionReady(id)),
+            error => dispatch(editCollectionError(error)))
+  }
+}
+*/
 
 export const GOTO_NEXT_CLIP = 'GOTO_NEXT_CLIP'
 
@@ -303,13 +382,8 @@ export const addClip = ($, id, data) => {
       })
       .then(res => {
         dispatch(finishAddClip(res))
-        
-        this.setState(prevState => {
-        })
+      }, error => {
+        dispatch(addClipError(error))
       })
-      .catch(error => {
-        this.setState({error})
-      })
-    
   }
 }

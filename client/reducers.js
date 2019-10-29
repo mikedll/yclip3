@@ -16,6 +16,9 @@ import {
   REQUEST_COLLECTION_PLAY,
   RECEIVED_COLLECTION_FOR_PLAY,
   PLAYING_ERROR,
+  FETCH_COLLECTION,
+  FINISH_FETCH_COLLECTION,
+  FETCH_COLLECTION_ERROR,
   GOTO_NEXT_CLIP,
   CLIP_CHECK_PENDING,
   CLIP_CHECK_DUE,
@@ -90,6 +93,12 @@ function clips(state = [], action) {
 
 function editor(state = {busy: false, error: "", collection: null}, action) {
   switch (action.type) {
+  case FETCH_COLLECTION:
+    return {...state, ...{busy: true}}
+  case FINISH_FETCH_COLLECTION:
+    return {...state, ...{busy: false, collection: action.res}}
+  case FETCH_COLLECTION_ERROR:
+    return {...state, ...{busy: false, error: action.error}}
   case REQUEST_ADD_CLIP:
     return {...state, ...{busy: true}}
   case ADD_CLIP_ERROR:
