@@ -42,13 +42,7 @@ export default class Editor extends Component {
       idToPos[this.props.$(el).data('ref-id')] = i
     })
 
-    new AjaxAssistant(this.props.$).put('/api/me/collections/' + this.state.collection._id + '/order', idToPos)
-      .then((collection) => {
-        this.setState({collection})
-      })
-      .catch((error) => {
-        this.setState({error})
-      })
+    this.updateClipOrder(this.props.$, this.props.collection._id, idToPos)
   }
 
   needCollection() {
@@ -242,9 +236,9 @@ export default class Editor extends Component {
         isPublicSection = (
           <div className="collection-modification form-check">
             <input className='is-public-toggle form-check-input' type="checkbox"
-                   id={'is-public-' + this.state.collection._id}
+                   id={'is-public-' + this.props.collection._id}
                    name="collection[isPublic]" value="isPublic" {...checked} onChange={this.onCollectionChange}/>
-            <label className="form-check-label" htmlFor={'is-public-' + this.state.collection._id}>Public</label>
+            <label className="form-check-label" htmlFor={'is-public-' + this.props.collection._id}>Public</label>
           </div>
         )        
       }
@@ -352,5 +346,6 @@ Editor.propTypes = {
   error: PropTypes.string.isRequired,
   fetch: PropTypes.func.isRequired,
   startingEdit: PropTypes.func.isRequired,
-  deleteClip: PropTypes.func.isRequired
+  deleteClip: PropTypes.func.isRequired,
+  updateClipOrder: PropTypes.func.isRequired
 }

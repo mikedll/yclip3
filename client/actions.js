@@ -420,3 +420,36 @@ export function deleteClip($, id, clipId) {
             error => dispatch(deleteClipError(error)))
   }
 }
+
+export const REQUEST_UPDATE_CLIP_ORDER = 'REQUEST_UPDATE_CLIP_ORDER'
+export const FINISH_UPDATE_CLIP_ORDER = 'FINISH_UPDATE_CLIP_ORDER'
+export const UPDATE_CLIP_ORDER_ERROR = 'UPDATE_CLIP_ORDER_ERROR'
+
+export function requestUpdateClipOrder() {
+  return {
+    type: REQUEST_UPDATE_CLIP_ORDER
+  }
+}
+
+export function finishUpdateClipOrder(res) {
+  return {
+    type: FINISH_UPDATE_CLIP_ORDER,
+    res
+  }
+}
+
+export function updateClipOrderError(error) {
+  return {
+    type: UPDATE_CLIP_ORDER_ERROR,
+    error
+  }
+}
+
+export function updateClipOrder($, id, ordering) {
+  return dispatch => {
+    dispatch(requestUpdateClipOrder())
+    new AjaxAssistant($).put('/api/me/collections/' + id + '/order', ordering)
+      .then(res => dispatch(finishUpdateClipOrder(res)),
+            error => dispatch(updateClipOrderError(error)))
+  }
+}

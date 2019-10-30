@@ -32,7 +32,10 @@ import {
   ADD_CLIP_ERROR,
   REQUEST_DELETE_CLIP,
   FINISH_DELETE_CLIP,
-  DELETE_CLIP_ERROR
+  DELETE_CLIP_ERROR,
+  REQUEST_UPDATE_CLIP_ORDER,
+  FINISH_UPDATE_CLIP_ORDER,
+  UPDATE_CLIP_ORDER_ERROR
 } from './actions.js'
 
 /*
@@ -109,10 +112,17 @@ function editor(state = {busy: false, error: "", collection: null}, action) {
   case FINISH_ADD_CLIP:
     return {...state, ...{busy: false, error: "", collection: action.res}}
   case REQUEST_DELETE_CLIP:
+    return {...state, ...{busy: true, error: ""}}
   case FINISH_DELETE_CLIP:
     const index = underscore.findIndex(state.collection.clips, (c) => c._id == action.clipId)
     return update(state, {collection: {clips: {$splice: [[index, 1]]}}})
   case DELETE_CLIP_ERROR:
+    return {...state, ...{busy: false, error: action.error}}
+  case REQUEST_UPDATE_CLIP_ORDER:
+    return {...state, ...{busy: true, error: ""}}
+  case FINISH_UPDATE_CLIP_ORDER:
+    return {...state, ...{busy: false, collection: action.res}}
+  case UPDATE_CLIP_ORDER_ERROR:
     return {...state, ...{busy: false, error: action.error}}
   default:
     return state
