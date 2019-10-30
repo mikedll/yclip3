@@ -375,15 +375,48 @@ export const addClip = ($, id, data) => {
   return dispatch => {
     dispatch(requestAddClip())
 
-    new AjaxAssistant($).post(`/api/me/collections/${id}/clips`, {
-        vid: data.vid,
-        start: data.start,
-        end: data.end
-      })
-      .then(res => {
-        dispatch(finishAddClip(res))
-      }, error => {
-        dispatch(addClipError(error))
-      })
+    return new AjaxAssistant($).post(`/api/me/collections/${id}/clips`, {
+      vid: data.vid,
+      start: data.start,
+      end: data.end
+    })
+    .then(res => {
+      dispatch(finishAddClip(res))
+    }, error => {
+      dispatch(addClipError(error))
+    })
+  }
+}
+
+export const REQUEST_DELETE_CLIP = 'REQUEST_DELETE_CLIP'
+export const FINISH_DELETE_CLIP = 'FINISH_DELETE_CLIP'
+export const DELETE_CLIP_ERROR = 'DELETE_CLIP_ERROR'
+
+export function requestDeleteClip() {
+  return {
+    type: REQUEST_DELETE_CLIP
+  }
+}
+
+export function finishDeleteClip(clipId) {
+  return {
+    type: FINISH_DELETE_CLIP,
+    clipId
+  }
+}
+
+export function deleteClipError(error) {
+  return {
+    type: DELETE_CLIP_ERROR,
+    error
+  }
+}
+
+export function deleteClip($, id, clipId) {
+  return dispatch => {
+    dispatch(requestDeleteClip())
+    new AjaxAssistant($).delete('/api/me/collections/' + id + '/clips/' + clipId)
+      .then(res => dispatch(finishDeleteClip(clipId)),
+            error => dispatch(deleteClipError(error)))
   }
 }

@@ -141,25 +141,12 @@ export default class CollectionEditor extends Component {
   onNameSubmit(e) {
     e.preventDefault()
 
-    this.setState({error: ""})
-    new AjaxAssistant(this.props.$).put(`/api/me/collections/${this.props.match.params.id}`, {
-        name: this.state.collection.name
-      })
-      .then(data => {
-        this.setState(prevState => {
-          return { ...update(prevState, {collection: {$set: data}}), ...{ editingName: false } }
-        })
-      })
-      .catch(error => {
-        this.setState({error})
-      })
-    
+    this.update(this.props.$, this.props.collection._id, {name: this.state.collection.name})
   }
   
   onNewClipSubmit(e) {
     e.preventDefault()
 
-    this.setState({error: ""})
     this.props.addClip(this.props.$, this.props.match.params.id, {
       vid: this.state.vid,
       start: this.state.start,
@@ -195,14 +182,7 @@ export default class CollectionEditor extends Component {
   }
 
   onDelete(e, id) {
-    new AjaxAssistant(this.props.$).delete('/api/me/collections/' + this.state.collection._id + '/clips/' + id)
-      .then(_ => {
-        const index = underscore.findIndex(this.state.collection.clips, (c) => c._id == id)
-        this.setState(prevState => update(prevState, {collection: {clips: {$splice: [[index, 1]]}}}))
-      })
-      .catch(error => {
-        this.setState(error)
-      })
+    this.props.deleteClip(this.props.$, this.props.collection._id, id)
   }
 
   thumbnailUrl() {
@@ -222,14 +202,14 @@ export default class CollectionEditor extends Component {
   }
   
   render() {
-    const error = this.state.error !== "" ? (
+    const error = this.props.error !== "" ? (
       <div className="alert alert-danger">
-        Error: {this.state.error}
+        Error: {this.props.error}
       </div>
     ): ""
 
     var body = null
-    if(this.state.collection) {
+    if(this.props.collection) {
 
       let nameSection
       nameSection = !this.state.editingName ? (
@@ -247,50 +227,46 @@ export default class CollectionEditor extends Component {
       )        
 
       let isPublicSection = null
-      if(this.state.collection) {
-        let checked = {checked: false}
-        if(this.state.collection.isPublic === true) {
-          checked = {checked: true}
-        }
-
-        isPublicSection = (
-          <div className="collection-modification form-check">
-            <input className='is-public-toggle form-check-input' type="checkbox"
-                   id={'is-public-' + this.state.collection._id}
-                   name="collection[isPublic]" value="isPublic" {...checked} onChange={this.onCollectionChange}/>
-            <label className="form-check-label" htmlFor={'is-public-' + this.state.collection._id}>Public</label>
-          </div>
-        )        
+      let checked = {checked: false}
+      if(this.state.collection.isPublic === true) {
+        checked = {checked: true}
       }
 
+      isPublicSection = (
+        <div className="collection-modification form-check">
+          <input className='is-public-toggle form-check-input' type="checkbox"
+                 id={'is-public-' + this.state.collection._id}
+                 name="collection[isPublic]" value="isPublic" {...checked} onChange={this.onCollectionChange}/>
+          <label className="form-check-label" htmlFor={'is-public-' + this.state.collection._id}>Public</label>
+        </div>
+      )        
+
       let thumbnailSection = null
-      if(this.state.collection) {
-        if(this.thumbnailUrl() === '' || this.state.thumbnailPrompt) {
-          let cancelBtn = this.thumbnailUrl() === '' ? null : (<a href='#' onClick={this.onReplaceThumbnail}>Cancel</a>)
-          thumbnailSection = (
-            <div className='thumbnail-pond'>
-              <FilePond labelIdle='Upload'
-                        files={this.state.thumbnails}
-                        allowMultiple={false}
-                        maxFiles={1}
-                        server={`/api/me/collections/${this.state.collection._id}/thumbnail`}
-                        onprocessfile={(error, file) => {
-                          this.setState({thumbnail: file.serverId})
-                }}
-                />
+      if(this.thumbnailUrl() === '' || this.state.thumbnailPrompt) {
+        let cancelBtn = this.thumbnailUrl() === '' ? null : (<a href='#' onClick={this.onReplaceThumbnail}>Cancel</a>)
+        thumbnailSection = (
+          <div className='thumbnail-pond'>
+            <FilePond labelIdle='Upload'
+                      files={this.state.thumbnails}
+                      allowMultiple={false}
+                      maxFiles={1}
+                      server={`/api/me/collections/${this.state.collection._id}/thumbnail`}
+                      onprocessfile={(error, file) => {
+                        this.setState({thumbnail: file.serverId})
+              }}
+              />
               {cancelBtn}
-            </div>
-          )
-        } else {
-          let imgRendered = this.thumbnailUrl() !== '' ? (<img src={this.thumbnailUrl()}/>) : null
-          thumbnailSection = (
-            <div className='thumbnail-wrapper'>
-              {imgRendered}
-              <br/>
-              <a href='#' onClick={this.onReplaceThumbnail}>Upload Thumbnail</a>
-            </div>            
-          )
-        }
+          </div>
+        )
+      } else {
+        let imgRendered = this.thumbnailUrl() !== '' ? (<img src={this.thumbnailUrl()}/>) : null
+        thumbnailSection = (
+          <div className='thumbnail-wrapper'>
+            {imgRendered}
+            <br/>
+            <a href='#' onClick={this.onReplaceThumbnail}>Upload Thumbnail</a>
+          </div>            
+        )
       }
 
       
@@ -316,7 +292,7 @@ export default class CollectionEditor extends Component {
               </tr>
             </thead>
             <tbody ref={el => this.tbodyEl = el}>
-              {this.state.collection.clips.map((c) => {
+              {this.props.collection.clips.map((c) => {
                 return (
                   <tr className="clip-container" key={c._id} data-ref-id={c._id}>
                     <td>{c.vid}</td>
@@ -366,5 +342,6 @@ CollectionEditor.propTypes = {
   $: PropTypes.func.isRequired,
   collection: PropTypes.object,
   fetch: PropTypes.func.isRequired,
-  startingEdit: PropTypes.func.isRequired
+  startingEdit: PropTypes.func.isRequired,
+  deleteClip: PropTypes.func.isRequired
 }

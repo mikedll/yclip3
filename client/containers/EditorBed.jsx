@@ -4,7 +4,8 @@ import CollectionEditor from 'components/CollectionEditor.jsx'
 import {
   addClip,
   startEditingCollection,
-  fetchCollection } from 'actions.js'
+  fetchCollection,
+  deleteClip } from 'actions.js'
 
 const mapStateToProps = state => {
   return {
@@ -15,7 +16,8 @@ const mapDispatchToProps = dispatch => {
   return {
     addClip: (clip) => dispatch(addClip(clip)),
     fetch: ($, id) => dispatch(fetchCollection($, id, true)),
-    startingEdit: collectionId => dispatch(startEditingCollection(collectionId))
+    startingEdit: collectionId => dispatch(startEditingCollection(collectionId)),
+    deleteClip: ($, id, clipId) => dispatch(deleteClip($, id, clipId))
   }
 }
 

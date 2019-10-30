@@ -29,7 +29,10 @@ import {
   JUMP_TO_CLIP_FOR_PLAY,
   REQUEST_ADD_CLIP,
   FINISH_ADD_CLIP,
-  ADD_CLIP_ERROR
+  ADD_CLIP_ERROR,
+  REQUEST_DELETE_CLIP,
+  FINISH_DELETE_CLIP,
+  DELETE_CLIP_ERROR
 } from './actions.js'
 
 /*
@@ -105,6 +108,12 @@ function editor(state = {busy: false, error: "", collection: null}, action) {
     return {...state, ...{busy: false, error: action.error}}
   case FINISH_ADD_CLIP:
     return {...state, ...{busy: false, error: "", collection: action.res}}
+  case REQUEST_DELETE_CLIP:
+  case FINISH_DELETE_CLIP:
+    const index = underscore.findIndex(state.collection.clips, (c) => c._id == action.clipId)
+    return update(state, {collection: {clips: {$splice: [[index, 1]]}}})
+  case DELETE_CLIP_ERROR:
+    return {...state, ...{busy: false, error: action.error}}
   default:
     return state
   }
