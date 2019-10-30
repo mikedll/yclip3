@@ -1,6 +1,6 @@
 
 import { connect } from 'react-redux'
-import CollectionEditor from 'components/CollectionEditor.jsx'
+import Editor from 'components/Editor.jsx'
 import {
   addClip,
   startEditingCollection,
@@ -9,6 +9,7 @@ import {
 
 const mapStateToProps = state => {
   return {
+    ...state.editor
   }
 }
 
@@ -21,6 +22,6 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-const EditorBed = connect(mapStateToProps, mapDispatchToProps)(CollectionEditor)
+const EditorBed = connect(mapStateToProps, mapDispatchToProps)(Editor)
 
 export default EditorBed

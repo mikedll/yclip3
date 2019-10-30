@@ -7,7 +7,7 @@ import AjaxAssistant from 'AjaxAssistant.jsx'
 import { FilePond } from 'react-filepond'
 import "filepond/dist/filepond.min.css";
 
-export default class CollectionEditor extends Component {
+export default class Editor extends Component {
 
   constructor(props) {
     super(props)
@@ -79,12 +79,16 @@ export default class CollectionEditor extends Component {
       return
     }
 
-    if(!this.state.collection || this.state.collection._id !== this.props.collection._id)
-      this.setState({collection: this.props.collection})
-    else {
-      // assumes state.collection is defined, and state.collection._id === props.collection._id
-      
-      // sometimes we mount the component despite not having its data yet. so we can't do this
+    
+
+    if(this.props.collection && (!prevProps.collection || underscore.some(['name', 'isPublic'], (attr) => {
+      return prevProps.collection[attr] !== this.props.collection[attr]
+    }))) {
+      this.setState({collection: underscore.pick(this.props.collection, 'name', 'isPublic')})
+    }
+
+    if(this.props.collection) {
+      // sometimes we mount the component despite not having a collection yet. so we can't do this
       // in componentDidMount.
       const _this = this
       if(this.tbodyEl && !this.props.$(this.tbodyEl).data('uiSortable')) {
@@ -94,12 +98,12 @@ export default class CollectionEditor extends Component {
           }
         })
       }
+    }
 
-      if (this.state.collection.isPublic !== this.props.collection.isPublic) {
-        // isPublic toggled
-        this.update(this.props.$, this.props.collection._id, {isPublic: this.state.collection.isPublic})
-      }      
-    }    
+    if(this.state.collection && this.state.collection.isPublic !== this.props.collection.isPublic) {
+      // isPublic toggled
+      this.update(this.props.$, this.props.collection._id, {isPublic: this.state.collection.isPublic})
+    }
   }
   
   componentWillUnmount() {
@@ -212,35 +216,39 @@ export default class CollectionEditor extends Component {
     if(this.props.collection) {
 
       let nameSection
-      nameSection = !this.state.editingName ? (
-        <form className="form-inline name-modification" onClick={this.onNameClick}>
-          <label htmlFor="collection-name-input form-check-label mr-2">Collection:&nbsp;</label>
-          <span>{this.state.collection.name}</span>
-        </form>
-      ) : (
-        <form className="form-inline name-modification" onSubmit={this.onNameSubmit}>
-          <label htmlFor="collection-name-input form-check-label">Collection: </label>
-          <input type="text" name="collection[name]" value={this.state.collection.name} onChange={this.onCollectionChange} placeholder="Collection Name" className="form-control" id="collection-name-input"/>
-          <button type="submit" className="btn btn-primary">Save</button>
-          <button className="btn btn-danger" onClick={this.onNameEditCancel}>Cancel</button>
-        </form>
-      )        
-
-      let isPublicSection = null
-      let checked = {checked: false}
-      if(this.state.collection.isPublic === true) {
-        checked = {checked: true}
+      if(this.state.collection) {
+        nameSection = !this.state.editingName ? (
+          <form className="form-inline name-modification" onClick={this.onNameClick}>
+            <label htmlFor="collection-name-input form-check-label mr-2">Collection:&nbsp;</label>
+            <span>{this.state.collection.name}</span>
+          </form>
+        ) : (
+          <form className="form-inline name-modification" onSubmit={this.onNameSubmit}>
+            <label htmlFor="collection-name-input form-check-label">Collection: </label>
+            <input type="text" name="collection[name]" value={this.state.collection.name} onChange={this.onCollectionChange} placeholder="Collection Name" className="form-control" id="collection-name-input"/>
+            <button type="submit" className="btn btn-primary">Save</button>
+            <button className="btn btn-danger" onClick={this.onNameEditCancel}>Cancel</button>
+          </form>
+        )        
       }
+      
+      let isPublicSection = null
+      if(this.state.collection) {
+        let checked = {checked: false}
+        if(this.state.collection.isPublic === true) {
+          checked = {checked: true}
+        }
 
-      isPublicSection = (
-        <div className="collection-modification form-check">
-          <input className='is-public-toggle form-check-input' type="checkbox"
-                 id={'is-public-' + this.state.collection._id}
-                 name="collection[isPublic]" value="isPublic" {...checked} onChange={this.onCollectionChange}/>
-          <label className="form-check-label" htmlFor={'is-public-' + this.state.collection._id}>Public</label>
-        </div>
-      )        
-
+        isPublicSection = (
+          <div className="collection-modification form-check">
+            <input className='is-public-toggle form-check-input' type="checkbox"
+                   id={'is-public-' + this.state.collection._id}
+                   name="collection[isPublic]" value="isPublic" {...checked} onChange={this.onCollectionChange}/>
+            <label className="form-check-label" htmlFor={'is-public-' + this.state.collection._id}>Public</label>
+          </div>
+        )        
+      }
+      
       let thumbnailSection = null
       if(this.thumbnailUrl() === '' || this.state.thumbnailPrompt) {
         let cancelBtn = this.thumbnailUrl() === '' ? null : (<a href='#' onClick={this.onReplaceThumbnail}>Cancel</a>)
@@ -250,7 +258,7 @@ export default class CollectionEditor extends Component {
                       files={this.state.thumbnails}
                       allowMultiple={false}
                       maxFiles={1}
-                      server={`/api/me/collections/${this.state.collection._id}/thumbnail`}
+                      server={`/api/me/collections/${this.props.collection._id}/thumbnail`}
                       onprocessfile={(error, file) => {
                         this.setState({thumbnail: file.serverId})
               }}
@@ -268,7 +276,6 @@ export default class CollectionEditor extends Component {
           </div>            
         )
       }
-
       
       body = (
         <div>
@@ -338,9 +345,11 @@ export default class CollectionEditor extends Component {
   }
 }
 
-CollectionEditor.propTypes = {
+Editor.propTypes = {
   $: PropTypes.func.isRequired,
   collection: PropTypes.object,
+  busy: PropTypes.bool.isRequired,
+  error: PropTypes.string.isRequired,
   fetch: PropTypes.func.isRequired,
   startingEdit: PropTypes.func.isRequired,
   deleteClip: PropTypes.func.isRequired
