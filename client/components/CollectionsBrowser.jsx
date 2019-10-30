@@ -76,7 +76,7 @@ class CollectionsBrowser extends Component {
 
     const { page, pages, total } = this.props
     const pagination = !this.props.page ? "" : (
-      <Paginator path="/collections" {...{page, pages, total}}/>
+      <Paginator path={(this.props.browsePrivate ? '/me/collections' : '/collections')} {...{page, pages, total}}/>
     )
 
     return (
