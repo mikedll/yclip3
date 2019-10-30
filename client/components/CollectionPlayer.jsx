@@ -94,7 +94,7 @@ class CollectionPlayer extends React.Component {
 
   scheduleMountPlayer() {
     const mountPlayer = () => {
-      if(this.props.collection.clips.length === 0) {
+      if(!this.props.collection || this.props.collection.clips.length === 0) {
         // No clips to play :(
         return;
       }

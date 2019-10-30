@@ -17,7 +17,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    addClip: (clip) => dispatch(addClip(clip)),
+    addClip: ($, id, clip) => dispatch(addClip($, id, clip)),
     fetch: ($, id) => dispatch(fetchCollection($, id, true)),
     startingEdit: collectionId => dispatch(startEditingCollection(collectionId)),
     deleteClip: ($, id, clipId) => dispatch(deleteClip($, id, clipId)),
