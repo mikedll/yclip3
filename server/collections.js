@@ -28,10 +28,11 @@ app.get('/:id', async (req, res, next) => {
         res.status(404).end()
         return
       }
-    } else {
-      const clips = await Clip.find().forCollection(clipCollection._id)
-      res.json({ ...clipCollection.inspect(), ...{clips: clips} })
     }
+
+    const clips = await Clip.find().forCollection(clipCollection._id)
+    res.json({ ...clipCollection.inspect(), ...{clips: clips} })
+
   } catch(err) {
     next(err)
   }
