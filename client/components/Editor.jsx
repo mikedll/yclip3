@@ -15,7 +15,6 @@ export default class Editor extends Component {
       vid: "",
       start: "",
       end: "",
-      error: "",
       editingName: false,
       thumbnail: null,
       thumbnailPrompt: false
@@ -341,6 +340,7 @@ export default class Editor extends Component {
 
 Editor.propTypes = {
   $: PropTypes.func.isRequired,
+  match: PropTypes.object.isRequired,
   collection: PropTypes.object,
   busy: PropTypes.bool.isRequired,
   error: PropTypes.string.isRequired,

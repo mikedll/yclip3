@@ -97,6 +97,15 @@ function clips(state = [], action) {
   }
 }
 
+function collections(state = [], action) {
+  switch (action.type) {
+  case RECEIVE_NEW_COLLECTION:
+    return state // [...state, action.collection]
+  default:
+    return state
+  }
+}
+
 function editor(state = {busy: false, error: "", collection: null}, action) {
   switch (action.type) {
   case FETCH_COLLECTION:
@@ -146,15 +155,6 @@ function browser(state = {busy: false, error: "", pages: 0, page: -1, total: 0, 
             ...{busy: false, collections: action.res.results}}
   case REQUEST_PAGE_ERROR:
     return {...state, ...{busy: false, error: action.error}}
-  default:
-    return state
-  }
-}
-
-function collections(state = [], action) {
-  switch (action.type) {
-  case RECEIVE_NEW_COLLECTION:
-    return state // [...state, action.collection]
   default:
     return state
   }
@@ -226,6 +226,7 @@ function playing(state = {
 export const rootReducer = combineReducers({
   clips,
   collections,
+  editor,
   browser,
   requestingNewCollection,
   newCollectionId,

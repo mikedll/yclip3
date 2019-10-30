@@ -8,9 +8,9 @@ import {
   deleteClip,
   updateClipOrder } from 'actions.js'
 
-const mapStateToProps = state => {
+const mapStateToProps = (state, ownProps) => {
   return {
-    ...state.editor
+    ...state.editor, ...ownProps
   }
 }
 
