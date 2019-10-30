@@ -41,7 +41,7 @@ export default class Editor extends Component {
       idToPos[this.props.$(el).data('ref-id')] = i
     })
 
-    this.updateClipOrder(this.props.$, this.props.collection._id, idToPos)
+    this.props.updateClipOrder(this.props.$, this.props.collection._id, idToPos)
   }
 
   needCollection() {
