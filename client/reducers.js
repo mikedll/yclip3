@@ -19,6 +19,9 @@ import {
   FETCH_COLLECTION,
   FINISH_FETCH_COLLECTION,
   FETCH_COLLECTION_ERROR,
+  REQUEST_UPDATE_COLLECTION,
+  FINISH_UPDATE_COLLECTION,
+  UPDATE_COLLECTION_ERROR,
   GOTO_NEXT_CLIP,
   CLIP_CHECK_PENDING,
   CLIP_CHECK_DUE,
@@ -132,6 +135,12 @@ function editor(state = {busy: false, error: "", collection: null}, action) {
   case FINISH_UPDATE_CLIP_ORDER:
     return {...state, ...{busy: false, collection: action.res}}
   case UPDATE_CLIP_ORDER_ERROR:
+    return {...state, ...{busy: false, error: action.error}}
+  case REQUEST_UPDATE_COLLECTION:
+    return {...state, ...{busy: true, error: ""}}
+  case FINISH_UPDATE_COLLECTION:
+    return {...state, ...{busy: false, collection: action.res}}
+  case UPDATE_COLLECTION_ERROR:
     return {...state, ...{busy: false, error: action.error}}
   default:
     return state

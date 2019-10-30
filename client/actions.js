@@ -212,7 +212,7 @@ export function updateCollectionError(error) {
 export function updateCollection($, id, diffs) {
   return dispatch => {
     dispatch(requestUpdateCollection())
-    new AjaxAssistant($).put('/api/me/collections/' + id)
+    new AjaxAssistant($).put('/api/me/collections/' + id, diffs)
       .then(res => dispatch(finishUpdateCollection(res)),
             error => dispatch(updateCollectionError(error)))
   }

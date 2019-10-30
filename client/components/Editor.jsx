@@ -95,7 +95,7 @@ export default class Editor extends Component {
 
     if(this.state.collection && this.state.collection.isPublic !== this.props.collection.isPublic) {
       // isPublic toggled
-      this.update(this.props.$, this.props.collection._id, {isPublic: this.state.collection.isPublic})
+      this.props.update(this.props.$, this.props.collection._id, {isPublic: this.state.collection.isPublic})
     }
   }
   
@@ -138,7 +138,8 @@ export default class Editor extends Component {
   onNameSubmit(e) {
     e.preventDefault()
 
-    this.update(this.props.$, this.props.collection._id, {name: this.state.collection.name})
+    this.props.update(this.props.$, this.props.collection._id, {name: this.state.collection.name})
+    this.setState({editingName: false})
   }
   
   onNewClipSubmit(e) {
@@ -347,5 +348,6 @@ Editor.propTypes = {
   fetch: PropTypes.func.isRequired,
   startingEdit: PropTypes.func.isRequired,
   deleteClip: PropTypes.func.isRequired,
-  updateClipOrder: PropTypes.func.isRequired
+  updateClipOrder: PropTypes.func.isRequired,
+  update: PropTypes.func.isRequired
 }
