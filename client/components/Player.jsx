@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import React from 'react';
 import AjaxAssistant from 'AjaxAssistant.jsx'
 
-class CollectionPlayer extends React.Component {
+class Player extends React.Component {
 
   constructor(props) {
     super(props)
@@ -284,7 +284,7 @@ class CollectionPlayer extends React.Component {
   }
 }
 
-CollectionPlayer.propTypes = {
+Player.propTypes = {
   $: PropTypes.func.isRequired,
   error: PropTypes.string.isRequired,
   seeking: PropTypes.bool.isRequired,
@@ -303,4 +303,4 @@ CollectionPlayer.propTypes = {
   jumpTo: PropTypes.func.isRequired
 }
 
-export default CollectionPlayer
+export default Player

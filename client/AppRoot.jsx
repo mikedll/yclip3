@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import { Link, Route, Switch } from 'react-router-dom';
 
 import AjaxAssistant from 'AjaxAssistant.jsx'
-import CollectionPlayerBed from 'containers/CollectionPlayerBed.jsx'
+import PlayerBed from 'containers/PlayerBed.jsx'
 import EditorBed from 'containers/EditorBed.jsx'
 import NewCollectionLink from 'containers/NewCollectionLink.jsx'
 import BrowseBed from 'containers/BrowseBed.jsx'
@@ -114,7 +114,7 @@ class AppRoot extends Component {
             globalWindow={this.props.globalWindow} user={this.state.user} browsePrivate={true}/>
           <PropsRoute path="/collections" exact component={BrowseBed} $={this.props.jQuery}
             globalWindow={this.props.globalWindow} user={this.state.user} browsePrivate={false}/>
-          <PropsRoute path="/collections/:id" exact component={CollectionPlayerBed} $={this.props.jQuery} />
+          <PropsRoute path="/collections/:id" exact component={PlayerBed} $={this.props.jQuery} />
           <PropsRoute path="/me/collections/:id/edit" exact
             globalWindow={this.props.globalWindow}
             component={EditorBed} $={this.props.jQuery}/>

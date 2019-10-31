@@ -16,7 +16,7 @@ import {
 
 import underscore from 'underscore'
 
-import CollectionPlayer from '../components/CollectionPlayer.jsx'
+import Player from '../components/Player.jsx'
 
 const mapStateToProps = (state, ownProps) => {
   const clipCheckIsDue = (state.playing.clipCheck === ClipCheckState.DUE)
@@ -48,5 +48,5 @@ const mapDispatchToProps = (dispatch) => ({
   }
 })
 
-const CollectionPlayerBed = connect(mapStateToProps, mapDispatchToProps)(CollectionPlayer)
-export default CollectionPlayerBed
+const PlayerBed = connect(mapStateToProps, mapDispatchToProps)(Player)
+export default PlayerBed
