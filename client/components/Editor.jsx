@@ -47,39 +47,23 @@ export default class Editor extends Component {
   needCollection() {
     return !this.props.collection || this.props.collection._id !== this.props.match.params.id
   }
-  
-  componentDidMount() {
-    this.props.startingEdit(this.props.match.params.id)
-    
-    if(this.needCollection() && !this.props.busy) {
-      this.fetchCollection()
-    }
+
+  refreshFormFromProps() {
+    this.setState({vid: "", start: "", duration: "", collection: underscore.pick(this.props.collection, 'name', 'isPublic')})
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if(prevProps.match.params.id !== this.props.match.params.id) {
-      this.props.startingEdit(this.props.match.params.id)      
-    }
-
-    if(this.needCollection()) {
+  fetchCollectionIfNeeded() {
+    const needed = this.needCollection()
+    if(needed) {
       if(!this.props.busy) {
-        // wrong collection loaded
-        this.setState({vid: "", start: "", duration: ""})
         this.fetchCollection()
       }
-
-      // if it was busy...then we're stuck with wrong collection until we 'unbusy'.
-      return
     }
 
-    
+    return needed
+  }
 
-    if(this.props.collection && (!prevProps.collection || underscore.some(['name', 'isPublic'], (attr) => {
-      return prevProps.collection[attr] !== this.props.collection[attr]
-    }))) {
-      this.setState({collection: underscore.pick(this.props.collection, 'name', 'isPublic')})
-    }
-
+  initSortable() {
     if(this.props.collection) {
       // sometimes we mount the component despite not having a collection yet. so we can't do this
       // in componentDidMount.
@@ -91,7 +75,34 @@ export default class Editor extends Component {
           }
         })
       }
+    }    
+  }
+
+  componentDidMount() {
+    this.props.startingEdit(this.props.match.params.id)
+
+    const needed = this.fetchCollectionIfNeeded()
+    if(needed) return
+    
+    this.refreshFormFromProps()
+    this.initSortable()
+  }
+  
+  componentDidUpdate(prevProps, prevState) {
+    if(prevProps.match.params.id !== this.props.match.params.id) {
+      this.props.startingEdit(this.props.match.params.id)      
     }
+
+    const needed = this.fetchCollectionIfNeeded()
+    if(needed) return
+
+    if(this.props.collection && (!prevProps.collection || underscore.some(['name', 'isPublic'], (attr) => {
+      return prevProps.collection[attr] !== this.props.collection[attr]
+    }))) {
+      this.refreshFormFromProps()
+    }
+
+    this.initSortable()
 
     if(this.state.collection && this.state.collection.isPublic !== this.props.collection.isPublic) {
       // isPublic toggled
