@@ -12,7 +12,7 @@ import makeStore from 'makeStore.js'
 import { receiveNewCollection } from 'actions.js'
 
 import NewCollectionLink from 'containers/NewCollectionLink.jsx'
-import ReadyEditor from 'containers/ReadyEditor.jsx'
+import EditorBed from 'containers/EditorBed.jsx'
 
 describe('<NewCollectionLink/>', function() {
 
@@ -52,7 +52,7 @@ describe('<NewCollectionLink/>', function() {
     let mock$ = spy()
     mock$.ajax = spy()
     
-    // Right now, this depends on ReadyEditor to tell it when the redirect has succeeded. Else, there's an infinite loop.
+    // Right now, this depends on EditorBed to tell it when the redirect has succeeded. Else, there's an infinite loop.
     const wrapper = mount(
       <Provider store={store}>
         <MemoryRouter initialEntries={['/somewhere']}>
@@ -62,7 +62,7 @@ describe('<NewCollectionLink/>', function() {
               )
           }}>
           </Route>
-          <Route path="/me/collections/:id/edit" exact render={routeProps => <ReadyEditor {...routeProps} $={mock$}/>}/>
+          <Route path="/me/collections/:id/edit" exact render={routeProps => <EditorBed {...routeProps} $={mock$}/>}/>
         </MemoryRouter>
       </Provider>
     )

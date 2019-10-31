@@ -4,10 +4,13 @@ import { mount } from 'enzyme'
 import { spy, stub } from 'sinon'
 import { expect } from 'chai'
 import { MemoryRouter } from 'react-router-dom'
+import makeStore from 'makeStore.js'
+import { Provider } from 'react-redux'
 
-import CollectionsBrowser from 'components/CollectionsBrowser.jsx'
+import Browser from 'components/Browser.jsx'
+import BrowserBed from 'containers/BrowserBed.jsx'
 
-describe('<CollectionsBrowser/>', function() {
+describe('<BrowserBed/>', function() {
 
   let clip1 = {
   }, clip2 = {
@@ -27,35 +30,52 @@ describe('<CollectionsBrowser/>', function() {
     name: "",
     clips: []
   }
-
+  
   it('should present private clip collections when marked as private browser', async () => {
 
     let mock$ = spy()
     mock$.ajax = spy()
+    let store = makeStore()
+
     const wrapper = mount(
-      <MemoryRouter>
-        <CollectionsBrowser $={mock$} user={{_id: 'user1'}} browsePrivate={true}/>
-      </MemoryRouter>
+      <Provider store={store}>
+        <MemoryRouter>
+          <BrowserBed $={mock$} user={{_id: 'user1'}} browsePrivate={true}/>
+        </MemoryRouter>
+      </Provider>
     )
 
     expect(mock$.ajax.calledWithMatch({url:'/api/me/collections?page=1'})).to.be.true
-    
-    await mock$.ajax.getCall(0).args[0].success({
+
+    let res = {
       page: 1,
       pages: 1,
       total: 2,
       results: [col1]
-    })
-    wrapper.update()
+    }
+
+    await mock$.ajax.getCall(0).args[0].success(res)
+
+    let browser = {
+      page: 1,
+      pages: 1,
+      total: 2,
+      collections: [col1]
+    }
+    
+    expect(store.getState().browser).to.deep.include(browser)
   })
 
   it('should not have edit/delete links on public collection, unless collection is an owned collection', async() => {
     let mock$ = spy()
     mock$.ajax = spy()
+    let store = makeStore()
     const wrapper = mount(
-      <MemoryRouter>
-        <CollectionsBrowser user={{_id: 'user1'}} $={mock$}/>
-      </MemoryRouter>
+      <Provider store={store}>
+        <MemoryRouter>
+          <BrowserBed user={{_id: 'user1'}} $={mock$} browsePrivate={false}/>
+        </MemoryRouter>
+      </Provider>
     )
     
     await mock$.ajax.getCall(0).args[0].success({
@@ -72,25 +92,16 @@ describe('<CollectionsBrowser/>', function() {
     expect(notOwnedColHolder.find('a.btn-delete')).to.have.lengthOf(0)
   })
 
-  it('should browse privately when configured as such', async () => {
-    let mock$ = spy()
-    mock$.ajax = spy()
-    const wrapper = mount(
-      <MemoryRouter>
-        <CollectionsBrowser $={mock$} user={{_id: 'user1'}} browsePrivate={true}/>
-      </MemoryRouter>
-    )
-
-    expect(mock$.ajax.calledWithMatch({url:'/api/me/collections?page=1'})).to.be.true
-  })
-  
   it('should present public clip collections on given page', async () => {
     let mock$ = spy()
     mock$.ajax = spy()
+    let store = makeStore()
     const wrapper = mount(
-      <MemoryRouter>
-        <CollectionsBrowser $={mock$}/>
-      </MemoryRouter>
+      <Provider store={store}>
+        <MemoryRouter>
+          <BrowserBed $={mock$} browsePrivate={false}/>
+        </MemoryRouter>
+      </Provider>
     )
 
     expect(mock$.ajax.calledWithMatch({url:'/api/collections?page=1'})).to.be.true
@@ -109,10 +120,13 @@ describe('<CollectionsBrowser/>', function() {
     let mock$ = stub().returns({data: function(ref) { return col2._id } })
     let mockW = {confirm: function() { return true } }
     mock$.ajax = spy()
+    let store = makeStore()
     const wrapper = mount(
-      <MemoryRouter>
-        <CollectionsBrowser $={mock$} globalWindow={mockW} user={{_id: 'user2'}}/>
-      </MemoryRouter>
+      <Provider store={store}>
+        <MemoryRouter>
+          <BrowserBed $={mock$} globalWindow={mockW} user={{_id: 'user2'}} browsePrivate={false}/>
+        </MemoryRouter>
+      </Provider>
     )
 
     await mock$.ajax.getCall(0).args[0].success({

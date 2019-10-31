@@ -29,7 +29,6 @@ export function requestPageError(error) {
 
 export function fetchBrowsePage($, isPrivate, page) {
   return (dispatch, getState) => {
-    const state = getState()
     dispatch(requestPage())
     new AjaxAssistant($).get((isPrivate ? '/api/me/collections' : '/api/collections') + '?' + serializeObj({page}))
       .then(res => {

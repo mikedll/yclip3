@@ -5,9 +5,9 @@ import { shallow, mount } from 'enzyme'
 import jQuery from 'jQuery'
 import { spy, stub, fake } from 'sinon'
 
-import CollectionEditor from 'components/CollectionEditor.jsx'
+import Editor from 'components/Editor.jsx'
 
-describe('<CollectionEditor />', function() {
+describe('<Editor />', function() {
 
   let clip1 = {
     _id: "asdf1",
@@ -36,7 +36,7 @@ describe('<CollectionEditor />', function() {
     })
     mock$.ajax = spy()
     const matchProps = { params: { id: clipCollection1._id } }
-    let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
+    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
     expect(mock$.ajax.calledWithMatch({url: '/api/me/collections/' + clipCollection1._id})).to.be.true
   })
 
@@ -48,7 +48,7 @@ describe('<CollectionEditor />', function() {
     mock$.ajax = spy()
 
     const matchProps = { params: { id: 'asdf0' } }
-    let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
+    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
     expect(mock$.ajax.calledOnce).to.be.true
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     expect(wrapper.state('collection')).to.deep.equal(clipCollection1)
@@ -63,7 +63,7 @@ describe('<CollectionEditor />', function() {
     })
     mock$.ajax = spy()
     const matchProps = { params: { id: 'asdf0' } }
-    let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
+    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     
     wrapper.find('form input[name="vid"]').simulate('change', {target: { name: 'vid', value: 'dfjlksdjf' }})
@@ -98,7 +98,7 @@ describe('<CollectionEditor />', function() {
     })
     mock$.ajax = spy()
     const matchProps = { params: { id: 'asdf0' } }
-    let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
+    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
     
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     wrapper.update()
@@ -119,7 +119,7 @@ describe('<CollectionEditor />', function() {
     })
     mock$.ajax = spy()
     const matchProps = { params: { id: 'asdf0' } }
-    let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
+    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
     
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     wrapper.update()
@@ -151,7 +151,7 @@ describe('<CollectionEditor />', function() {
     })
     mock$.ajax = spy()
     const matchProps = { params: { id: clipCollection1._id } }
-    let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
+    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
     
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     wrapper.update()
@@ -178,7 +178,7 @@ describe('<CollectionEditor />', function() {
     })
     mock$.ajax = fake()
     const matchProps = { params: { id: clipCollection1._id } }
-    let wrapper = mount(<CollectionEditor $={mock$} match={matchProps}/>)
+    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
     
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     wrapper.update()

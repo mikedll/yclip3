@@ -5,9 +5,9 @@ import { expect } from 'chai'
 import { mount } from 'enzyme'
 import { MemoryRouter } from 'react-router-dom'
 
-import CollectionPlayer from 'components/CollectionPlayer.jsx'
+import Player from 'components/Player.jsx'
 
-describe('<CollectionPlayer/>', function() {
+describe('<Player/>', function() {
   let clip1 = {
     _id: "asdf1",
     vid:"Iwuy4hHO3YQ",
@@ -40,7 +40,7 @@ describe('<CollectionPlayer/>', function() {
       jumpTo: spy()
     }
     const wrapper = mount(
-      <CollectionPlayer fetch={fetch} match={mockMatch} {...mockProps}/>
+      <Player fetch={fetch} match={mockMatch} {...mockProps}/>
     )
 
     expect(fetch.calledOnce).to.be.true
