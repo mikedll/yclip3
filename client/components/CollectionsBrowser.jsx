@@ -22,10 +22,8 @@ class CollectionsBrowser extends Component {
       qPage = 1
     }
 
-    const fetchRequired =
-          (prevProps && prevProps.browsePrivate !== this.props.browsePrivate) // jumped between public/private
-          || (!this.props.page || this.props.page !== qPage)                  // no page fetched, or wrong page
-          || (this.props.lastFetchPublic === this.props.browsePrivate)        // old fetch cache public/private conflict
+    const fetchRequired = (this.props.page !== qPage)                  // no page fetched, or wrong page
+          || (this.props.lastFetchPublic === this.props.browsePrivate) // old fetch cache public/private conflict
 
     const fetchOk = !(this.props.browsePrivate && this.props.error === 'That resource is forbidden to you')
 
