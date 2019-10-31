@@ -12,10 +12,11 @@ export function requestPage() {
   }
 }
 
-export function receivePage(res) {
+export function receivePage(res, isPrivate) {
   return {
     type: RECEIVE_PAGE,
-    res
+    res,
+    isPrivate
   }
 }
 
@@ -26,13 +27,13 @@ export function requestPageError(error) {
   }
 }
 
-export function fetchBrowsePage($, path, page) {
+export function fetchBrowsePage($, isPrivate, page) {
   return (dispatch, getState) => {
     const state = getState()
     dispatch(requestPage())
-    new AjaxAssistant($).get(path + '?' + serializeObj({page}))
+    new AjaxAssistant($).get((isPrivate ? '/api/me/collections' : '/api/collections') + '?' + serializeObj({page}))
       .then(res => {
-        dispatch(receivePage(res))
+        dispatch(receivePage(res, isPrivate))
       }, error => {
         dispatch(requestPageError(error))
       })

@@ -25,11 +25,12 @@ class CollectionsBrowser extends Component {
     const fetchRequired =
           (prevProps && prevProps.browsePrivate !== this.props.browsePrivate) // jumped between public/private
           || (!this.props.page || this.props.page !== qPage)                  // no page fetched, or wrong page
+          || (this.props.lastFetchPublic === this.props.browsePrivate)        // old fetch cache public/private conflict
 
     const fetchOk = !(this.props.browsePrivate && this.props.error === 'That resource is forbidden to you')
 
     if(fetchRequired && fetchOk && !this.props.busy) {
-      this.props.fetchPage(this.props.$, (this.props.browsePrivate ? '/api/me/collections' : '/api/collections'), qPage)
+      this.props.fetchPage(this.props.$, this.props.browsePrivate, qPage)
     }
   }
 
@@ -99,6 +100,7 @@ CollectionsBrowser.propTypes = {
   globalWindow:  PropTypes.object,
   user: PropTypes.object,
   browsePrivate: PropTypes.bool.isRequired,
+  lastFetchPublic: PropTypes.bool.isRequired,
   page: PropTypes.number.isRequired,
   pages: PropTypes.number.isRequired,
   total: PropTypes.number.isRequired,

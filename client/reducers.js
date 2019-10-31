@@ -147,7 +147,15 @@ function editor(state = {busy: false, error: "", collection: null}, action) {
   }
 }
 
-function browser(state = {busy: false, error: "", pages: 0, page: -1, total: 0, collections: []}, action) {
+function browser(state = {
+  busy: false,
+  error: "",
+  pages: 0,
+  page: -1,
+  total: 0,
+  lastFetchPublic: false,
+  collections: []
+}, action) {
   switch (action.type) {
   case REQUEST_DELETE:
     return {...state, ...{busy: true}}
@@ -161,7 +169,7 @@ function browser(state = {busy: false, error: "", pages: 0, page: -1, total: 0, 
   case RECEIVE_PAGE:
     return {...state,
             ...underscore.pick(action.res, 'page', 'pages', 'total'),
-            ...{busy: false, collections: action.res.results}}
+            ...{busy: false, collections: action.res.results, lastFetchPublic: !action.isPrivate}}
   case REQUEST_PAGE_ERROR:
     return {...state, ...{busy: false, error: action.error}}
   default:

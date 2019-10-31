@@ -9,7 +9,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    fetchPage: ($, path, page) => dispatch(fetchBrowsePage($, path, page)),
+    fetchPage: ($, isPrivate, page) => dispatch(fetchBrowsePage($, isPrivate, page)),
     delete: ($, id) => dispatch(browseDelete($, id))
   }
 }
