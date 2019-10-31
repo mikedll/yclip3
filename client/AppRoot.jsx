@@ -6,7 +6,7 @@ import AjaxAssistant from 'AjaxAssistant.jsx'
 import PlayerBed from 'containers/PlayerBed.jsx'
 import EditorBed from 'containers/EditorBed.jsx'
 import NewCollectionLink from 'containers/NewCollectionLink.jsx'
-import BrowseBed from 'containers/BrowseBed.jsx'
+import BrowserBed from 'containers/BrowserBed.jsx'
 
 const renderMergedProps = (component, ...rest) => {
   const finalProps = Object.assign({}, ...rest);
@@ -110,9 +110,9 @@ class AppRoot extends Component {
 
         <Switch>
           <PropsRoute path="/" exact component={welcome} $={this.props.jQuery}/>
-          <PropsRoute path="/me/collections" exact component={BrowseBed} $={this.props.jQuery}
+          <PropsRoute path="/me/collections" exact component={BrowserBed} $={this.props.jQuery}
             globalWindow={this.props.globalWindow} user={this.state.user} browsePrivate={true}/>
-          <PropsRoute path="/collections" exact component={BrowseBed} $={this.props.jQuery}
+          <PropsRoute path="/collections" exact component={BrowserBed} $={this.props.jQuery}
             globalWindow={this.props.globalWindow} user={this.state.user} browsePrivate={false}/>
           <PropsRoute path="/collections/:id" exact component={PlayerBed} $={this.props.jQuery} />
           <PropsRoute path="/me/collections/:id/edit" exact

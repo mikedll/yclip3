@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import { getUrlQueryAsObj } from 'UrlHelper.jsx'
 import Paginator from 'components/Paginator.jsx'
 
-class CollectionsBrowser extends Component {
+class Browser extends Component {
 
   constructor(props) {
     super(props)
@@ -93,7 +93,7 @@ class CollectionsBrowser extends Component {
   }
 }
 
-CollectionsBrowser.propTypes = {
+Browser.propTypes = {
   $: PropTypes.func.isRequired,
   globalWindow:  PropTypes.object,
   user: PropTypes.object,
@@ -109,4 +109,4 @@ CollectionsBrowser.propTypes = {
   delete: PropTypes.func.isRequired
 }
 
-export default CollectionsBrowser
+export default Browser
