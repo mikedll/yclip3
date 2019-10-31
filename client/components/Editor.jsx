@@ -65,8 +65,6 @@ export default class Editor extends Component {
 
   initSortable() {
     if(this.props.collection) {
-      // sometimes we mount the component despite not having a collection yet. so we can't do this
-      // in componentDidMount.
       const _this = this
       if(this.tbodyEl && !this.props.$(this.tbodyEl).data('uiSortable')) {
         this.props.$(this.tbodyEl).sortable({
