@@ -5,7 +5,8 @@ import { MemoryRouter as Router } from 'react-router-dom'
 import { configure, shallow, mount } from 'enzyme'
 import jQuery from 'jQuery'
 import { spy, stub } from 'sinon'
-
+import { Provider } from 'react-redux'
+import makeStore from 'makeStore.js'
 import AppRoot from 'AppRoot.jsx'
 
 describe('<AppRoot />', () => {
@@ -22,14 +23,21 @@ describe('<AppRoot />', () => {
     clips: []
   }
 
+  let store
+  beforeEach(() => {
+    store = makeStore()
+  })
+
   it('should display no name when logged out', async () => {
     let mock$ = spy()
     let mockW = spy()
     mock$.ajax = spy()
     let wrapper = mount(
-      <Router initialEntries={['/']}>
-        <AppRoot user={null} jQuery={mock$} globalWindow={mockW}/>
-      </Router>
+      <Provider store={store}>
+        <Router initialEntries={['/']}>
+          <AppRoot user={null} jQuery={mock$} globalWindow={mockW}/>
+        </Router>
+      </Provider>
     )
 
     expect(wrapper.find('.sign-in-container .name')).to.have.lengthOf(0)
@@ -40,9 +48,11 @@ describe('<AppRoot />', () => {
     let mockW = spy()
     mock$.ajax = spy()
     let wrapper = mount(
-      <Router initialEntries={['/']}>
-        <AppRoot user={{name: "Mike Rivers"}} jQuery={mock$} globalWindow={mockW}/>
-      </Router>
+      <Provider store={store}>
+        <Router initialEntries={['/']}>
+          <AppRoot user={{name: "Mike Rivers"}} jQuery={mock$} globalWindow={mockW}/>
+        </Router>
+      </Provider>
     )
 
     expect(wrapper.find('.sign-in-container .name').text()).to.equal('Mike Rivers')
@@ -80,9 +90,11 @@ describe('<AppRoot />', () => {
     
     mock$.ajax = spy()
     let wrapper = mount(
-      <Router initialEntries={['/']}>
-        <AppRoot user={{name: 'Mike Rivers'}} jQuery={mock$} globalWindow={mockW}/>
-      </Router>
+      <Provider store={store}>
+        <Router initialEntries={['/']}>
+          <AppRoot user={{name: 'Mike Rivers'}} jQuery={mock$} globalWindow={mockW}/>
+        </Router>
+      </Provider>
     )
     expect(wrapper.find('.sign-in-container .name').text()).to.equal('Mike Rivers')
 
@@ -103,9 +115,11 @@ describe('<AppRoot />', () => {
     let mockW = spy()
     mock$.ajax = spy()
     let wrapper = mount(
-      <Router initialEntries={['/']}>
-        <AppRoot user={null} jQuery={mock$} globalWindow={mockW}/>
-      </Router>
+      <Provider store={store}>
+        <Router initialEntries={['/']}>
+          <AppRoot user={null} jQuery={mock$} globalWindow={mockW}/>
+        </Router>
+      </Provider>
     )
 
     let googleUserStub = {
@@ -125,12 +139,14 @@ describe('<AppRoot />', () => {
   
   it('should render /collections without error', async () => {
     let mock$ = spy()
-    let mockW = spy()
+    let mockW = {}
     mock$.ajax = spy()
     let wrapper = mount(
-      <Router initialEntries={['/collections']}>
-        <AppRoot jQuery={mock$} globalWindow={mockW}/>
-      </Router>
+      <Provider store={store}>
+        <Router initialEntries={['/collections']}>
+          <AppRoot jQuery={mock$} globalWindow={mockW}/>
+        </Router>
+      </Provider>
     )
 
     await mock$.ajax.getCall(0).args[0].success({

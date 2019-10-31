@@ -5,9 +5,12 @@ import { shallow, mount } from 'enzyme'
 import jQuery from 'jQuery'
 import { spy, stub, fake } from 'sinon'
 
+import makeStore from 'makeStore.js'
+import { Provider } from 'react-redux'
 import Editor from 'components/Editor.jsx'
+import EditorBed from 'containers/EditorBed.jsx'
 
-describe('<Editor />', function() {
+describe('<EditorBed />', function() {
 
   let clip1 = {
     _id: "asdf1",
@@ -26,7 +29,9 @@ describe('<Editor />', function() {
     clips: [clip1, clip2]
   }
 
+  let store
   beforeEach(() => {
+    store = makeStore()
   })
   
   it('should fetch collection on load', () => {
@@ -36,7 +41,11 @@ describe('<Editor />', function() {
     })
     mock$.ajax = spy()
     const matchProps = { params: { id: clipCollection1._id } }
-    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
+    let wrapper = mount(
+      <Provider store={store}>
+        <EditorBed $={mock$} match={matchProps}/>
+      </Provider>
+    )
     expect(mock$.ajax.calledWithMatch({url: '/api/me/collections/' + clipCollection1._id})).to.be.true
   })
 
@@ -48,10 +57,17 @@ describe('<Editor />', function() {
     mock$.ajax = spy()
 
     const matchProps = { params: { id: 'asdf0' } }
-    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
+    let wrapper = mount(
+      <Provider store={store}>
+        <EditorBed $={mock$} match={matchProps}/>
+      </Provider>
+    )
     expect(mock$.ajax.calledOnce).to.be.true
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
-    expect(wrapper.state('collection')).to.deep.equal(clipCollection1)
+
+    const state = store.getState()
+    expect(state.editor.collection).to.deep.equal(clipCollection1)
+    
     wrapper.update()
     expect(wrapper.find('.clip-container')).to.have.lengthOf(2)
   })
@@ -63,7 +79,11 @@ describe('<Editor />', function() {
     })
     mock$.ajax = spy()
     const matchProps = { params: { id: 'asdf0' } }
-    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
+    let wrapper = mount(
+      <Provider store={store}>
+        <EditorBed $={mock$} match={matchProps}/>
+      </Provider>
+    )
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     
     wrapper.find('form input[name="vid"]').simulate('change', {target: { name: 'vid', value: 'dfjlksdjf' }})
@@ -98,7 +118,11 @@ describe('<Editor />', function() {
     })
     mock$.ajax = spy()
     const matchProps = { params: { id: 'asdf0' } }
-    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
+    let wrapper = mount(
+      <Provider store={store}>
+        <EditorBed $={mock$} match={matchProps}/>
+      </Provider>
+    )
     
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     wrapper.update()
@@ -119,7 +143,11 @@ describe('<Editor />', function() {
     })
     mock$.ajax = spy()
     const matchProps = { params: { id: 'asdf0' } }
-    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
+    let wrapper = mount(
+      <Provider store={store}>
+        <EditorBed $={mock$} match={matchProps}/>
+      </Provider>
+    )
     
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     wrapper.update()
@@ -151,7 +179,11 @@ describe('<Editor />', function() {
     })
     mock$.ajax = spy()
     const matchProps = { params: { id: clipCollection1._id } }
-    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
+    let wrapper = mount(
+      <Provider store={store}>
+        <EditorBed $={mock$} match={matchProps}/>
+      </Provider>
+    )
     
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     wrapper.update()
@@ -178,7 +210,11 @@ describe('<Editor />', function() {
     })
     mock$.ajax = fake()
     const matchProps = { params: { id: clipCollection1._id } }
-    let wrapper = mount(<Editor $={mock$} match={matchProps}/>)
+    let wrapper = mount(
+      <Provider store={store}>
+        <EditorBed $={mock$} match={matchProps}/>
+      </Provider>
+    )
     
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
     wrapper.update()
