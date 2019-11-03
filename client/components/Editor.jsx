@@ -49,7 +49,7 @@ export default class Editor extends Component {
   }
 
   refreshFormFromProps() {
-    this.setState({vid: "", start: "", duration: "", collection: underscore.pick(this.props.collection, 'name', 'isPublic'), thumbnail: this.props.collection.thumbnail.name})
+    this.setState({vid: "", start: "", duration: "", collection: underscore.pick(this.props.collection, 'name', 'isPublic'), thumbnail: this.props.collection.thumbnail ? this.props.collection.thumbnail.name : ''})
   }
 
   fetchCollectionIfNeeded() {
