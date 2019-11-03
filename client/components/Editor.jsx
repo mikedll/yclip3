@@ -193,7 +193,7 @@ export default class Editor extends Component {
   }
 
   thumbnailUrl() {
-    if(!this.props.collection.thumbnail) return ''
+    if(!this.state.thumbnail && !this.props.collection.thumbnail) return ''
 
     const name = this.state.thumbnail
     if(this.props.globalWindow.imageBucket)
