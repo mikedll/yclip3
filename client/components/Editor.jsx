@@ -49,7 +49,7 @@ export default class Editor extends Component {
   }
 
   refreshFormFromProps() {
-    this.setState({vid: "", start: "", duration: "", collection: underscore.pick(this.props.collection, 'name', 'isPublic')})
+    this.setState({vid: "", start: "", duration: "", collection: underscore.pick(this.props.collection, 'name', 'isPublic'), thumbnail: this.props.collection.thumbnail.name})
   }
 
   fetchCollectionIfNeeded() {
@@ -195,7 +195,7 @@ export default class Editor extends Component {
   thumbnailUrl() {
     if(!this.props.collection.thumbnail) return ''
 
-    const name = this.props.collection.thumbnail.name
+    const name = this.state.thumbnail
     if(this.props.globalWindow.imageBucket)
       return ('http://' + this.props.globalWindow.imageBucket + '/' + name + '.png')
     else      
@@ -256,17 +256,19 @@ export default class Editor extends Component {
       if(this.thumbnailUrl() === '' || this.state.thumbnailPrompt) {
         let cancelBtn = this.thumbnailUrl() === '' ? null : (<a href='#' onClick={this.onReplaceThumbnail}>Cancel</a>)
         thumbnailSection = (
-          <div className='thumbnail-pond'>
-            <FilePond labelIdle='Upload'
-                      files={this.state.thumbnails}
-                      allowMultiple={false}
-                      maxFiles={1}
-                      server={`/api/me/collections/${this.props.collection._id}/thumbnail`}
-                      onprocessfile={(error, file) => {
-                        this.setState({thumbnail: file.serverId})
-              }}
-              />
-              {cancelBtn}
+          <div className="thumbnail-pond-wrapper">
+            <div className='thumbnail-pond'>
+              <FilePond labelIdle='Upload'
+                        files={this.state.thumbnails}
+                        allowMultiple={false}
+                        maxFiles={1}
+                        server={`/api/me/collections/${this.props.collection._id}/thumbnail`}
+                        onprocessfile={(error, file) => {
+                          this.setState({thumbnail: file.serverId, thumbnailPrompt: false})
+                }}
+                />
+            </div>
+            {cancelBtn}
           </div>
         )
       } else {

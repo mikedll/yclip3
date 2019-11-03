@@ -99,6 +99,11 @@ tr.active {
   justify-content: space-between;
 }
 
+.thumbnail-pond-wrapper {
+  color: #fff;
+  a { color: #fff; }
+}
+
 .thumbnail-pond {
   width: 275px;
   height: 100px;

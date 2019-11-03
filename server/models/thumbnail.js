@@ -2,6 +2,7 @@
 const path = require('path')
 const fs = require('fs')
 
+const secureRandom = require('secure-random')
 const AWS = require('aws-sdk')
 const gm = require('gm')
 const imageMagick = gm.subClass({imageMagick: true})
@@ -17,12 +18,19 @@ const ThumbnailSchema = new mongoose.Schema({
   },
   name: {
     type: String,
+    unique: true,
     required: false
   }
 })
 
 ThumbnailSchema.query.forCollection = function(id) {
   return this.find({clipCollection: id})
+}
+
+ThumbnailSchema.methods.generateName = function() {
+  const nameRandom = secureRandom(8, { type: 'Buffer' })
+  const nameRandomAsHex = nameRandom.toString('hex')
+  this.name = nameRandomAsHex
 }
 
 ThumbnailSchema.methods.diskPath = function() {

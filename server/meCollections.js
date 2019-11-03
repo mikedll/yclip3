@@ -155,9 +155,24 @@ app.post('/:id/thumbnail', async(req, res, next) => {
       return
     }
   }
+
+  let succeeded = false, tries = 0
+  const DUP_KEY_ERROR = 11000
+  while(!succeeded && tries < 7) {
+    thumbnail = new Thumbnail({clipCollection: clipCollection._id})
+    thumbnail.generateName()
+    try {
+      await thumbnail.save()
+      succeeded = true
+    } catch(e) {
+      if(e.code === DUP_KEY_ERROR) {
+        succeeded = false
+        tries += 1
+      }
+      next(e)
+    }
+  }
   
-  thumbnail = new Thumbnail({clipCollection: clipCollection._id, name: clipCollection._id.toString()})
-  await thumbnail.save()
   let err = await thumbnail.moveToStorage(config.s3.bucket !== undefined, req.files.filepond)
   if(err) {
     next(err)

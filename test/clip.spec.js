@@ -20,5 +20,6 @@ describe('Clip', function() {
     expect(clip.start).to.equal(5399)
     expect(clip.duration).to.equal(46.331)
   })
+
 })
 

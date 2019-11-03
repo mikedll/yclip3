@@ -34,11 +34,17 @@ function migrate(args) {
   })
 }
 
+const run = async () => {
+  // for messing around.  
+}
+
 const args = process.argv.slice(2)
 
 if(args.length > 0) {
   if(args[0] == 'migrate') {
     migrate(args)    
+  } else if (args[0] === 'run') {
+    run()
   }
 } else {
   const app = require('./server/app.js')

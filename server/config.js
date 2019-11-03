@@ -46,7 +46,7 @@ const config = {
   localStorageLocation: (envVars.NODE_ENV !== 'test' ? path.join(__dirname, '../static/storage') : path.join(__dirname, '../tmp/storage')),
   mongo: {
     uri: envVars.MONGODB_URI || `mongodb://${envVars.MONGO_HOST}:${envVars.MONGO_PORT}/${envVars.MONGO_DATABASE}`,
-    connectionOpts: { useNewUrlParser: true }
+    connectionOpts: { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }
   },
   s3: {
     key: envVars.AWS_ACCESS_KEY_ID,
