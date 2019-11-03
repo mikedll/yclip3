@@ -1,6 +1,7 @@
 import update from 'immutability-helper';
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import { Link } from 'react-router-dom'
 
 import underscore from 'underscore'
 import AjaxAssistant from 'AjaxAssistant.jsx'
@@ -287,6 +288,9 @@ export default class Editor extends Component {
           <div className="editor-top-wrapper">
             <div>
               {nameSection}
+              <Link to={'/collections/' + this.props.collection._id}>View</Link>
+            </div>
+            <div>
               {isPublicSection}
             </div>
             <div>
