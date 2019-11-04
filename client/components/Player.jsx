@@ -94,7 +94,7 @@ class Player extends React.Component {
 
   scheduleMountPlayer() {
     const mountPlayer = () => {
-      if(!this.props.collection || this.props.collection.clips.length === 0) {
+      if(this.player || !this.props.collection || this.props.collection.clips.length === 0) {
         // No clips to play :(
         return;
       }
@@ -129,6 +129,11 @@ class Player extends React.Component {
   componentDidMount() {
     if(this.fetchCollectionRequired() && !this.props.busy) {
       this.props.fetch(this.props.$, this.props.match.params.id)
+      return
+    }
+
+    if(!this.player) {
+      this.scheduleMountPlayer()
       return
     }
   }
