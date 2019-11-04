@@ -4,6 +4,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme'
 import jQuery from 'jQuery'
 import { spy, stub, fake } from 'sinon'
+import { MemoryRouter } from 'react-router-dom'
 
 import makeStore from 'makeStore.js'
 import { Provider } from 'react-redux'
@@ -43,7 +44,9 @@ describe('<EditorBed />', function() {
     const matchProps = { params: { id: clipCollection1._id } }
     let wrapper = mount(
       <Provider store={store}>
-        <EditorBed $={mock$} match={matchProps}/>
+        <MemoryRouter>
+          <EditorBed $={mock$} match={matchProps}/>
+        </MemoryRouter>
       </Provider>
     )
     expect(mock$.ajax.calledWithMatch({url: '/api/me/collections/' + clipCollection1._id})).to.be.true
@@ -59,7 +62,9 @@ describe('<EditorBed />', function() {
     const matchProps = { params: { id: 'asdf0' } }
     let wrapper = mount(
       <Provider store={store}>
-        <EditorBed $={mock$} match={matchProps}/>
+        <MemoryRouter>
+          <EditorBed $={mock$} match={matchProps}/>
+        </MemoryRouter>
       </Provider>
     )
     expect(mock$.ajax.calledOnce).to.be.true
@@ -81,7 +86,9 @@ describe('<EditorBed />', function() {
     const matchProps = { params: { id: 'asdf0' } }
     let wrapper = mount(
       <Provider store={store}>
-        <EditorBed $={mock$} match={matchProps}/>
+        <MemoryRouter>
+          <EditorBed $={mock$} match={matchProps}/>
+        </MemoryRouter>          
       </Provider>
     )
     await mock$.ajax.getCall(0).args[0].success(clipCollection1)
@@ -120,7 +127,9 @@ describe('<EditorBed />', function() {
     const matchProps = { params: { id: 'asdf0' } }
     let wrapper = mount(
       <Provider store={store}>
-        <EditorBed $={mock$} match={matchProps}/>
+        <MemoryRouter>        
+          <EditorBed $={mock$} match={matchProps}/>
+        </MemoryRouter>
       </Provider>
     )
     
@@ -145,7 +154,9 @@ describe('<EditorBed />', function() {
     const matchProps = { params: { id: 'asdf0' } }
     let wrapper = mount(
       <Provider store={store}>
-        <EditorBed $={mock$} match={matchProps}/>
+        <MemoryRouter>
+          <EditorBed $={mock$} match={matchProps}/>
+        </MemoryRouter>
       </Provider>
     )
     
@@ -181,7 +192,9 @@ describe('<EditorBed />', function() {
     const matchProps = { params: { id: clipCollection1._id } }
     let wrapper = mount(
       <Provider store={store}>
-        <EditorBed $={mock$} match={matchProps}/>
+        <MemoryRouter>
+          <EditorBed $={mock$} match={matchProps}/>
+        </MemoryRouter>
       </Provider>
     )
     
@@ -212,7 +225,9 @@ describe('<EditorBed />', function() {
     const matchProps = { params: { id: clipCollection1._id } }
     let wrapper = mount(
       <Provider store={store}>
-        <EditorBed $={mock$} match={matchProps}/>
+        <MemoryRouter>
+          <EditorBed $={mock$} match={matchProps}/>
+        </MemoryRouter>          
       </Provider>
     )
     
