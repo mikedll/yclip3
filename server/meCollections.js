@@ -168,8 +168,9 @@ app.post('/:id/thumbnail', async(req, res, next) => {
       if(e.code === DUP_KEY_ERROR) {
         succeeded = false
         tries += 1
+      } else {
+        next(e)
       }
-      next(e)
     }
   }
   
