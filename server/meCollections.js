@@ -174,6 +174,10 @@ app.post('/:id/thumbnail', async(req, res, next) => {
     }
   }
   
+  if(tries === 7) {
+    next("failed to generate unique id for thumbnail.")
+  }
+  
   let err = await thumbnail.moveToStorage(config.s3.bucket !== undefined, req.files.filepond)
   if(err) {
     next(err)
