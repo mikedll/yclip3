@@ -51,6 +51,7 @@ class Browser extends Component {
 
   render() {
     const thumbnails = !this.props.collections ? "" : this.props.collections.map((c) => {
+      const displayTitle = c.name.trim() !== '' ? c.name : c._id
       let editLinks = null
       if(this.props.user && this.props.user._id === c.userId) {
         editLinks = (
@@ -62,7 +63,7 @@ class Browser extends Component {
 
       return (
         <div key={c._id} className="collection-brief">
-          {c._id} - {c.name}
+          {displayTitle}
           <br/>
           Clips: {c.clips.length}
           <br/>
