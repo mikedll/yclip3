@@ -1,4 +1,5 @@
 
+import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import React from 'react';
 import AjaxAssistant from 'AjaxAssistant.jsx'
@@ -269,10 +270,21 @@ class Player extends React.Component {
         {this.props.error}
       </div>
     )
+
+    const editLink = (this.props.user &&
+                      this.props.collection &&
+                      this.props.user._id === this.props.collection.userId)
+          ? (<div className="text-center">
+              <Link to={'/me/collections/' + this.props.collection._id + '/edit'}>Edit</Link>
+             </div>
+            )
+          : null
     
     return (
       <div className="embedded-player-container">
         {errorMsg}
+
+        {editLink}
         
         <div id="embedded-player-5"></div>
 
@@ -293,6 +305,7 @@ Player.propTypes = {
   $: PropTypes.func.isRequired,
   error: PropTypes.string.isRequired,
   seeking: PropTypes.bool.isRequired,
+  user: PropTypes.object,  
   collection: PropTypes.object,
   clipIndex: PropTypes.number,
   clipCheck: PropTypes.string,

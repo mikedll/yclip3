@@ -114,7 +114,8 @@ class AppRoot extends Component {
             globalWindow={this.props.globalWindow} user={this.state.user} browsePrivate={true}/>
           <PropsRoute path="/collections" exact component={BrowserBed} $={this.props.jQuery}
             globalWindow={this.props.globalWindow} user={this.state.user} browsePrivate={false}/>
-          <PropsRoute path="/collections/:id" exact component={PlayerBed} $={this.props.jQuery} />
+          <PropsRoute path="/collections/:id" exact component={PlayerBed} $={this.props.jQuery}
+            user={this.state.user}/>
           <PropsRoute path="/me/collections/:id/edit" exact
             globalWindow={this.props.globalWindow}
             component={EditorBed} $={this.props.jQuery}/>
