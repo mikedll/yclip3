@@ -102,7 +102,7 @@ app.put('/:id/order', csrfProtection, async (req, res, next) => {
           return clip.save()
         }))
         updatedClips.sort((l, r) => l.position - r.position)
-        res.status(200).json({...clipCollection.inspect(), ...{clips: clips}})
+        res.status(200).json({...clipCollection.inspect(), ...{clips: updatedClips}})
       } catch (err) {
         next(err)
       }
