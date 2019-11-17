@@ -16,6 +16,7 @@ const envVarsSchema = Joi.object({
   MONGO_DATABASE: Joi.string()
     .description("Mongo database name")
     .default("yclip3dev"),
+  GOOGLE_ANALYTICS: Joi.string(),
   MONGODB_URI: Joi.string(),
   GOOGLE_SIGNIN_CLIENT_ID: Joi.string().required(),
   COOKIE_SECRET: Joi.string().required(),
@@ -41,6 +42,7 @@ if(error) {
 const config = {
   cookieSecret: envVars.COOKIE_SECRET,
   googleClientId: envVars.GOOGLE_SIGNIN_CLIENT_ID,
+  googleAnalyticsId: envVars.GOOGLE_ANALYTICS,
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   localStorageLocation: (envVars.NODE_ENV !== 'test' ? path.join(__dirname, '../static/storage') : path.join(__dirname, '../tmp/storage')),
