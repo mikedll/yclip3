@@ -225,15 +225,17 @@ app.post('/:collection_id/clips', csrfProtection, async (req, res, next) => {
     const clipCollection = await ClipCollection.findOne({userId: user._id, _id: req.params.collection_id})
     if(!clipCollection) {
       res.status(404).end()
-    } else {
-      let newClip = new Clip()
-      newClip.clipCollection = clipCollection._id
-      newClip.vid = req.body.vid
-      newClip.parseStartEnd(req.body.start, req.body.end)
-      await newClip.save()
-      const clips = await Clip.find({clipCollection: req.params.collection_id})
-      res.status(201).json({...clipCollection.inspect(), ...{clips: clips}})
+      return
     }
+
+    const clips = await Clip.find({clipCollection: clipCollection._id}).sort('position')
+    let newClip = new Clip()
+    newClip.clipCollection = clipCollection._id
+    newClip.vid = req.body.vid
+    newClip.parseStartEnd(req.body.start, req.body.end)
+    newClip.position = clips.length === 0 ? 0 : (clips[clips.length - 1].position + 1)
+    await newClip.save()
+    res.status(201).json({...clipCollection.inspect(), ...{clips: [...clips, newClip]}})
   } catch(err) {
     next(err)
   }

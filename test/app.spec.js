@@ -269,15 +269,19 @@ describe('App', () => {
     const collection = new ClipCollection({userId: user1._id, name: "nice songs"})
     await collection.save()
 
-    const savedClips = await Promise.all([clip1, clip2].map(async (clip) => {
-      let newClip = new Clip(clip)
+    const clipsReady = [clip1, clip2].map(c => {
+      let newClip = new Clip(c)
       newClip.clipCollection = collection._id
-      return await newClip.save()
-    }))
+      return newClip
+    })
+
+    let saved = []
+    saved.push(await clipsReady[0].save())
+    saved.push(await clipsReady[1].save())
     
     const ordering = {
-      [savedClips[0]._id]: 1,
-      [savedClips[1]._id]: 0
+      [saved[0]._id]: 1,
+      [saved[1]._id]: 0
     }
 
     const wrappedApp = session(app)
@@ -289,6 +293,31 @@ describe('App', () => {
     const foundClips = await Clip.find({clipCollection: collection._id}).sort('position')
     expect(foundClips[0].vid).to.equal("dQw4w9WgXcQ")
     expect(foundClips[1].vid).to.equal("Iwuy4hHO3YQ")
+  })
+
+  it('should give position to any new clip added', async () => {
+    const collection = new ClipCollection({userId: user1._id, name: "my list"})
+    await collection.save()
+
+    const wrappedApp = session(app)
+    await wrappedApp.post('/api/sessions/testsignin').send({userId: user1._id})
+    
+    const clipsCasted = [clip1, clip2].map((clip) => {
+      let clipCasted = clip
+      clipCasted.end = (clipCasted.start + clipCasted.duration).toString()
+      clipCasted.start = clipCasted.start.toString()
+      return clipCasted
+    })
+
+    await wrappedApp.post('/api/me/collections/' + collection._id + '/clips').send(clipsCasted[0])
+    await wrappedApp.post('/api/me/collections/' + collection._id + '/clips').send(clipsCasted[1])
+    
+    const clips = await Clip.find({clipCollection: collection._id}).sort('position')
+    console.log("length", clips.length)
+    
+    const foundClips = await Clip.find({clipCollection: collection._id}).sort('position')
+    expect(foundClips[0].position).to.equal(0)
+    expect(foundClips[1].position).to.equal(1)
   })
 
   it('should permit clip deletion', async () => {
