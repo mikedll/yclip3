@@ -16,7 +16,7 @@ window.onYouTubeIframeAPIReady = function() {
   if(window.ytApiLoadedHook) window.ytApiLoadedHook()
 }  
 
-const silent = false
+const silent = true
 window.dout = function(s) {
   if (silent) return
   console.log(s)
