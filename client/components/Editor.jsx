@@ -2,8 +2,9 @@ import update from 'immutability-helper';
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
-
 import underscore from 'underscore'
+
+import { formatTime } from 'timerFmt.js'
 import AjaxAssistant from 'AjaxAssistant.jsx'
 import { FilePond } from 'react-filepond'
 import "filepond/dist/filepond.min.css";
@@ -164,31 +165,6 @@ export default class Editor extends Component {
     })
   }
 
-  timerFormatted(time) {
-    const hours = Math.floor(time / (60 * 60))
-    let remaining = time - (hours * 60 * 60)
-    const minutes = Math.floor(remaining / 60)
-    const seconds = remaining - (minutes * 60)
-    const secondsRounded = +(Math.round(seconds + "e+3")  + "e-3")
-    let ret = String(secondsRounded)
-
-    if(ret.length < 2) {
-      ret = '0' + ret
-    }
-
-    ret = minutes + ':' + ret
-
-    if(hours > 0) {
-      if(String(minutes).length < 2) {
-        ret = '0' + ret
-      }
-
-      ret = hours + ':' + ret
-    }
-
-    return ret
-  }
-
   onDelete(e, id) {
     this.props.deleteClip(this.props.$, this.props.collection._id, id)
   }
@@ -312,8 +288,8 @@ export default class Editor extends Component {
                 return (
                   <tr className="clip-container" key={c._id} data-ref-id={c._id}>
                     <td>{c.vid}</td>
-                    <td>{this.timerFormatted(c.start)}</td>
-                    <td>{this.timerFormatted(c.start + c.duration)}</td>
+                    <td>{formatTime(c.start)}</td>
+                    <td>{formatTime(c.start + c.duration)}</td>
                     <td><button className="btn btn-danger btn-delete" onClick={(e) => this.onDelete(e, c._id)}><i className="fas fa-trash"></i></button></td>
                   </tr>
                 )

@@ -2,6 +2,8 @@
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import React from 'react';
+
+import { formatTime } from 'timerFmt.js'
 import AjaxAssistant from 'AjaxAssistant.jsx'
 
 class Player extends React.Component {
@@ -253,8 +255,8 @@ class Player extends React.Component {
     const rows = !this.props.collection ? null : this.props.collection.clips.map((c, i) => (
       <tr key={i} className={"" + ((this.props.clipIndex !== null && this.props.clipIndex === i) ? 'active' : '')}>
         <td>{c.vid}</td>
-        <td>{c.start}s</td>
-        <td>{c.duration}s</td>
+        <td>{formatTime(c.start)}</td>
+        <td>{formatTime(c.start + c.duration)}</td>
       </tr>      
     ))
     const table = (
@@ -263,7 +265,7 @@ class Player extends React.Component {
             <tr>
               <th>Video</th>
               <th>Start</th>
-              <th>Duration</th>
+              <th>End</th>
             </tr>
           </thead>
           <tbody>
