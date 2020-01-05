@@ -295,11 +295,11 @@ const markClipCheckPending = () => {
   }
 }
 
-export const curClip = (playing) => {
-  if(playing.clipIndex === null) return null;
+export const curClip = (player, collection) => {
+  if(!collection || player.clipIndex === null) return null;
 
-  if(playing.clipIndex < playing.collection.clips.length) {
-    const clip = playing.collection.clips[playing.clipIndex]
+  if(player.clipIndex < collection.clips.length) {
+    const clip = collection.clips[player.clipIndex]
     
     return {
       vid: clip.vid,

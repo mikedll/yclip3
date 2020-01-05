@@ -19,8 +19,8 @@ import Player from '../components/Player.jsx'
 
 const mapStateToProps = (state, ownProps) => {
   const clipCheckIsDue = (state.player.clipCheck === ClipCheckState.DUE)
-  const propCurClip = curClip(state.player)
   const collection = state.player.collectionId ? state.collections[state.player.collectionId] : null
+  const propCurClip = curClip(state.player, collection)
 
   return {...underscore.pick(state.player, 'error', 'clipIndex', 'seeking', 'busy'),
           collection,
