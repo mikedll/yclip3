@@ -56,7 +56,7 @@ export default class Editor extends Component {
   fetchCollectionIfNeeded() {
     const needed = this.needCollection()
     if(needed) {
-      if(!this.props.busy) {
+      if(!this.props.busy && (!this.props.error || this.props.error !== 'A resource could not be found.')) {
         this.fetchCollection()
       }
     }

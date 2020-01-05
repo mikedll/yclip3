@@ -138,8 +138,11 @@ export function receiveCollectionForPlay(collection) {
 export function fetchCollectionToPlay($, id) {
   return (dispatch, getState) => {
 
-    // Could do a cache check here, to see if we already have the
-    // collection.
+    const state = getState()
+    if(state.collections[id]) {
+      dispatch(cacheHit(id, 'PLAYER'))
+      return
+    }
     
     dispatch(requestCollectionPlay(id))
     new AjaxAssistant($).get('/api/collections/' + id)
@@ -151,9 +154,17 @@ export function fetchCollectionToPlay($, id) {
   }
 }
 
+export const CACHE_HIT = 'CACHE_HIT'
 export const FETCH_COLLECTION = 'FETCH_COLLECTION'
 export const FINISH_FETCH_COLLECTION = 'FINISH_FETCH_COLLECTION'
 export const FETCH_COLLECTION_ERROR = 'FETCH_COLLECTION_ERROR'
+
+export function cacheHit(id, zone = 'EDITOR') {
+  return {
+    type: CACHE_HIT,
+    id, zone
+  }
+}
 
 export function requestCollection() {
   return {
@@ -176,7 +187,13 @@ export function fetchCollectionError(error) {
 }
 
 export const fetchCollection = ($, id, requireOwned = false) => {
-  return dispatch => {
+  return (dispatch, getState) => {
+    const state = getState()
+    if(state.collections[id]) {
+      dispatch(cacheHit(id))
+      return
+    }
+    
     dispatch(requestCollection())
     const path = requireOwned ? '/api/me/collections' : '/api/collections'
     new AjaxAssistant($).get(path + '/' + id)

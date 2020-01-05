@@ -1,5 +1,6 @@
 
 import { connect } from 'react-redux'
+import underscore from 'underscore'
 import Editor from 'components/Editor.jsx'
 import {
   addClip,
@@ -10,8 +11,11 @@ import {
   updateCollection } from 'actions.js'
 
 const mapStateToProps = (state, ownProps) => {
+  const collection = state.editor.collectionId ? state.collections[state.editor.collectionId] : null
   return {
-    ...state.editor, ...ownProps
+    ...underscore.pick(state.editor, 'error', 'busy'),
+    collection,
+    ...ownProps
   }
 }
 

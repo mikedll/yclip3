@@ -3,7 +3,7 @@
 import { expect } from 'chai'
 import React from 'react';
 import { shallow, mount } from 'enzyme'
-import { spy } from 'sinon'
+import { spy, stub } from 'sinon'
 import { MemoryRouter, Route } from 'react-router-dom'
 
 import { Provider } from 'react-redux'
@@ -49,7 +49,10 @@ describe('<NewCollectionLink/>', function() {
   // This one causes infinite loop from redirect -mikedll, 6/4/2019.
   it('should redirect user to new collection when made', () => {
     const store = makeStore()
-    let mock$ = spy()
+    let mock$ = stub().returns({
+      sortable: spy(),
+      data: stub().returns(true)
+    })
     mock$.ajax = spy()
     
     // Right now, this depends on EditorBed to tell it when the redirect has succeeded. Else, there's an infinite loop.
@@ -67,7 +70,7 @@ describe('<NewCollectionLink/>', function() {
       </Provider>
     )
 
-    store.dispatch(receiveNewCollection({_id: 'asdf1'}))
+    store.dispatch(receiveNewCollection({_id: 'asdf1', clips: []}))
     expect(wrapper.find('Router').prop('history').location.pathname).to.equal('/me/collections/asdf1/edit')
   })
 })

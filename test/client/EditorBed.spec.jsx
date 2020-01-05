@@ -6,6 +6,7 @@ import jQuery from 'jQuery'
 import { spy, stub, fake } from 'sinon'
 import { MemoryRouter } from 'react-router-dom'
 
+import { receiveCollectionForPlay } from 'actions.js'
 import makeStore from 'makeStore.js'
 import { Provider } from 'react-redux'
 import Editor from 'components/Editor.jsx'
@@ -34,7 +35,7 @@ describe('<EditorBed />', function() {
   beforeEach(() => {
     store = makeStore()
   })
-  
+
   it('should fetch collection on load', () => {
     let mock$ = stub().returns({
       sortable: spy(),
@@ -52,6 +53,26 @@ describe('<EditorBed />', function() {
     expect(mock$.ajax.calledWithMatch({url: '/api/me/collections/' + clipCollection1._id})).to.be.true
   })
 
+  it('should not fetch collection if collection is in cache', () => {
+    let mock$ = stub().returns({
+      sortable: spy(),
+      data: stub().returns(true)
+    })
+    mock$.ajax = spy()
+
+    store.dispatch(receiveCollectionForPlay(clipCollection1))
+    
+    const matchProps = { params: { id: clipCollection1._id } }
+    let wrapper = mount(
+      <Provider store={store}>
+        <MemoryRouter>
+          <EditorBed $={mock$} match={matchProps}/>
+        </MemoryRouter>
+      </Provider>
+    )
+    expect(mock$.ajax.callCount).to.equal(0)
+  })
+  
   it('should list existing clips', async () => {
     let mock$ = stub().returns({
       sortable: spy(),

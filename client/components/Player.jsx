@@ -126,12 +126,22 @@ class Player extends React.Component {
     return (!this.props.collection ||
             (this.props.collection._id !== this.props.match.params.id))
   }
+
+  fetchCollectionIfNeeded() {
+    if(this.fetchCollectionRequired() && !this.props.busy) {
+
+      if(this.props.error && this.props.error === 'A resource could not be found.')
+        return false
+
+      this.props.fetch(this.props.$, this.props.match.params.id)
+      return true
+    }
+
+    return true
+  }
   
   componentDidMount() {
-    if(this.fetchCollectionRequired() && !this.props.busy) {
-      this.props.fetch(this.props.$, this.props.match.params.id)
-      return
-    }
+    if(!this.fetchCollectionIfNeeded()) return
 
     if(!this.player) {
       this.scheduleMountPlayer()
@@ -140,10 +150,7 @@ class Player extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if(this.fetchCollectionRequired() && !this.props.busy) {
-      this.props.fetch(this.props.$, this.props.match.params.id)
-      return
-    }
+    if(!this.fetchCollectionIfNeeded()) return
     
     if(!this.player) {
       this.scheduleMountPlayer()

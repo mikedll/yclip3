@@ -16,6 +16,7 @@ import {
   REQUEST_COLLECTION_PLAY,
   RECEIVED_COLLECTION_FOR_PLAY,
   PLAYING_ERROR,
+  CACHE_HIT,
   FETCH_COLLECTION,
   FINISH_FETCH_COLLECTION,
   FETCH_COLLECTION_ERROR,
@@ -46,31 +47,17 @@ import {
 state = {
   loggedInUser: null || {_id: 'adsf1', name: 'mike rivers'},
   newCollectionId: null || 'adsf3',
-  clips: [{
-      id: 'asdfclip1',
-      clipCollection: 'asdf1',
-      start: something,
-      end: something else,
-      vid: blahvid,
-      position: 1
-    },
-    {
-      id: 'asdfclip2',
-      clipCollection: 'asdf1',
-      start: something,
-      end: something else,
-      vid: blahvid,
-      position: 2
+  collections: {
+    'asdf' => { 
+      userId: 'asdf1',
+      id: 'asdf',
+      name: 'My collection',
+      isPublic: true,
+      clips: [...]
     }
-  ],
-  collections: [{
-    userId: 'asdf1',
-    id: 'asdf',
-    name: 'My collection',
-    isPublic: true,
   }],
   editor: {
-    collection: {_id: 'asdf1'},
+    collectionId: 'asdf',
     busy: false,
     error: ""
   },
@@ -124,6 +111,11 @@ function collections(state = {}, action) {
 
 function editor(state = {busy: false, error: "", collection: null}, action) {
   switch (action.type) {
+  case CACHE_HIT:
+    if(action.zone !== 'EDITOR')
+      return state
+    else
+      return {...state, ...{collectionId: action.id}}
   case FETCH_COLLECTION:
     return {...state, ...{busy: true}}
   case FINISH_FETCH_COLLECTION:
@@ -212,7 +204,7 @@ function newCollectionId(state = null, action) {
   }
 }
 
-function playing(state = {
+function player(state = {
   error: "",
   collectionId: null,
   clipIndex: null,
@@ -223,6 +215,11 @@ function playing(state = {
 
   let next
   switch(action.type) {
+  case CACHE_HIT:
+    if(action.zone !== 'PLAYER')
+      return state
+    else
+      return {...state, ...{collectionId: action.id}}
   case REQUEST_COLLECTION_PLAY:
     return {...state, ...{busy: true, collectionId: null, clipIndex: null, clipCheck: null, seeking: false, error: ""}}
   case RECEIVED_COLLECTION_FOR_PLAY:
@@ -260,5 +257,5 @@ export const rootReducer = combineReducers({
   browser,
   requestingNewCollection,
   newCollectionId,
-  playing  
+  player
 })
