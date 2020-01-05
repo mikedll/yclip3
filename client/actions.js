@@ -128,7 +128,7 @@ function playingError(error) {
   }
 }
 
-function receiveCollectionForPlay(collection) {
+export function receiveCollectionForPlay(collection) {
   return {
     type: RECEIVED_COLLECTION_FOR_PLAY,
     collection
@@ -398,9 +398,10 @@ export function requestDeleteClip() {
   }
 }
 
-export function finishDeleteClip(clipId) {
+export function finishDeleteClip(id, clipId) {
   return {
     type: FINISH_DELETE_CLIP,
+    id,
     clipId
   }
 }
@@ -416,7 +417,7 @@ export function deleteClip($, id, clipId) {
   return dispatch => {
     dispatch(requestDeleteClip())
     new AjaxAssistant($).delete('/api/me/collections/' + id + '/clips/' + clipId)
-      .then(res => dispatch(finishDeleteClip(clipId)),
+      .then(res => dispatch(finishDeleteClip(id, clipId)),
             error => dispatch(deleteClipError(error)))
   }
 }

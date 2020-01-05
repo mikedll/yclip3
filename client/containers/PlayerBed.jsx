@@ -1,5 +1,6 @@
 
 import { connect } from 'react-redux'
+import underscore from 'underscore'
 
 import {
   nextClipOrMonitor,
@@ -14,14 +15,18 @@ import {
   jumpToForPlay
 } from '../actions.js'
 
-import underscore from 'underscore'
-
 import Player from '../components/Player.jsx'
 
 const mapStateToProps = (state, ownProps) => {
   const clipCheckIsDue = (state.playing.clipCheck === ClipCheckState.DUE)
   const propCurClip = curClip(state.playing)
-  return {...state.playing, clipCheckIsDue, curClip: propCurClip, ...ownProps }
+  const collection = state.playing.collectionId ? state.collections[state.playing.collectionId] : null
+
+  return {...underscore.pick(state.playing, 'error', 'clipIndex', 'seeking', 'busy'),
+          collection,
+          clipCheckIsDue,
+          curClip: propCurClip,
+          ...ownProps }
 }
 
 const mapDispatchToProps = (dispatch) => ({

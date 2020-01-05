@@ -84,7 +84,7 @@ state = {
   },
   playing: null | {
     error: "",
-    collection: 'adsf1',  // may hold clips
+    collectionId: 'asdf',
     clipIndex: 2 || null,
     seeking: false,
     clipCheck: null || ClipCheckState.pending || ClipCheckState.due
@@ -100,10 +100,23 @@ function clips(state = [], action) {
   }
 }
 
-function collections(state = [], action) {
+function collections(state = {}, action) {
   switch (action.type) {
   case RECEIVE_NEW_COLLECTION:
-    return state // [...state, action.collection]
+    return {...state, ...{[action.collection._id]: action.collection} }
+  case RECEIVED_COLLECTION_FOR_PLAY:
+    return {...state, ...{[action.collection._id]: action.collection} }
+  case FINISH_FETCH_COLLECTION:
+    return {...state, ...{[action.res._id]: action.res} }
+  case FINISH_ADD_CLIP:
+    return {...state, ...{[action.res._id]: action.res} }
+  case FINISH_DELETE_CLIP:
+    const index = underscore.findIndex(state[action.id].clips, (c) => c._id == action.clipId)
+    return update(state, {[action.id]: {clips: {$splice: [[index, 1]]}}})
+  case FINISH_UPDATE_CLIP_ORDER:
+    return {...state, ...{[action.res._id]: action.res}}
+  case FINISH_UPDATE_COLLECTION:
+    return {...state, ...{[action.res._id]: action.res}}
   default:
     return state
   }
@@ -201,7 +214,7 @@ function newCollectionId(state = null, action) {
 
 function playing(state = {
   error: "",
-  collection: null,
+  collectionId: null,
   clipIndex: null,
   seeking: false,
   clipCheck: null,
@@ -211,9 +224,9 @@ function playing(state = {
   let next
   switch(action.type) {
   case REQUEST_COLLECTION_PLAY:
-    return {...state, ...{busy: true, collection: null, clipIndex: null, clipCheck: null, seeking: false, error: ""}}
+    return {...state, ...{busy: true, collectionId: null, clipIndex: null, clipCheck: null, seeking: false, error: ""}}
   case RECEIVED_COLLECTION_FOR_PLAY:
-    return {...state, ...{busy: false, collection: action.collection}}
+    return {...state, ...{busy: false, collectionId: action.collection._id}}
   case JUMP_TO_CLIP_FOR_PLAY:
     return {...state, ...{clipIndex: action.index}}
   case SHUTDOWN_PLAYER:
