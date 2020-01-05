@@ -250,9 +250,10 @@ export const fetchCollectionForEdit = ($, id, requireOwned = true) => {
 
 export const GOTO_NEXT_CLIP = 'GOTO_NEXT_CLIP'
 
-export function gotoNextClip() {
+export function gotoNextClip(collection) {
   return {
-    type: GOTO_NEXT_CLIP
+    type: GOTO_NEXT_CLIP,
+    collection
   }
 }
 
@@ -318,7 +319,8 @@ export function nextClipOrMonitor(vid, currentTime) {
   return (dispatch, getState) => {
 
     const state = getState()
-    const c = curClip(state.playing)
+    const collection = state.player.collectionId ? state.collections[state.player.collectionId] : null
+    const c = curClip(state.player, collection)
 
     if(!c) {
       dout("error: requested timeout without a clip in bounds.")
@@ -335,7 +337,7 @@ export function nextClipOrMonitor(vid, currentTime) {
 
     // clip is over?
     if (currentTime >= c.end) {
-      dispatch(gotoNextClip())
+      dispatch(gotoNextClip(collection))
       return Promise.resolve() // why are we using promises here again...?
     }
 

@@ -239,7 +239,7 @@ function player(state = {
   case CLIP_CHECK_PENDING:
     return {...state, ...{clipCheck: ClipCheckState.PENDING} }
   case GOTO_NEXT_CLIP:
-    if(state.clipIndex >= state.collection.clips.length - 1) {
+    if(state.clipIndex >= action.collection.clips.length - 1) {
       next = {clipIndex: null}
     } else {
       next = {clipIndex: state.clipIndex + 1}
