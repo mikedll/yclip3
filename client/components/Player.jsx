@@ -129,6 +129,10 @@ class Player extends React.Component {
             (this.props.collection._id !== this.props.match.params.id))
   }
 
+  /*
+    Returns true if correct collection is present, and it
+    is okay to proceed to render the player.
+  */
   fetchCollectionIfNeeded() {
     if(this.fetchCollectionRequired() && !this.props.busy) {
 
@@ -136,7 +140,7 @@ class Player extends React.Component {
         return false
 
       this.props.fetch(this.props.$, this.props.match.params.id)
-      return true
+      return false
     }
 
     return true
