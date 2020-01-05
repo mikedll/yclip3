@@ -29,7 +29,7 @@ describe('<PlayerBed/>', function() {
     clips: []
   }
   
-  it.only('should retrieve collection from cache', () => {
+  it('should retrieve collection from cache', () => {
 
     let mock$ = spy()
     mock$.ajax = spy()
