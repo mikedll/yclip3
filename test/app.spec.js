@@ -313,7 +313,6 @@ describe('App', () => {
     await wrappedApp.post('/api/me/collections/' + collection._id + '/clips').send(clipsCasted[1])
     
     const clips = await Clip.find({clipCollection: collection._id}).sort('position')
-    console.log("length", clips.length)
     
     const foundClips = await Clip.find({clipCollection: collection._id}).sort('position')
     expect(foundClips[0].position).to.equal(0)
