@@ -351,6 +351,11 @@ export function nextClipOrMonitor(vid, currentTime) {
       setTimeout(() => resolve(), timeUntilClipEnds)
     })
     waitForClipPromise.then(() => {
+      const state = getState()
+      if(state.player.clipCheck !== ClipCheckState.PENDING)
+        // player likely killed while timeout was expiring.
+        return
+
       dispatch(clipCheckDue())
     })
 

@@ -239,6 +239,10 @@ function player(state = {
     return {...state, ...{clipCheck: ClipCheckState.DUE} }
   case CLIP_CHECK_PENDING:
     return {...state, ...{clipCheck: ClipCheckState.PENDING} }
+  case FINISH_DELETE_CLIP:
+  case FINISH_UPDATE_CLIP_ORDER:
+    // clipIndex doesn't mean anything, now.
+    return {...state, ...{clipIndex: null, clipCheck: null}}
   case GOTO_NEXT_CLIP:
     if(state.clipIndex >= action.collection.clips.length - 1) {
       next = {clipIndex: null}
