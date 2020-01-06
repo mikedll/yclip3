@@ -39,7 +39,8 @@ import {
   DELETE_CLIP_ERROR,
   REQUEST_UPDATE_CLIP_ORDER,
   FINISH_UPDATE_CLIP_ORDER,
-  UPDATE_CLIP_ORDER_ERROR
+  UPDATE_CLIP_ORDER_ERROR,
+  JUMP_TO_CLIP
 } from './actions.js'
 
 /*
@@ -225,9 +226,9 @@ function player(state = {
   case RECEIVED_COLLECTION_FOR_PLAY:
     return {...state, ...{busy: false, collectionId: action.collection._id}}
   case JUMP_TO_CLIP_FOR_PLAY:
-    return {...state, ...{clipIndex: action.index}}
+    return {...state, ...{clipIndex: action.index, clipCheck: null}}
   case SHUTDOWN_PLAYER:
-    return {...state, ...{clipIndex: null, clipCheckDue: null}}
+    return {...state, ...{clipIndex: null, clipCheck: null}}
   case PLAYING_ERROR:
     return {...state, ...{busy: false, error: action.error}}
   case SEEKING_TO_CLIP:

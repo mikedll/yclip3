@@ -84,7 +84,7 @@ tr.active {
   height: 250px;
 }
 
-/************************* CollectionEditor *************/
+/************************* Editor *************/
 
 .name-modification {
   margin-block-end: 0;
@@ -121,3 +121,9 @@ tr.active {
   color: #fff;
 }
 
+/************************* Player *************/
+
+.clip-summary table a {
+  color: #fff;
+  text-decoration: underline;
+}

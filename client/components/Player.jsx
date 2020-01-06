@@ -20,6 +20,7 @@ class Player extends React.Component {
     this.onPlay = this.onPlay.bind(this)    
     this.onPlayerReady = this.onPlayerReady.bind(this)
     this.onPlayerStateChange = this.onPlayerStateChange.bind(this)
+    this.onJump = this.onJump.bind(this)    
   }
 
   onPlay(e) {
@@ -36,6 +37,12 @@ class Player extends React.Component {
     }
   }
 
+  onJump(e, c) {
+    e.preventDefault()
+    if(!this.props.collection) return
+    this.props.jumpTo(this.props.collection.clips.indexOf(c))
+  }
+  
   onPlayerReady(e) {
     this.setState({loaded: true})
   }
@@ -181,17 +188,20 @@ class Player extends React.Component {
       return
     }
 
-    const seekIfNew = function(prevProps, curProps) {
+    const seekIfNew = function(ytState, prevProps, curProps) {
       const c = curProps.curClip
       if (c && prevProps.clipIndex !== curProps.clipIndex) {
         // clip change
-        if (this.player.getVideoData().video_id !== c.vid) {
+        if (ytState === YT.PlayerState.PAUSED || this.player.getVideoData().video_id !== c.vid) {
           dout(`indexChange -> cueing(${c.vid})`)
           this.props.seeking()
           this.player.cueVideoById({videoId:c.vid, startSeconds: c.start, endSeconds: c.end})
         } else {
           this.player.seekTo(c.start, true)
         }
+      } else if (c && ytState === YT.PlayerState.PAUSED) {
+        this.props.seeking()
+        this.player.cueVideoById({videoId:c.vid, startSeconds: c.start, endSeconds: c.end})
       }
     }
 
@@ -200,17 +210,25 @@ class Player extends React.Component {
     }
     const s = this.player.getPlayerState()
     switch (s) {
+    case YT.PlayerState.PAUSED: {
+      if (this.props.curClip) {
+        seekIfNew.call(this, s, prevProps, this.props)
+      }
+      break
+    }
     case YT.PlayerState.ENDED: {
       if(prevProps.clipIndex === prevProps.collection.clips.length && this.props.clipIndex === null) {
         // Clips finished.
         dout("successful finish")
-        break
+      } else if (this.props.curClip) {
+        seekIfNew.call(this, s, prevProps, this.props)
       }
+      break
     }
     case YT.PlayerState.CUED:
     case YT.PlayerState.UNSTARTED: {
       dout("didUpdate.(ended,cued,unstarted)")
-      seekIfNew.call(this, prevState, this.props)
+      seekIfNew.call(this, s, prevProps, this.props)
       break
     }
     case YT.PlayerState.PLAYING: {
@@ -219,12 +237,11 @@ class Player extends React.Component {
         // Clips finished.
         this.player.pauseVideo()
       } else {
-        seekIfNew.call(this, prevProps, this.props)
+        seekIfNew.call(this, s, prevProps, this.props)
       }
 
       break
     }
-    case YT.PlayerState.PAUSED:
     default: {
       // buffering...stopped...?
       dout("didUpdated.(ended,paused,other:" + s + ")")
@@ -258,7 +275,10 @@ class Player extends React.Component {
 
     const rows = !this.props.collection ? null : this.props.collection.clips.map((c, i) => (
       <tr key={i} className={"" + ((this.props.clipIndex !== null && this.props.clipIndex === i) ? 'active' : '')}>
-        <td>{c.vid}</td>
+        <td>
+          {c.vid}{' '}
+          <a href='#' className='jump-link' onClick={e => this.onJump(e, c)}>[Jump Here]</a>
+        </td>
         <td>{formatTime(c.start)}</td>
         <td>{formatTime(c.start + c.duration)}</td>
       </tr>      

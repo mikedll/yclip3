@@ -25,10 +25,10 @@ describe('<Player/>', function() {
   }
 
   it('should fetch clips and present them in table', async () => {
-    let fetch = spy()
-    const mockMatch = { params: { id: clipCollection1._id } }
     const mockProps = {
+      match: { params: { id: clipCollection1._id } },
       $: spy(),
+      fetch: spy(),
       error: "",
       seeking: spy(),
       busy: false,
@@ -40,11 +40,36 @@ describe('<Player/>', function() {
       jumpTo: spy()
     }
     const wrapper = mount(
-      <Player fetch={fetch} match={mockMatch} {...mockProps}/>
+      <Player {...mockProps}/>
     )
 
-    expect(fetch.calledOnce).to.be.true
+    expect(mockProps.fetch.calledOnce).to.be.true
     wrapper.setProps({collection: clipCollection1})
     expect(wrapper.find('tbody tr')).to.have.lengthOf(2)
   })
+
+  it('should permit jumping to a specific clip', () => {
+    const mockProps = {
+      match: { params: { id: clipCollection1._id } },
+      $: spy(),
+      fetch: spy(),
+      error: "",
+      seeking: spy(),
+      busy: false,
+      collection: clipCollection1,
+      clipCheckIsDue: false,
+      onVideoEnd: spy(),
+      enteredPlaying: spy(),
+      nextClipOrScheduleCheck: spy(),
+      shutdown: spy(),
+      jumpTo: spy()
+    }
+    const wrapper = mount(
+      <Player {...mockProps}/>
+    )
+    wrapper.find('.clip-summary tbody tr').at(1).find('a.jump-link').simulate('click')
+    expect(mockProps.jumpTo.getCall(0).args[0]).to.equal(1)
+  })
+  
+  
 })
