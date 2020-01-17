@@ -111,7 +111,7 @@ export default class Editor extends Component {
   }
   
   componentWillUnmount() {
-    if(this.tbodyEl) {
+    if(this.tbodyEl && this.props.$(this.tbodyEl).data('uiSortable')) {
       this.props.$(this.tbodyEl).sortable('destroy')
     }
   }

@@ -50,7 +50,7 @@ app.post('/', csrfProtection, async (req, res, next) => {
   
   const clipCollection = new ClipCollection({userId: user._id, name: ""})
   clipCollection.save()
-    .then(collection => res.status(201).json(collection))
+    .then(collection => res.status(201).json({...collection.toJSON(), ...{clips: []}}))
     .catch(err => { next(err) })
 })
 
