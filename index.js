@@ -53,6 +53,6 @@ if(args.length > 0) {
   const mongooseEvents = require('./server/mongooseEvents.js')
   const mongoose = require('mongoose')
   mongoose.connect(config.mongo.uri, config.mongo.connectionOpts)
-  app.listen(config.port, () => console.log(`Listening on port ${config.port}!`))
+  app.listen(config.port, 'localhost', () => console.log(`Listening on port ${config.port}!`))
 }
 
