@@ -1,3 +1,4 @@
+require('dotenv').config()
 
 function migrate(args) {
   const fs = require('fs')
