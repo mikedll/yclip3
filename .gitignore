@@ -17,3 +17,5 @@ test/components.js
 static/js
 
 .envrc
+
+.env
