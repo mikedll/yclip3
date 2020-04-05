@@ -63,7 +63,23 @@ class AppRoot extends Component {
   }
   
   render() {
-    const welcome = () => (<div>Welcome to the application.</div>)
+    const welcome = () => (
+      <div>
+        <p>
+          Welcome.
+        </p>
+
+        <p>
+          This application allows you to create clips out of YouTube videos.
+          It uses the YouTube Video player to replay the clips that you make.
+        </p>
+
+        <p>
+          The clip collections you make can be marked as Public if you want, or you can keep them
+          private.
+        </p>
+      </div>
+    )
     const MenuLink = ({ label, to }) => (
       <Route path={to} exact children={({ match }) => (
         <li className={'nav-item' + (match ? ' active' : '')}>

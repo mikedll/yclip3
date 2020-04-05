@@ -33,7 +33,7 @@ class Browser extends Component {
           || (this.props.lastFetchPublic === this.props.browsePrivate) // old fetch cache public/private conflict
 
     // not getting Forbidden errors, or if we are, we just gained a user.
-    const fetchOk = !(this.props.browsePrivate && this.props.error === Forbidden) || (!prevProps.user && this.props.user)
+    const fetchOk = !(this.props.browsePrivate && this.props.error === Forbidden) || (prevProps && !prevProps.user && this.props.user)
 
     if(fetchRequired && fetchOk && !this.props.busy) {
       this.props.fetchPage(this.props.$, this.props.browsePrivate, qPage)
