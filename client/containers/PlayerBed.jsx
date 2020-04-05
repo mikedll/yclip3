@@ -13,7 +13,8 @@ import {
   fetchCollectionToPlay,
   shutdownPlayer,
   jumpToForPlay,
-  discardPrivateCollections
+  discardPrivateCollections,
+  resetPlayerError
 } from '../actions.js'
 
 import Player from '../components/Player.jsx'
@@ -54,7 +55,8 @@ const mapDispatchToProps = (dispatch) => ({
   },
   discardPrivateCollections: (index) => {
     dispatch(discardPrivateCollections())
-  }
+  },
+  resetError: () => dispatch(resetPlayerError())
 })
 
 const PlayerBed = connect(mapStateToProps, mapDispatchToProps)(Player)

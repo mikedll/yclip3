@@ -43,7 +43,8 @@ import {
   JUMP_TO_CLIP,
   DISCARD_PAGES,
   DISCARD_PRIVATE_COLLECTIONS,
-  RESET_EDITOR_ERROR
+  RESET_EDITOR_ERROR,
+  RESET_PLAYER_ERROR
 } from './actions.js'
 
 /*
@@ -259,6 +260,8 @@ function player(state = {
       next = {clipIndex: state.clipIndex + 1}
     }
     return {...state, ...{clipCheck: null}, ...next}
+  case RESET_PLAYER_ERROR:
+    return {...state, error: ""}
   default:
     return state
   }

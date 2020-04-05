@@ -171,7 +171,12 @@ class Player extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if(!this.fetchCollectionIfNeeded()) return
+    if(!this.fetchCollectionIfNeeded()) {
+      if(!prevProps.user && this.props.user) {
+        this.props.resetError()
+      }
+      return
+    }
 
     if(!this.props.user && !this.props.collection.isPublic) {
       this.player.destroy()
@@ -371,7 +376,8 @@ Player.propTypes = {
   fetch: PropTypes.func.isRequired,
   shutdown: PropTypes.func.isRequired,
   jumpTo: PropTypes.func.isRequired,
-  discardPrivateCollections: PropTypes.func.isRequired
+  discardPrivateCollections: PropTypes.func.isRequired,
+  resetError: PropTypes.func.isRequired
 }
 
 export default Player

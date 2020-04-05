@@ -502,3 +502,11 @@ export function resetEditorError(id) {
     type: RESET_EDITOR_ERROR
   }
 }
+
+export const RESET_PLAYER_ERROR = 'RESET_PLAYER_ERROR'
+
+export function resetPlayerError() {
+  return {
+    type: RESET_PLAYER_ERROR
+  }
+}
