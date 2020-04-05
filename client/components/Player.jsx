@@ -181,6 +181,7 @@ class Player extends React.Component {
     if(!this.props.user && !this.props.collection.isPublic) {
       this.player.destroy()
       window.ytPlayer = this.player = null
+      this.setState({loaded: false})
       this.props.discardPrivateCollections()
 
       // Allow fetch to return NotFound.

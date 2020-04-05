@@ -4,7 +4,8 @@ import Browser from 'components/Browser.jsx'
 import {
   fetchBrowsePage,
   browseDelete,
-  discardPages
+  discardPages,
+  resetPlayerError
 } from 'actions.js'
 
 const mapStateToProps = (state, ownProps) => {
@@ -15,7 +16,8 @@ const mapDispatchToProps = dispatch => {
   return {
     discardPages: () => dispatch(discardPages()),
     fetchPage: ($, isPrivate, page) => dispatch(fetchBrowsePage($, isPrivate, page)),
-    delete: ($, id) => dispatch(browseDelete($, id))
+    delete: ($, id) => dispatch(browseDelete($, id)),
+    resetPlayerError: () => dispatch(resetPlayerError())
   }
 }
 

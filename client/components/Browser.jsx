@@ -75,7 +75,7 @@ class Browser extends Component {
           <br/>
           Clips: {c.clips.length}
           <br/>
-          <Link to={`/collections/${c._id}`}>View</Link>
+          <Link onClick={(e) => this.props.resetPlayerError()} to={`/collections/${c._id}`}>View</Link>
           {editLinks ? ' | ' : ''}
           {editLinks}
         </div>
@@ -116,7 +116,8 @@ Browser.propTypes = {
   collections: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
   discardPages: PropTypes.func.isRequired,
   fetchPage: PropTypes.func.isRequired,
-  delete: PropTypes.func.isRequired
+  delete: PropTypes.func.isRequired,
+  resetPlayerError: PropTypes.func.isRequired
 }
 
 export default Browser
