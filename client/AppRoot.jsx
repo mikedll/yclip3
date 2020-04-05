@@ -118,7 +118,7 @@ class AppRoot extends Component {
             user={this.state.user}/>
           <PropsRoute path="/me/collections/:id/edit" exact
             globalWindow={this.props.globalWindow}
-            component={EditorBed} $={this.props.jQuery}/>
+            component={EditorBed} user={this.state.user} $={this.props.jQuery}/>
         </Switch>
       </div>
     )

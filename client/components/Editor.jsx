@@ -8,6 +8,7 @@ import { formatTime } from 'timerFmt.js'
 import AjaxAssistant from 'AjaxAssistant.jsx'
 import { FilePond } from 'react-filepond'
 import "filepond/dist/filepond.min.css";
+import { NotFound, Forbidden } from '../messages.js'
 
 export default class Editor extends Component {
 
@@ -57,7 +58,7 @@ export default class Editor extends Component {
   fetchCollectionIfNeeded() {
     const needed = this.needCollection()
     if(needed) {
-      if(!this.props.busy && (!this.props.error || this.props.error !== 'A resource could not be found.')) {
+      if(!this.props.busy && (!this.props.error || (this.props.error !== NotFound && this.props.error !== Forbidden))) {
         this.fetchCollection()
       }
     }
@@ -83,7 +84,13 @@ export default class Editor extends Component {
 
     const needed = this.fetchCollectionIfNeeded()
     if(needed) return
-    
+
+    if(this.props.collection && !this.props.user) {
+      // Not really sure how this happened.
+      this.props.discardPrivateCollections()
+      return
+    }
+
     this.refreshFormFromProps()
     this.initSortable()
   }
@@ -95,6 +102,11 @@ export default class Editor extends Component {
 
     const needed = this.fetchCollectionIfNeeded()
     if(needed) return
+
+    if(this.props.collection && !this.props.user) {
+      this.props.discardPrivateCollections()
+      return
+    }
 
     if(this.props.collection && (!prevProps.collection || underscore.some(['name', 'isPublic'], (attr) => {
       return prevProps.collection[attr] !== this.props.collection[attr]
@@ -340,5 +352,7 @@ Editor.propTypes = {
   startingEdit: PropTypes.func.isRequired,
   deleteClip: PropTypes.func.isRequired,
   updateClipOrder: PropTypes.func.isRequired,
-  update: PropTypes.func.isRequired
+  update: PropTypes.func.isRequired,
+  user: PropTypes.object,
+  discardPrivateCollections: PropTypes.func.isRequired
 }

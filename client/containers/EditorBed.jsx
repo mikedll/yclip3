@@ -8,7 +8,9 @@ import {
   fetchCollection,
   deleteClip,
   updateClipOrder,
-  updateCollection } from 'actions.js'
+  updateCollection,
+  discardPrivateCollections
+} from 'actions.js'
 
 const mapStateToProps = (state, ownProps) => {
   const collection = state.editor.collectionId ? state.collections[state.editor.collectionId] : null
@@ -26,7 +28,8 @@ const mapDispatchToProps = dispatch => {
     startingEdit: collectionId => dispatch(startEditingCollection(collectionId)),
     deleteClip: ($, id, clipId) => dispatch(deleteClip($, id, clipId)),
     updateClipOrder: ($, id, ordering) => dispatch(updateClipOrder($, id, ordering)),
-    update: ($, id, attrs) => dispatch(updateCollection($, id, attrs))
+    update: ($, id, attrs) => dispatch(updateCollection($, id, attrs)),
+    discardPrivateCollections: () => dispatch(discardPrivateCollections())
   }
 }
 
