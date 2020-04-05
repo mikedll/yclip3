@@ -41,7 +41,8 @@ import {
   FINISH_UPDATE_CLIP_ORDER,
   UPDATE_CLIP_ORDER_ERROR,
   JUMP_TO_CLIP,
-  DISCARD_PAGES
+  DISCARD_PAGES,
+  DISCARD_PRIVATE_COLLECTIONS
 } from './actions.js'
 
 /*
@@ -106,6 +107,8 @@ function collections(state = {}, action) {
     return {...state, ...{[action.res._id]: action.res}}
   case FINISH_UPDATE_COLLECTION:
     return {...state, ...{[action.res._id]: action.res}}
+  case DISCARD_PRIVATE_COLLECTIONS:
+    return underscore.omit(state, function(value, key) { return !value.isPublic })
   default:
     return state
   }

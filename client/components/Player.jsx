@@ -5,6 +5,7 @@ import React from 'react';
 
 import { formatTime } from 'timerFmt.js'
 import AjaxAssistant from 'AjaxAssistant.jsx'
+import { NotFound } from '../messages.js'
 
 class Player extends React.Component {
 
@@ -141,9 +142,10 @@ class Player extends React.Component {
     is okay to proceed to render the player.
   */
   fetchCollectionIfNeeded() {
-    if(this.fetchCollectionRequired() && !this.props.busy) {
+    if(this.fetchCollectionRequired()) {
+      if(this.props.busy) return false
 
-      if(this.props.error && this.props.error === 'A resource could not be found.')
+      if(this.props.error && this.props.error === NotFound)
         return false
 
       this.props.fetch(this.props.$, this.props.match.params.id)
@@ -156,6 +158,12 @@ class Player extends React.Component {
   componentDidMount() {
     if(!this.fetchCollectionIfNeeded()) return
 
+    if(!this.props.user && !this.props.collection.isPublic) {
+      this.props.discardPrivateCollections()
+      // Allow fetch to return Forbidden. Return.
+      return
+    }
+
     if(!this.player) {
       this.scheduleMountPlayer()
       return
@@ -164,6 +172,15 @@ class Player extends React.Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if(!this.fetchCollectionIfNeeded()) return
+
+    if(!this.props.user && !this.props.collection.isPublic) {
+      this.player.destroy()
+      this.props.discardPrivateCollections()
+
+      // Allow fetch to return NotFound.
+      
+      return
+    }
     
     if(!this.player) {
       this.scheduleMountPlayer()
@@ -298,7 +315,7 @@ class Player extends React.Component {
         </table>
     )
 
-    const errorMsg = (this.props.error === "") ? "" : (
+    const errorMsg = (this.props.error === "") ? null : (
       <div className="alert alert-danger">
         {this.props.error}
       </div>
@@ -315,7 +332,9 @@ class Player extends React.Component {
     
     return (
       <div className="embedded-player-container">
-        {errorMsg}
+        <div>{/* outside divs avoid react error: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node. */}
+          {errorMsg}
+        </div>
 
         {editLink}
         
@@ -350,7 +369,8 @@ Player.propTypes = {
   seeking: PropTypes.func.isRequired,
   fetch: PropTypes.func.isRequired,
   shutdown: PropTypes.func.isRequired,
-  jumpTo: PropTypes.func.isRequired
+  jumpTo: PropTypes.func.isRequired,
+  discardPrivateCollections: PropTypes.func.isRequired
 }
 
 export default Player

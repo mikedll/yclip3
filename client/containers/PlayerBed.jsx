@@ -12,7 +12,8 @@ import {
   fetchingCollection,
   fetchCollectionToPlay,
   shutdownPlayer,
-  jumpToForPlay
+  jumpToForPlay,
+  discardPrivateCollections
 } from '../actions.js'
 
 import Player from '../components/Player.jsx'
@@ -50,6 +51,9 @@ const mapDispatchToProps = (dispatch) => ({
   },
   jumpTo: (index) => {
     dispatch(jumpToForPlay(index))
+  },
+  discardPrivateCollections: (index) => {
+    dispatch(discardPrivateCollections())
   }
 })
 

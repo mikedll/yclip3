@@ -149,7 +149,6 @@ export function fetchCollectionToPlay($, id) {
       .then(collection => { dispatch(receiveCollectionForPlay(collection)) },
             error => {
               dispatch(playingError(error))
-              console.log("An error occurred while fetching a collecdtion")
             })
   }
 }
@@ -484,5 +483,14 @@ export const DISCARD_PAGES = 'DISCARD_PAGES'
 export function discardPages() {
   return {
     type: DISCARD_PAGES
+  }
+}
+
+export const DISCARD_PRIVATE_COLLECTIONS = 'DISCARD_PRIVATE_COLLECTIONS'
+
+export function discardPrivateCollections(id) {
+  return {
+    type: DISCARD_PRIVATE_COLLECTIONS,
+    id: id
   }
 }
