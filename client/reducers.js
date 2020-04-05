@@ -42,7 +42,8 @@ import {
   UPDATE_CLIP_ORDER_ERROR,
   JUMP_TO_CLIP,
   DISCARD_PAGES,
-  DISCARD_PRIVATE_COLLECTIONS
+  DISCARD_PRIVATE_COLLECTIONS,
+  RESET_EDITOR_ERROR
 } from './actions.js'
 
 /*
@@ -152,6 +153,8 @@ function editor(state = {busy: false, error: "", collection: null}, action) {
     return {...state, ...{busy: false, collection: action.res}}
   case UPDATE_COLLECTION_ERROR:
     return {...state, ...{busy: false, error: action.error}}
+  case RESET_EDITOR_ERROR:
+    return {...state, error: ""}
   default:
     return state
   }

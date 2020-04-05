@@ -9,7 +9,8 @@ import {
   deleteClip,
   updateClipOrder,
   updateCollection,
-  discardPrivateCollections
+  discardPrivateCollections,
+  resetEditorError
 } from 'actions.js'
 
 const mapStateToProps = (state, ownProps) => {
@@ -29,7 +30,8 @@ const mapDispatchToProps = dispatch => {
     deleteClip: ($, id, clipId) => dispatch(deleteClip($, id, clipId)),
     updateClipOrder: ($, id, ordering) => dispatch(updateClipOrder($, id, ordering)),
     update: ($, id, attrs) => dispatch(updateCollection($, id, attrs)),
-    discardPrivateCollections: () => dispatch(discardPrivateCollections())
+    discardPrivateCollections: () => dispatch(discardPrivateCollections()),
+    resetError: () => dispatch(resetEditorError())
   }
 }
 

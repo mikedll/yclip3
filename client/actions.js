@@ -494,3 +494,11 @@ export function discardPrivateCollections(id) {
     id: id
   }
 }
+
+export const RESET_EDITOR_ERROR = 'RESET_EDITOR_ERROR'
+
+export function resetEditorError(id) {
+  return {
+    type: RESET_EDITOR_ERROR
+  }
+}

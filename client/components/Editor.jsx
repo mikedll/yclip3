@@ -100,6 +100,11 @@ export default class Editor extends Component {
       this.props.startingEdit(this.props.match.params.id)      
     }
 
+    if(!prevProps.user && this.props.user) {
+      this.props.resetError()
+      return
+    }
+
     const needed = this.fetchCollectionIfNeeded()
     if(needed) return
 
@@ -354,5 +359,6 @@ Editor.propTypes = {
   updateClipOrder: PropTypes.func.isRequired,
   update: PropTypes.func.isRequired,
   user: PropTypes.object,
-  discardPrivateCollections: PropTypes.func.isRequired
+  discardPrivateCollections: PropTypes.func.isRequired,
+  resetError: PropTypes.func.isRequired
 }
