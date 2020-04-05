@@ -177,7 +177,7 @@ function browser(state = {
             ...underscore.pick(action.res, 'page', 'pages', 'total'),
             ...{busy: false, collections: action.res.results, lastFetchPublic: !action.isPrivate}}
   case REQUEST_PAGE_ERROR:
-    return {...state, ...{busy: false, error: action.error}}
+    return {...state, ...{busy: false, lastFetchPublic: false, error: action.error}}
   default:
     return state
   }

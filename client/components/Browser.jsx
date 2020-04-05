@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { getUrlQueryAsObj } from 'UrlHelper.jsx'
 import Paginator from 'components/Paginator.jsx'
+import { Forbidden } from '../messages.js'
 
 class Browser extends Component {
 
@@ -13,7 +14,7 @@ class Browser extends Component {
     this.onDelete = this.onDelete.bind(this)
   }
 
-  retrieveIfNecessary(prevProps) {
+  retrieveIfNecessary() {
     const query = getUrlQueryAsObj()
     let qPage = 1
     try {
@@ -25,7 +26,7 @@ class Browser extends Component {
     const fetchRequired = (this.props.page !== qPage)                  // no page fetched, or wrong page
           || (this.props.lastFetchPublic === this.props.browsePrivate) // old fetch cache public/private conflict
 
-    const fetchOk = !(this.props.browsePrivate && this.props.error === 'That resource is forbidden to you')
+    const fetchOk = !(this.props.browsePrivate && this.props.error === Forbidden)
 
     if(fetchRequired && fetchOk && !this.props.busy) {
       this.props.fetchPage(this.props.$, this.props.browsePrivate, qPage)
@@ -41,8 +42,8 @@ class Browser extends Component {
     }
   }
   
-  componentDidUpdate(prevProps) {
-    this.retrieveIfNecessary(prevProps)
+  componentDidUpdate() {
+    this.retrieveIfNecessary()
   }
   
   componentDidMount() {

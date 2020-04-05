@@ -1,4 +1,8 @@
 
+import {
+  Forbidden, NotFound
+} from './messages.js'
+
 export default class AjaxAssistant {
 
   constructor($) {
@@ -16,9 +20,9 @@ export default class AjaxAssistant {
 
     if(text === "") {
       if(xhr.status === 404) {
-        text = "A resource could not be found."
+        text = NotFound
       } else if(xhr.status === 403) {
-        text = "That resource is forbidden to you."
+        text = Forbidden
       }
     }
     
