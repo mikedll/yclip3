@@ -40,7 +40,8 @@ import {
   REQUEST_UPDATE_CLIP_ORDER,
   FINISH_UPDATE_CLIP_ORDER,
   UPDATE_CLIP_ORDER_ERROR,
-  JUMP_TO_CLIP
+  JUMP_TO_CLIP,
+  DISCARD_PAGES
 } from './actions.js'
 
 /*
@@ -178,6 +179,8 @@ function browser(state = {
             ...{busy: false, collections: action.res.results, lastFetchPublic: !action.isPrivate}}
   case REQUEST_PAGE_ERROR:
     return {...state, ...{busy: false, lastFetchPublic: false, error: action.error}}
+  case DISCARD_PAGES:
+    return {...state, collections: [], pages: 0, page: -1, total: 0}
   default:
     return state
   }

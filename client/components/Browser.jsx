@@ -14,7 +14,13 @@ class Browser extends Component {
     this.onDelete = this.onDelete.bind(this)
   }
 
-  retrieveIfNecessary() {
+  setupPages(prevProps) {
+    // Discard any held pages. State transition will reveal Forbidden later.
+    if(this.props.page !== -1 && this.props.browsePrivate && !this.props.user) {
+      this.props.discardPages()
+      return
+    }
+
     const query = getUrlQueryAsObj()
     let qPage = 1
     try {
@@ -26,7 +32,8 @@ class Browser extends Component {
     const fetchRequired = (this.props.page !== qPage)                  // no page fetched, or wrong page
           || (this.props.lastFetchPublic === this.props.browsePrivate) // old fetch cache public/private conflict
 
-    const fetchOk = !(this.props.browsePrivate && this.props.error === Forbidden)
+    // not getting Forbidden errors, or if we are, we just gained a user.
+    const fetchOk = !(this.props.browsePrivate && this.props.error === Forbidden) || (!prevProps.user && this.props.user)
 
     if(fetchRequired && fetchOk && !this.props.busy) {
       this.props.fetchPage(this.props.$, this.props.browsePrivate, qPage)
@@ -42,12 +49,12 @@ class Browser extends Component {
     }
   }
   
-  componentDidUpdate() {
-    this.retrieveIfNecessary()
+  componentDidUpdate(prevProps) {
+    this.setupPages(prevProps)
   }
   
   componentDidMount() {
-    this.retrieveIfNecessary()
+    this.setupPages()
   }
 
   render() {
@@ -107,6 +114,7 @@ Browser.propTypes = {
   error: PropTypes.string.isRequired,
   busy: PropTypes.bool.isRequired,
   collections: PropTypes.arrayOf(PropTypes.object.isRequired).isRequired,
+  discardPages: PropTypes.func.isRequired,
   fetchPage: PropTypes.func.isRequired,
   delete: PropTypes.func.isRequired
 }

@@ -478,3 +478,11 @@ export function updateClipOrder($, id, ordering) {
             error => dispatch(updateClipOrderError(error)))
   }
 }
+
+export const DISCARD_PAGES = 'DISCARD_PAGES'
+
+export function discardPages() {
+  return {
+    type: DISCARD_PAGES
+  }
+}
