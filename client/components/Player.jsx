@@ -300,6 +300,7 @@ class Player extends React.Component {
     const rows = !this.props.collection ? null : this.props.collection.clips.map((c, i) => (
       <tr key={i} className={"" + ((this.props.clipIndex !== null && this.props.clipIndex === i) ? 'active' : '')}>
         <td>
+          <img src={`https://img.youtube.com/vi/${c.vid}/1.jpg`} />
           {c.vid}{' '}
           <a href='#' className='jump-link' onClick={e => this.onJump(e, c)}>[Jump Here]</a>
         </td>
