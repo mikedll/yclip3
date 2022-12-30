@@ -51,7 +51,7 @@
     "jquery-ui-dist": "^1.12.1",
     "jsdom": "^15.0.0",
     "jsdom-global": "^3.0.2",
-    "mocha": "^6.1.4",
+    "mocha": "^10.2.0",
     "mochapack": "^1.1.1",
     "prop-types": "^15.7.2",
     "react-filepond": "^7.0.1",
